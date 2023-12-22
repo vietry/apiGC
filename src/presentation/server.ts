@@ -27,12 +27,15 @@ export class Server{
 
         //* Middlewares
 
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({extended: true})); //x-www-form-urlencoded
+
         //* Public Folder
         this.app.use(express.static(this.publicPath));
 
 
         //* Routes
-
+        this.app.use(this.routes);
 
 
         //* SPA
