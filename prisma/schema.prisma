@@ -7,181 +7,13 @@ datasource db {
   url      = env("SQLSERVER_URL")
 }
 
-model Articulo {
-  idArticulo  Int       @id(map: "PK__Articulo__AABB74222074ABAD") @default(autoincrement())
-  codigo      String    @db.VarChar(10)
-  nombre      String    @db.VarChar(90)
-  present     Decimal?  @db.Decimal(8, 3)
-  codFamilia  String?   @db.VarChar(8)
-  codClase    String?   @db.VarChar(6)
-  codLinea    String?   @db.VarChar(6)
-  codDivision String?   @db.VarChar(6)
-  idFamilia   Int?
-  idClase     Int?
-  idLinea     Int?
-  idDivision  Int?
-  idEmpresa   Int
-  created_at  DateTime  @db.DateTime
-  updated_at  DateTime  @db.DateTime
-  Clase       Clase?    @relation(fields: [idClase], references: [idClase], onDelete: NoAction, onUpdate: NoAction, map: "fk_Articulo_Clase1")
-  Division    Division? @relation(fields: [idDivision], references: [idDivision], onDelete: NoAction, onUpdate: NoAction, map: "fk_Articulo_Division1")
-  Familia     Familia?  @relation(fields: [idFamilia], references: [idFamilia], onDelete: NoAction, onUpdate: NoAction, map: "fk_Articulo_Familia1")
-  Linea       Linea?    @relation(fields: [idLinea], references: [idLinea], onDelete: NoAction, onUpdate: NoAction, map: "fk_Articulo_Linea1")
-}
-
-model Clase {
-  idClase    Int        @id(map: "PK__Clase__17317A68F8E780D2")
-  codigo     String     @db.VarChar(6)
-  nombre     String     @db.VarChar(60)
-  idEmpresa  Int
-  created_at DateTime?  @db.DateTime
-  updated_at DateTime?  @db.DateTime
-  Articulo   Articulo[]
-  Empresa    Empresa    @relation(fields: [idEmpresa], references: [idEmpresa], onUpdate: NoAction, map: "fk_Empresa_Clase1")
-}
-
-model Cliente {
-  idCliente      Int              @id(map: "PK__Cliente__885457EE2A801494") @default(autoincrement())
-  codigo         String           @db.VarChar(20)
-  nombre         String           @db.VarChar(90)
-  latitud        Decimal?         @db.Decimal(10, 6)
-  longitud       Decimal?         @db.Decimal(10, 6)
-  created_at     DateTime         @db.DateTime
-  updated_at     DateTime         @db.DateTime
-  ClienteZonaAnt ClienteZonaAnt[]
-}
-
-model ClienteZonaAnt {
-  idCliZonA    Int          @id(map: "PK__ClienteZ__7C24FB9D83F90E05") @default(autoincrement())
-  idEmpresa    Int
-  idCliente    Int
-  codCliente   String       @db.VarChar(20)
-  idZonaAnt    Int
-  codZona      String       @db.VarChar(4)
-  created_at   DateTime     @db.DateTime
-  updated_at   DateTime     @db.DateTime
-  Cliente      Cliente      @relation(fields: [idCliente], references: [idCliente], onUpdate: NoAction, map: "fk_ClienteZonaA_Cliente")
-  Empresa      Empresa      @relation(fields: [idEmpresa], references: [idEmpresa], onUpdate: NoAction, map: "fk_ClienteZonaA_Empresa")
-  ZonaAnterior ZonaAnterior @relation(fields: [idZonaAnt], references: [idZonaAnt], onUpdate: NoAction, map: "fk_ClienteZonaA_ZonaA")
-}
-
-model Departamento {
-  idDepartamento String      @id(map: "PK__Departam__C225F98D975B3D30") @db.VarChar(2)
-  nombre         String      @unique(map: "UQ_nombre_Departamento") @db.VarChar(30)
-  Provincia      Provincia[]
-
-  @@index([nombre], map: "idx_nombre_Departamento")
-}
-
-model Distrito {
-  idDistrito     String    @id(map: "PK__Distrito__494092A880EB9263") @db.VarChar(6)
-  nombre         String    @db.VarChar(40)
-  idProvincia    String    @db.VarChar(4)
-  idDepartamento String    @db.VarChar(2)
-  Provincia      Provincia @relation(fields: [idProvincia], references: [idProvincia], onUpdate: NoAction, map: "FK_Distrito_Provincia")
-}
-
-model Division {
-  idDivision Int        @id(map: "PK__Division__AE340A04D8C02CDF")
-  codigo     String     @db.VarChar(6)
-  nombre     String     @db.VarChar(30)
-  idEmpresa  Int
-  created_at DateTime?  @db.DateTime
-  updated_at DateTime?  @db.DateTime
-  Articulo   Articulo[]
-  Empresa    Empresa    @relation(fields: [idEmpresa], references: [idEmpresa], onUpdate: NoAction, map: "fk_Empresa_Division1")
-  Negocio    Negocio[]
-}
-
-model Empresa {
-  idEmpresa      Int              @id(map: "PK__Empresa__75D2CED49D3A3ADC")
-  nomEmpresa     String           @db.VarChar(15)
-  created_at     DateTime         @db.DateTime
-  updated_at     DateTime         @db.DateTime
-  Clase          Clase[]
-  ClienteZonaAnt ClienteZonaAnt[]
-  Division       Division[]
-  Familia        Familia[]
-  Linea          Linea[]
-  ZonaAnterior   ZonaAnterior[]
-}
-
-model Familia {
-  idFamilia  Int        @id(map: "PK__Familia__CC8AA3145C1D2B8F")
-  codigo     String     @db.VarChar(7)
-  nombre     String     @db.VarChar(90)
-  idEmpresa  Int
-  created_at DateTime?  @db.DateTime
-  updated_at DateTime?  @db.DateTime
-  Articulo   Articulo[]
-  Empresa    Empresa    @relation(fields: [idEmpresa], references: [idEmpresa], onUpdate: NoAction, map: "fk_Empresa_Familia1")
-}
-
 model Foto {
-  idFoto     Int       @id(map: "PK__Foto__69D6509417E3E0F6") @default(autoincrement())
-  ruta       String    @db.VarChar(50)
-  type       String?   @db.VarChar(5)
-  created_at DateTime  @db.DateTime
-  updated_at DateTime  @db.DateTime
-  Usuario    Usuario[]
-}
-
-model Informe {
-  idInforme  Int      @id(map: "PK__Informe__8BC324EA343112FA") @default(autoincrement())
-  nombre     String?  @db.VarChar(100)
-  ruta       String?  @db.VarChar(50)
-  type       String?  @db.VarChar(5)
-  created_at DateTime @db.DateTime
-  updated_at DateTime @db.DateTime
-}
-
-model Linea {
-  idLinea    Int        @id(map: "PK__Linea__4F210ABF8EE9B105")
-  codigo     String     @db.VarChar(6)
-  nombre     String     @db.VarChar(60)
-  idEmpresa  Int
-  created_at DateTime?  @db.DateTime
-  updated_at DateTime?  @db.DateTime
-  Articulo   Articulo[]
-  Empresa    Empresa    @relation(fields: [idEmpresa], references: [idEmpresa], onUpdate: NoAction, map: "fk_Empresa_Linea1")
-}
-
-model Negocio {
-  idNegocio  Int      @id(map: "PK__Negocio__70E1E107EE295E13") @default(autoincrement())
-  nombre     String   @db.VarChar(20)
-  idDivision Int
-  created_at DateTime @db.DateTime
-  updated_at DateTime @db.DateTime
-  Division   Division @relation(fields: [idDivision], references: [idDivision], onUpdate: NoAction, map: "fk_Negocio_Division1")
-}
-
-model Persona {
-  idPersona  Int       @id(map: "PK__Persona__A4788141E91D416A") @default(autoincrement())
-  dni        String    @unique(map: "UQ_dni") @db.VarChar(10)
-  nombres    String    @db.VarChar(45)
-  apellidos  String?   @db.VarChar(45)
-  celular    String?   @db.VarChar(15)
-  created_at DateTime  @db.DateTime
-  updated_at DateTime  @db.DateTime
-  Usuario    Usuario[]
-}
-
-model Provincia {
-  idProvincia    String       @id(map: "PK__Provinci__5F9F113CDBADC918") @db.VarChar(4)
-  nombre         String       @unique(map: "UQ_nombre_Provincia") @db.VarChar(30)
-  idDepartamento String       @db.VarChar(2)
-  Distrito       Distrito[]
-  Departamento   Departamento @relation(fields: [idDepartamento], references: [idDepartamento], onUpdate: NoAction, map: "fk_Provincia_Departamento")
-
-  @@index([idDepartamento], map: "idx_idDepartamento_Provincia")
-}
-
-model Rol {
-  idRol      Int       @id(map: "PK__Rol__3C872F76149C0293") @default(autoincrement())
-  nomRol     String    @db.VarChar(10)
-  created_at DateTime  @db.DateTime
-  updated_at DateTime  @db.DateTime
-  Usuario    Usuario[]
+  id        Int       @id(map: "PK__Foto__3213E83FFF8B0427") @default(autoincrement())
+  ruta      String    @db.VarChar(50)
+  tipo      String?   @db.VarChar(5)
+  createdAt DateTime? @db.DateTime
+  updatedAt DateTime? @db.DateTime
+  Usuario   Usuario[]
 }
 
 model Todo {
@@ -193,29 +25,15 @@ model Todo {
 }
 
 model Usuario {
-  idUsuario  Int      @id(map: "PK__Usuario__645723A6C9E189A5") @default(autoincrement())
-  usuario    String   @db.VarChar(20)
-  password   String   @db.VarChar(255)
-  correo     String   @db.VarChar(40)
-  idPersona  Int
-  idRol      Int
-  idFoto     Int
-  created_at DateTime @db.DateTime
-  updated_at DateTime @db.DateTime
-  Foto       Foto     @relation(fields: [idFoto], references: [idFoto], onUpdate: NoAction, map: "fk_Usuario_Foto")
-  Persona    Persona  @relation(fields: [idPersona], references: [idPersona], onUpdate: NoAction, map: "fk_Usuario_Persona")
-  Rol        Rol      @relation(fields: [idRol], references: [idRol], onUpdate: NoAction, map: "fk_Usuario_Rol")
-}
-
-model ZonaAnterior {
-  idZonaAnt      Int              @id(map: "PK__ZonaAnte__8AD0FF1FBC79F32E")
-  idEmpresa      Int
-  codigo         String           @db.VarChar(4)
-  nombre         String           @db.VarChar(45)
-  zonaA          String           @db.VarChar(45)
-  zonaB          String?          @db.VarChar(20)
-  created_at     DateTime         @db.DateTime
-  updated_at     DateTime         @db.DateTime
-  ClienteZonaAnt ClienteZonaAnt[]
-  Empresa        Empresa          @relation(fields: [idEmpresa], references: [idEmpresa], onUpdate: NoAction, map: "fk_Zona_Empresa1")
+  id        Int       @id(map: "PK__Usuario__3213E83F3A6CA641") @default(autoincrement())
+  nombres   String    @db.VarChar(45)
+  apellidos String?   @db.VarChar(45)
+  password  String    @db.VarChar(255)
+  celular   String?   @db.VarChar(15)
+  correo    String    @db.VarChar(40)
+  rol       String    @db.VarChar(10)
+  idFoto    Int?
+  createdAt DateTime? @db.DateTime
+  updatedAt DateTime? @db.DateTime
+  Foto      Foto?     @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
 }

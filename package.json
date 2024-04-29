@@ -7,9 +7,10 @@
     "dev": "tsnd --respawn --clear src/app.ts",
     "build": "rimraf ./dist && tsc",
     "start": "npm run build && node dist/app.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "prisma:sqlserver:test": "dotenv -e .env.test -- npx prisma migrate deploy",
+    "test": "npm run prisma:sqlserver:test && jest",
+    "test:watch": "npm run prisma:sqlserver:test && jest --watch",
+    "test:coverage": "npm run prisma:sqlserver:test && jest --coverage"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,8 @@
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.5",
+    "@types/supertest": "^6.0.2",
+    "dotenv-cli": "^7.4.1",
     "jest": "^29.7.0",
     "prisma": "^5.13.0",
     "rimraf": "^5.0.5",
