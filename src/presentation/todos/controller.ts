@@ -25,7 +25,6 @@ export class TodosController{
        .execute()
        .then(todos => res.json(todos))
        .catch( error => this.handleError(res, error));
-
     };
 
     public getTodoById = (req:Request, res:Response) => {
@@ -57,7 +56,6 @@ export class TodosController{
         .execute(updateTodoDto!)
         .then(todo => res.json(todo))
         .catch( error => this.handleError(res, error));
-    
     }
 
     public deleteToDo = (req:Request, res:Response) =>  {
@@ -67,7 +65,6 @@ export class TodosController{
         .execute(id)
         .then(todo => res.json(todo))
         .catch( error => this.handleError(res, error));
-
     }
 
 }

@@ -5,6 +5,13 @@ import {get} from 'env-var';
 export const envs = {
     PORT: get('PORT').required().asPortNumber(),
     PUBLIC_PATH: get('PUBLIC_PATH').default('public').asString(),
-}
 
+    SQLSERVER_DB_NAME: get('SQLSERVER_DB_NAME').required().asString(),
+    SQLSERVER_USER: get('SQLSERVER_USER').required().asString(),
+    SQLSERVER_PASSWORD: get('SQLSERVER_PASSWORD').required().asString(),
+    SQLSERVER_SERVER: get('SQLSERVER_SERVER').required().asString(),
+    SQLSERVER_PORT: get('SQLSERVER_PORT').required().asString(),
+
+    JWT_SEED:  get('JWT_SEED').required().asString() ,
+}
 

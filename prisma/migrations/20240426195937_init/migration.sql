@@ -29,7 +29,7 @@ CREATE TABLE [dbo].[Usuario] (
     [apellidos] VARCHAR(45),
     [password] VARCHAR(255) NOT NULL,
     [celular] VARCHAR(15),
-    [correo] VARCHAR(40) NOT NULL,
+    [email] VARCHAR(40) NOT NULL,
     [rol] VARCHAR(10) NOT NULL,
     [idFoto] INT,
     [createdAt] DATETIME,

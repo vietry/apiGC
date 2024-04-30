@@ -30,7 +30,7 @@ model Usuario {
   apellidos String?   @db.VarChar(45)
   password  String    @db.VarChar(255)
   celular   String?   @db.VarChar(15)
-  correo    String    @db.VarChar(40)
+  email     String    @db.VarChar(40)
   rol       String    @db.VarChar(10)
   idFoto    Int?
   createdAt DateTime? @db.DateTime

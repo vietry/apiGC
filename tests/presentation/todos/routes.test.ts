@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { testServer } from '../../test-server';
-import { prisma } from '../../../src/data/postgres';
+import { prisma } from '../../../src/data/sqlserver';
 import { error } from 'console';
 import { text } from 'stream/consumers';
 import { send } from 'process';
