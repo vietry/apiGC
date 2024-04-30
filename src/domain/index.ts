@@ -20,6 +20,7 @@ export * from './use-cases/todo/get-todos';
 export * from './use-cases/usuario/create-usuario';
 export * from './use-cases/usuario/update-usuario';
 export * from './use-cases/usuario/delete-usuario';
+export * from './use-cases/usuario/get-email';
 export * from './use-cases/usuario/get-usuario';
 export * from './use-cases/usuario/get-usuarios';
 

@@ -2,11 +2,11 @@ import { UsuarioEntity } from "../../entities/usuario.entity";
 import { UsuarioRepository } from "../../repositories/usuario.repository";
 
 
-export interface GetUsuarioUseCase{
+export interface GetEmailUseCase{
     execute(email: string): Promise<UsuarioEntity>
 }
 
-export class GetUsuario implements GetUsuarioUseCase {
+export class GetEmail implements GetEmailUseCase {
     constructor (
         private readonly repository : UsuarioRepository
         ) {}
