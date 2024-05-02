@@ -18,7 +18,7 @@ export class SqlServerDatabase {
                 server: server,
                 database: database,
                 options: {
-                    encrypt: true,
+                    encrypt: false,
                     trustServerCertificate: true
                 }
             });

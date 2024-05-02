@@ -1,13 +1,13 @@
 import { Validators } from "../../../config/validators";
 
 
-export class LoginUserDto{
+export class LoginUsuarioDto{
     constructor(
         public email:string,
         public password:string,
     ){}
 
-    static login(object: {[key: string]: any}): [string?, LoginUserDto?] {
+    static create(object: {[key: string]: any}): [string?, LoginUsuarioDto?] {
 
         const { email, password} = object;
     
@@ -19,7 +19,7 @@ export class LoginUserDto{
     
         return [
             undefined,
-            new LoginUserDto(email, password)
+            new LoginUsuarioDto(email, password)
         ];
     }
 

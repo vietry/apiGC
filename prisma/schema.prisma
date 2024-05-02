@@ -25,15 +25,16 @@ model Todo {
 }
 
 model Usuario {
-  id        Int       @id(map: "PK__Usuario__3213E83F3A6CA641") @default(autoincrement())
-  nombres   String    @db.VarChar(45)
-  apellidos String?   @db.VarChar(45)
-  password  String    @db.VarChar(255)
-  celular   String?   @db.VarChar(15)
-  email     String    @db.VarChar(40)
-  rol       String    @db.VarChar(10)
-  idFoto    Int?
-  createdAt DateTime? @db.DateTime
-  updatedAt DateTime? @db.DateTime
-  Foto      Foto?     @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
+  id            Int       @id(map: "PK__Usuario__3213E83F0E11F4B3") @default(autoincrement())
+  nombres       String    @db.VarChar(45)
+  apellidos     String?   @db.VarChar(45)
+  email         String    @db.VarChar(40)
+  emailValidado Boolean
+  password      String    @db.VarChar(255)
+  rol           String    @db.VarChar(10)
+  celular       String?   @db.VarChar(15)
+  idFoto        Int?
+  createdAt     DateTime? @db.DateTime
+  updatedAt     DateTime? @db.DateTime
+  Foto          Foto?     @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
 }

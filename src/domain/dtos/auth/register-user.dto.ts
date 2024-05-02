@@ -6,6 +6,7 @@ export class RegisterUsuarioDto{
         public nombres: string,
         public apellidos: string,
         public email: string,
+        public emailValidado: boolean,
         public password: string,
         public rol: string,
         
@@ -13,7 +14,7 @@ export class RegisterUsuarioDto{
 
 static create(object: {[key: string]: any}): [string?, RegisterUsuarioDto?] {
 
-    const { nombres, apellidos, email, password, rol} = object;
+    const { nombres, apellidos, email, emailValidado, password, rol} = object;
 
     if(!nombres) return ['Nombres faltante'];
     if(!apellidos) return ['Apellidos faltante'];
@@ -25,7 +26,7 @@ static create(object: {[key: string]: any}): [string?, RegisterUsuarioDto?] {
 
     return [
         undefined,
-        new RegisterUsuarioDto(nombres, apellidos, email, password, rol)
+        new RegisterUsuarioDto(nombres, apellidos, email, emailValidado, password, rol)
     ];
 }
     
