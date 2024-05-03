@@ -24,6 +24,7 @@ export class UsuarioEntity {
         if (!apellidos) throw CustomError.badRequest('Nombres is required');
         if (!password) throw CustomError.badRequest('Password is required');
         if (!email) throw CustomError.badRequest('Correo is required');
+        if ( emailValidado === undefined ) throw CustomError.badRequest( 'Missing emailValidated' );
         if (!rol) throw CustomError.badRequest('Rol is required');
 
         return new UsuarioEntity(

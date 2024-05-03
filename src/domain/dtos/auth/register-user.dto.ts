@@ -6,9 +6,9 @@ export class RegisterUsuarioDto{
         public nombres: string,
         public apellidos: string,
         public email: string,
-        public emailValidado: boolean,
+        public emailValidado: boolean = false,
         public password: string,
-        public rol: string,
+        public rol: string = 'USUARIO',
         
     ){}
 

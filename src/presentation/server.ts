@@ -1,6 +1,8 @@
 import express, { Router } from 'express';
 import compression from 'compression';
 import path from 'path';
+import ngrok from '@ngrok/ngrok';
+import { envs } from '../config';
 
 interface Options {
     port: number;
@@ -52,10 +54,15 @@ export class Server{
             console.log(`Server running on port ${this.port}`);
         });
 
+        // Inicia ngrok y expone el servidor local a la web
+        /*await ngrok.connect({ addr: this.port, authtoken: envs.NGROK_TOKEN})
+        .then(listener => console.log(`Ingress established at: ${listener.url()}`))*/
+
     }
 
     public close(){
         this.serverListener?.close();
+        //ngrok.disconnect();
     }
 
 }
