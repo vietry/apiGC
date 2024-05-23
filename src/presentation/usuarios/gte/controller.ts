@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { CustomError, CreateColaboradorDTO } from "../../../domain";
+import { CustomError } from "../../../domain";
 
-export class ColaboradorController{
+export class GteController{
 
     // DI
     constructor(
@@ -17,15 +17,12 @@ export class ColaboradorController{
         res.status(500).json({error: 'Internal server error - check logs'});
     }
 
-    createColaborador = async (req: Request, res: Response) => {
-        const [error, createColaboradorDto] = CreateColaboradorDTO.create(req.body);
-        if(error) return res.status(400).json({error});
-        
-        res.json(createColaboradorDto)
+    registerGte = async (req: Request, res: Response) => {
+        res.json('Create GTE')
     }
 
-    getColaboradores = async (req: Request, res: Response) => {
-        res.json('Get colaboradores')
+    getGtes = async (req: Request, res: Response) => {
+        res.json('Get GTEs')
     }
 
  

@@ -7,6 +7,7 @@ export class CreateUsuarioDto {
         public readonly password: string,
         public readonly celular: string | null,
         public readonly email: string,
+        public readonly emailValidado: boolean,
         public readonly rol: string,
         public readonly idFoto: number | null,
         public readonly createdAt: Date | null,
@@ -15,7 +16,7 @@ export class CreateUsuarioDto {
 
     static create( props: {[key:string]: any}): [string?, CreateUsuarioDto?]{
 
-        const {id, nombres, apellidos, password, celular, email, rol, idFoto, createdAt, updatedAt} = props;
+        const {id, nombres, apellidos, password, celular, email, emailValidado, rol, idFoto, createdAt, updatedAt} = props;
 
         if(!id) return ['ID property is required', undefined];
         if(!nombres||nombres.length === 0) return ['Nombres property is required', undefined];
@@ -23,6 +24,6 @@ export class CreateUsuarioDto {
         if(!email||email.length === 0) return ['Correo property is required', undefined];
         if(!rol) return ['Rol property is required', undefined];
 
-        return [undefined, new CreateUsuarioDto(id, nombres, apellidos, password, celular, email, rol, idFoto, createdAt, updatedAt)];
+        return [undefined, new CreateUsuarioDto(id, nombres, apellidos, password, celular, email, emailValidado, rol, idFoto, createdAt, updatedAt)];
     }
 }
