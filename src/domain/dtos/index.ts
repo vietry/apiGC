@@ -9,3 +9,4 @@ export * from './auth/login-user.dto';
 export * from './auth/register-user.dto';
 
 export * from './colaborador/create-colaborador.dto';
+export * from './gte/create-gte.dto';

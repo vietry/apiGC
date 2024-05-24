@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { CustomError, CreateColaboradorDTO } from "../../../domain";
+import { CustomError, CreateColaboradorDTO, ColaboradorEntity, PaginationDto } from "../../../domain";
 import { ColaboradorService } from "../../services/colaborador.service";
+
 
 export class ColaboradorController{
 
@@ -29,7 +30,17 @@ export class ColaboradorController{
     }
 
     getColaboradores = async (req: Request, res: Response) => {
-        res.json('Get colaboradores')
+        
+        const {page = 1, limit= 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if(error) return res.status(400).json({error});
+
+
+        this.colaboradorService.getColaboradores(paginationDto!)
+            .then(colaboradores => res.status(200).json(colaboradores))
+            .catch( error => this.handleError(res, error));
+        
+        //res.json('Get colaboradores')
     }
 
  
