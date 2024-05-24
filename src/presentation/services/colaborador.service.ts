@@ -14,13 +14,26 @@ export class ColaboradorService{
         //const colaboradorExists = await prisma.colaborador.findFirst({where: {email: createColaboradorDto.cargo}});
 
         try {
-            
-            const colaborador = new ColaboradorEntity({
-                ...createColaboradorDto,
-                idNegocio: 1,
-                idUsuario: user.id
+            const currentDate = new Date();
+            const colaborador = new ColaboradorEntity(
+                createColaboradorDto.cargo,
+                createColaboradorDto.idArea,
+                createColaboradorDto.idZonaAnt,
+                user.id,
 
-            })
+            );
+
+            await prisma.colaborador.create({
+                data: {
+                    ...colaborador,
+                    createdAt: currentDate,
+                    updatedAt: currentDate, 
+                }
+            });
+
+            return {
+              name:  colaborador.cargo
+            }
 
         } catch (error) {
             throw CustomError.internalServer(`${error}`)

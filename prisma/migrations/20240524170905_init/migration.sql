@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[Foto] (
     [tipo] VARCHAR(5),
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Foto__3213E83F202D2B0E] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Foto__3213E83F9B2FC9CA] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -25,7 +25,7 @@ CREATE TABLE [dbo].[Usuario] (
     [idFoto] INT,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Usuario__3213E83FE7A17D03] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Usuario__3213E83F0EACBEB1] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -34,7 +34,7 @@ CREATE TABLE [dbo].[Area] (
     [nombre] VARCHAR(20) NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Area__3213E83F559A1BD1] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Area__3213E83FF40F56AB] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -54,7 +54,8 @@ CREATE TABLE [dbo].[Articulo] (
     [idEmpresa] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Articulo__3213E83F199F91D5] PRIMARY KEY CLUSTERED ([id])
+    [activo] BIT,
+    CONSTRAINT [PK__Articulo__3213E83FCE557976] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -65,7 +66,7 @@ CREATE TABLE [dbo].[Clase] (
     [idEmpresa] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Clase__3213E83F418763E5] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Clase__3213E83FB62D24FC] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -73,11 +74,9 @@ CREATE TABLE [dbo].[Cliente] (
     [id] INT NOT NULL IDENTITY(1,1),
     [codigo] VARCHAR(20) NOT NULL,
     [nombre] VARCHAR(90) NOT NULL,
-    [latitud] DECIMAL(10,6),
-    [longitud] DECIMAL(10,6),
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Cliente__3213E83FEB84AEF8] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Cliente__3213E83F41998880] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -87,7 +86,7 @@ CREATE TABLE [dbo].[ClienteUbigeo] (
     [idDistrito] VARCHAR(6) NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__ClienteU__3213E83FECA8837F] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__ClienteU__3213E83FC8E9C437] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -100,7 +99,7 @@ CREATE TABLE [dbo].[ClienteZonaAnt] (
     [codZona] VARCHAR(4) NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__ClienteZ__3213E83F698FB355] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__ClienteZ__3213E83FCC8B2A20] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -108,12 +107,11 @@ CREATE TABLE [dbo].[Colaborador] (
     [id] INT NOT NULL IDENTITY(1,1),
     [cargo] VARCHAR(45),
     [idArea] INT NOT NULL,
-    [idZonaAnt] INT NOT NULL,
-    [idNegocio] INT NOT NULL,
+    [idZonaAnt] INT,
     [idUsuario] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Colabora__3213E83FD253B5F2] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Colabora__3213E83FD1A845EE] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -122,20 +120,20 @@ CREATE TABLE [dbo].[Contacto] (
     [nombre] VARCHAR(45) NOT NULL,
     [apellido] VARCHAR(45) NOT NULL,
     [cargo] VARCHAR(20) NOT NULL,
-    [correo] VARCHAR(30) NOT NULL,
-    [celularA] VARCHAR(20) NOT NULL,
+    [correo] VARCHAR(30),
+    [celularA] VARCHAR(20),
     [celularB] VARCHAR(20),
     [idCliente] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Contacto__3213E83F781F1702] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Contacto__3213E83FE366AC02] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
 CREATE TABLE [dbo].[Cultivo] (
     [id] INT NOT NULL IDENTITY(1,1),
     [certificacion] VARCHAR(20),
-    [area] DECIMAL(4,2),
+    [hectareas] DECIMAL(6,2),
     [mesInicio] VARCHAR(20),
     [mesFinal] VARCHAR(20),
     [observacion] VARCHAR(255),
@@ -143,14 +141,14 @@ CREATE TABLE [dbo].[Cultivo] (
     [idVariedad] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Cultivo__3213E83FF67F055F] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Cultivo__3213E83FFB68ED1A] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
 CREATE TABLE [dbo].[Departamento] (
     [id] VARCHAR(2) NOT NULL,
     [nombre] VARCHAR(30) NOT NULL,
-    CONSTRAINT [PK__Departam__3213E83FC48230C5] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [PK__Departam__3213E83FCCAC51A3] PRIMARY KEY CLUSTERED ([id]),
     CONSTRAINT [UQ_nombre_Departamento] UNIQUE NONCLUSTERED ([nombre])
 );
 
@@ -160,7 +158,7 @@ CREATE TABLE [dbo].[Distrito] (
     [nombre] VARCHAR(40) NOT NULL,
     [idProvincia] VARCHAR(4) NOT NULL,
     [idDepartamento] VARCHAR(2) NOT NULL,
-    CONSTRAINT [PK__Distrito__3213E83F47F24E94] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Distrito__3213E83F8B13452E] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -171,7 +169,7 @@ CREATE TABLE [dbo].[Division] (
     [idEmpresa] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Division__3213E83FA86B4635] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Division__3213E83F1E9363F7] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -180,7 +178,7 @@ CREATE TABLE [dbo].[Empresa] (
     [nomEmpresa] VARCHAR(15) NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Empresa__3213E83F03AB4AC0] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Empresa__3213E83F00FEF365] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -189,19 +187,21 @@ CREATE TABLE [dbo].[Familia] (
     [codigo] VARCHAR(7) NOT NULL,
     [nombre] VARCHAR(60) NOT NULL,
     [idEmpresa] INT NOT NULL,
+    [enfoque] BIT,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Familia__3213E83F13213D92] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Familia__3213E83FF8E78BBD] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
 CREATE TABLE [dbo].[Fundo] (
     [id] INT NOT NULL IDENTITY(1,1),
     [nombre] VARCHAR(45),
-    [idClienteUbigeo] INT NOT NULL,
+    [idClienteUbigeo] INT,
+    [idPuntoContacto] INT,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Fundo__3213E83FB0AFEA20] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Fundo__3213E83F883394F8] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -210,7 +210,7 @@ CREATE TABLE [dbo].[Labor] (
     [nombre] VARCHAR(45) NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Labor__3213E83F31F197F4] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Labor__3213E83F1DE9FFF2] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -221,7 +221,7 @@ CREATE TABLE [dbo].[LaborVisita] (
     [idRepresentada] INT,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__LaborVis__3213E83FA8E80F06] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__LaborVis__3213E83FEE2BAE98] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -232,7 +232,7 @@ CREATE TABLE [dbo].[Linea] (
     [idEmpresa] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Linea__3213E83FA15AC581] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Linea__3213E83F661874D8] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -242,16 +242,7 @@ CREATE TABLE [dbo].[Negocio] (
     [idDivision] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Negocio__3213E83FB903AC60] PRIMARY KEY CLUSTERED ([id])
-);
-
--- CreateTable
-CREATE TABLE [dbo].[Planta] (
-    [id] INT NOT NULL IDENTITY(1,1),
-    [nombre] VARCHAR(45) NOT NULL,
-    [updatedAt] DATETIME,
-    [createdAt] DATETIME,
-    CONSTRAINT [PK__Planta__3213E83F1F73FFB1] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Negocio__3213E83F4FC43B0D] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -259,7 +250,7 @@ CREATE TABLE [dbo].[Provincia] (
     [id] VARCHAR(4) NOT NULL,
     [nombre] VARCHAR(30) NOT NULL,
     [idDepartamento] VARCHAR(2) NOT NULL,
-    CONSTRAINT [PK__Provinci__3213E83F200AA1DB] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [PK__Provinci__3213E83F92C3BCE7] PRIMARY KEY CLUSTERED ([id]),
     CONSTRAINT [UQ_nombre_Provincia] UNIQUE NONCLUSTERED ([nombre])
 );
 
@@ -269,7 +260,7 @@ CREATE TABLE [dbo].[Representada] (
     [nombre] VARCHAR(45) NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Represen__3213E83FCDD5725A] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Represen__3213E83F7BDC7D61] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -279,18 +270,18 @@ CREATE TABLE [dbo].[SubLabor] (
     [idLabor] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__SubLabor__3213E83F0378FF6C] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__SubLabor__3213E83F7766DF07] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
 CREATE TABLE [dbo].[Variedad] (
     [id] INT NOT NULL IDENTITY(1,1),
     [nombre] VARCHAR(45) NOT NULL,
-    [idPlanta] INT NOT NULL,
+    [idVegetacion] INT NOT NULL,
     [idFoto] INT,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Variedad__3213E83F5555687D] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Variedad__3213E83F9C7696A8] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -320,7 +311,7 @@ CREATE TABLE [dbo].[Visita] (
     [idFoto] INT,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Visita__3213E83F77D895CF] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Visita__3213E83F24D31225] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -330,7 +321,7 @@ CREATE TABLE [dbo].[VisitaArticulo] (
     [idArticulo] INT NOT NULL,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__VisitaAr__3213E83FD7847FCC] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__VisitaAr__3213E83F04D1A6F3] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -343,7 +334,7 @@ CREATE TABLE [dbo].[ZonaAnterior] (
     [zonaB] VARCHAR(20),
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__ZonaAnte__3213E83FA8B22675] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__ZonaAnte__3213E83F4023B10B] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateTable
@@ -353,7 +344,138 @@ CREATE TABLE [dbo].[Todo] (
     [completedAt] DATETIME,
     [createdAt] DATETIME,
     [updatedAt] DATETIME,
-    CONSTRAINT [PK__Todo__3213E83F6A125941] PRIMARY KEY CLUSTERED ([id])
+    CONSTRAINT [PK__Todo__3213E83FD55A9D3E] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[BlancoBiologico] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [cientifico] VARCHAR(45),
+    [estandarizado] VARCHAR(45),
+    [idVegetacion] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__BlancoBi__3213E83F260745EF] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[DemoPlot] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [titulo] VARCHAR(45),
+    [objetivo] VARCHAR(45),
+    [hasPrueba] DECIMAL(6,2),
+    [instalacion] DATETIME,
+    [finalizacion] DATETIME,
+    [estado] VARCHAR(10),
+    [validacion] BIT,
+    [idSubLabor] INT NOT NULL,
+    [idCultivo] INT NOT NULL,
+    [idContactoP] INT NOT NULL,
+    [idBlanco] INT NOT NULL,
+    [idDistrito] VARCHAR(6) NOT NULL,
+    [idArticulo] INT,
+    [idGte] INT NOT NULL,
+    [idTienda] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__DemoPlot__3213E83F851E72E0] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[FotoDemoPlot] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [idDemoPlot] INT NOT NULL,
+    [ruta] VARCHAR(50) NOT NULL,
+    [tipo] VARCHAR(5),
+    [latitud] DECIMAL(10,6),
+    [longitud] DECIMAL(10,6),
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__FotoDemo__3213E83FBC7F3D9C] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[Gte] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [activo] BIT,
+    [idSubZona] INT NOT NULL,
+    [idColaborador] INT NOT NULL,
+    [idUsuario] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__Gte__3213E83FBE071BC6] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[MacroZona] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [codi] VARCHAR(3) NOT NULL,
+    [nombre] VARCHAR(70) NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__MacroZon__3213E83FFD9ADB5E] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[PuntoContacto] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [nombre] VARCHAR(90) NOT NULL,
+    [tipoDoc] VARCHAR(3),
+    [numDoc] VARCHAR(11),
+    [hectareas] DECIMAL(6,2),
+    [tipo] VARCHAR(1) NOT NULL,
+    [dirReferencia] VARCHAR(90),
+    [lider] BIT,
+    [activo] BIT NOT NULL,
+    [idGte] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__PuntoCon__3213E83F6C03219B] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[PuntoTienda] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [idPunto] INT NOT NULL,
+    [idTienda] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__PuntoTie__3213E83FA2E0582C] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[SubZona] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [codi] VARCHAR(3) NOT NULL,
+    [nombre] VARCHAR(70),
+    [idMacroZona] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__SubZona__3213E83F11485BE3] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[Vegetacion] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [nombre] VARCHAR(45) NOT NULL,
+    [updatedAt] DATETIME,
+    [createdAt] DATETIME,
+    CONSTRAINT [PK__Vegetaci__3213E83F6C9C83ED] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[ContactoPunto] (
+    [id] INT NOT NULL IDENTITY(1,1),
+    [nombre] VARCHAR(45) NOT NULL,
+    [apellido] VARCHAR(45) NOT NULL,
+    [cargo] VARCHAR(20) NOT NULL,
+    [correo] VARCHAR(30),
+    [celularA] VARCHAR(20),
+    [celularB] VARCHAR(20),
+    [idPunto] INT NOT NULL,
+    [createdAt] DATETIME,
+    [updatedAt] DATETIME,
+    CONSTRAINT [PK__Contacto__3213E83F69F47B8C] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- CreateIndex
@@ -399,9 +521,6 @@ ALTER TABLE [dbo].[ClienteZonaAnt] ADD CONSTRAINT [fk_ClienteZonaA_Empresa] FORE
 ALTER TABLE [dbo].[ClienteZonaAnt] ADD CONSTRAINT [fk_ClienteZonaA_ZonaA] FOREIGN KEY ([idZonaAnt]) REFERENCES [dbo].[ZonaAnterior]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE [dbo].[Colaborador] ADD CONSTRAINT [fk_Colaborador_Negocio1] FOREIGN KEY ([idNegocio]) REFERENCES [dbo].[Negocio]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
 ALTER TABLE [dbo].[Colaborador] ADD CONSTRAINT [fk_Colaborador_Usuario1] FOREIGN KEY ([idUsuario]) REFERENCES [dbo].[Usuario]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
@@ -432,6 +551,9 @@ ALTER TABLE [dbo].[Familia] ADD CONSTRAINT [fk_Empresa_Familia1] FOREIGN KEY ([i
 ALTER TABLE [dbo].[Fundo] ADD CONSTRAINT [fk_Fundo_ClienteUbigeo] FOREIGN KEY ([idClienteUbigeo]) REFERENCES [dbo].[ClienteUbigeo]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE [dbo].[Fundo] ADD CONSTRAINT [fk_Fundo_PuntoContacto1] FOREIGN KEY ([idPuntoContacto]) REFERENCES [dbo].[PuntoContacto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE [dbo].[LaborVisita] ADD CONSTRAINT [fk_LaborVisita_Representada] FOREIGN KEY ([idRepresentada]) REFERENCES [dbo].[Representada]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
@@ -456,7 +578,7 @@ ALTER TABLE [dbo].[SubLabor] ADD CONSTRAINT [fk_Labor_SubLabor1] FOREIGN KEY ([i
 ALTER TABLE [dbo].[Variedad] ADD CONSTRAINT [fk_Variedad_Foto1] FOREIGN KEY ([idFoto]) REFERENCES [dbo].[Foto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE [dbo].[Variedad] ADD CONSTRAINT [fk_Variedad_Planta1] FOREIGN KEY ([idPlanta]) REFERENCES [dbo].[Planta]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE [dbo].[Variedad] ADD CONSTRAINT [fk_Variedad_Vegetacion1] FOREIGN KEY ([idVegetacion]) REFERENCES [dbo].[Vegetacion]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[Visita] ADD CONSTRAINT [fk_Visita_Colaborador1] FOREIGN KEY ([idColaborador]) REFERENCES [dbo].[Colaborador]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -481,6 +603,60 @@ ALTER TABLE [dbo].[VisitaArticulo] ADD CONSTRAINT [fk_VisitaArticulo_Visita1] FO
 
 -- AddForeignKey
 ALTER TABLE [dbo].[ZonaAnterior] ADD CONSTRAINT [fk_Zona_Empresa1] FOREIGN KEY ([idEmpresa]) REFERENCES [dbo].[Empresa]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[BlancoBiologico] ADD CONSTRAINT [fk_Blanco_Vegetacion1] FOREIGN KEY ([idVegetacion]) REFERENCES [dbo].[Vegetacion]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_Articulo1] FOREIGN KEY ([idArticulo]) REFERENCES [dbo].[Articulo]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_Blanco1] FOREIGN KEY ([idBlanco]) REFERENCES [dbo].[BlancoBiologico]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_ContactoP1] FOREIGN KEY ([idContactoP]) REFERENCES [dbo].[ContactoPunto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_Cultivo1] FOREIGN KEY ([idCultivo]) REFERENCES [dbo].[Cultivo]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_Gte1] FOREIGN KEY ([idGte]) REFERENCES [dbo].[Gte]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_Provincia1] FOREIGN KEY ([idDistrito]) REFERENCES [dbo].[Distrito]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_SubLabor1] FOREIGN KEY ([idSubLabor]) REFERENCES [dbo].[SubLabor]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[DemoPlot] ADD CONSTRAINT [fk_DemoPlot_Tienda1] FOREIGN KEY ([idTienda]) REFERENCES [dbo].[PuntoContacto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[FotoDemoPlot] ADD CONSTRAINT [fk_Foto_DemoPlot1] FOREIGN KEY ([idDemoPlot]) REFERENCES [dbo].[DemoPlot]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Gte] ADD CONSTRAINT [fk_Gte_Colaborador1] FOREIGN KEY ([idColaborador]) REFERENCES [dbo].[Colaborador]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Gte] ADD CONSTRAINT [fk_Gte_SubZona1] FOREIGN KEY ([idSubZona]) REFERENCES [dbo].[SubZona]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Gte] ADD CONSTRAINT [fk_Gte_Usuario1] FOREIGN KEY ([idUsuario]) REFERENCES [dbo].[Usuario]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[PuntoContacto] ADD CONSTRAINT [fk_PuntoContacto_Gte] FOREIGN KEY ([idGte]) REFERENCES [dbo].[Gte]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[PuntoTienda] ADD CONSTRAINT [fk_PuntoTienda_Punto] FOREIGN KEY ([idPunto]) REFERENCES [dbo].[PuntoContacto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[PuntoTienda] ADD CONSTRAINT [fk_PuntoTienda_Tienda] FOREIGN KEY ([idTienda]) REFERENCES [dbo].[PuntoContacto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[SubZona] ADD CONSTRAINT [fk_SubZona_MacroZona1] FOREIGN KEY ([idMacroZona]) REFERENCES [dbo].[MacroZona]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[ContactoPunto] ADD CONSTRAINT [fk_Contacto_PuntoContacto] FOREIGN KEY ([idPunto]) REFERENCES [dbo].[PuntoContacto]([id]) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 COMMIT TRAN;
 
