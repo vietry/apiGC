@@ -13,9 +13,6 @@ export class ColaboradorRoutes {
         router.get('/',controller.getColaboradores);
         router.post('/',[ AuthMiddleware.validateJWT] ,controller.createColaborador);
 
-
-
-
         return router;
     }
 }

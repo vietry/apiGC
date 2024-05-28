@@ -6,8 +6,7 @@ export class GteService{
     //DI
     constructor(){}
 
-    async createGte( createGteDto: CreateGteDto, colaborador: ColaboradorEntity, user: UsuarioEntity){
-        //const colaboradorExists = await prisma.colaborador.findFirst({where: {email: createColaboradorDto.cargo}});
+    async createGte( createGteDto: CreateGteDto, user: UsuarioEntity){
         try {
             const currentDate = new Date();
 
@@ -15,7 +14,8 @@ export class GteService{
                 data: {
                     activo: createGteDto.activo,
                     idSubZona: createGteDto.idSubZona,
-                    idColaborador: colaborador.id,
+                    //idColaborador: colaborador.id,
+                    idColaborador: createGteDto.idColaborador,
                     idUsuario: user.id,
                     createdAt: currentDate,
                     updatedAt: currentDate,
@@ -26,12 +26,13 @@ export class GteService{
                 id: gte.id,
                 activo:  gte.activo,
                 SubZona: gte.idSubZona,
-                Usuario: gte.idUsuario,
                 Colaborar: gte.idColaborador,
+                Usuario: gte.idUsuario,
               
             }
-
+            
         } catch (error) {
+        
             throw CustomError.internalServer(`${error}`)
         }
 
@@ -65,8 +66,8 @@ export class GteService{
                         id: gte.id,
                         activo:  gte.activo,
                         SubZona: gte.idSubZona,
-                        Usuario: gte.idUsuario,
                         Colaborar: gte.idColaborador,
+                        Usuario: gte.idUsuario,
                         }
                         })
             }

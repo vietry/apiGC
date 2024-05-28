@@ -6,6 +6,7 @@ export * from './entities/todo.entity';
 export * from './entities/usuario.entity';
 export * from './entities/colaborador.entity';
 export * from './entities/gte.entity';
+export * from './entities/punto_contacto.entity';
 
 export * from './repositories/todo.repository';
 export * from './repositories/usuario.repository';

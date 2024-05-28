@@ -1,19 +1,17 @@
 import { Router } from "express";
 import { GteController } from "./controller";
+import { GteService } from "../../services/gte.service";
+import { AuthMiddleware } from "../../middlewares/auth.middleware";
 
 export class GteRoutes {
     static get routes(): Router{
         const router = Router();
-        const controller = new GteController();
+        const gteService = new GteService();
+        const controller = new GteController(gteService);
 
 
         router.get('/',controller.getGtes);
-        router.post('/',controller.registerGte);
-
-        // router.use('/api/products', TodoRoutes.routes);
-        // router.use('/api/clients', TodoRoutes.routes);
-        // router.use('/api/users', TodoRoutes.routes);
-
+        router.post('/',[ AuthMiddleware.validateJWT] ,controller.createGte);
 
         return router;
     }

@@ -3,6 +3,7 @@ import { TodoRoutes } from "./todos/routes";
 import { AuthRoutes } from "./auth/routes";
 import { ColaboradorRoutes } from "./usuarios/colaborador/routes";
 import { GteRoutes } from "./usuarios/gte/routes";
+import { PuntoContactoRoutes } from "./puntos-contacto/routes";
 
 export class AppRoutes {
     static get routes(): Router{
@@ -13,6 +14,7 @@ export class AppRoutes {
         router.use('/api/auth', AuthRoutes.routes);
         router.use('/api/colaboradores', ColaboradorRoutes.routes);
         router.use('/api/gtes', GteRoutes.routes);
+        router.use('/api/puntoscontacto', PuntoContactoRoutes.routes);
 
 
 
