@@ -4,7 +4,7 @@
 import { prisma } from "../../data/sqlserver";
 import { CreateContactoPuntoDto, CustomError, PaginationDto } from "../../domain";
 
-export class ColaboradorService{
+export class ContactoPuntoService{
 
     //DI
     constructor(){}
@@ -53,9 +53,9 @@ export class ColaboradorService{
         try {
             //const colaboradores = await prisma.colaborador.findMany({where: {idUsuario: 1}});
 
-            const [total, colaboradores] = await Promise.all([
-                await prisma.colaborador.count(),
-                await prisma.colaborador.findMany({
+            const [total, contactos] = await Promise.all([
+                await prisma.contactoPunto.count(),
+                await prisma.contactoPunto.findMany({
                     skip: ((page -1) * limit),
                     take: limit
                 })
@@ -66,17 +66,23 @@ export class ColaboradorService{
                 page: page,
                 limit: limit,
                 total: total,
-                next: `/api/colaboradores?page${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0)  ? `/api/colaboradores?page${(page - 1)}&limit=${limit}`: null ,
+                next: `/api/contactospunto?page${(page + 1)}&limit=${limit}`,
+                prev: (page - 1 > 0)  ? `/api/contactospunto?page${(page - 1)}&limit=${limit}`: null ,
 
-                colaboradores: colaboradores.map((colaborador) => {
+                colaboradores: contactos,
+                
+                /*contactos.map((contacto) => {
                     return {
-                        id: colaborador.id,
-                        cargo:  colaborador.cargo,
-                        Area: colaborador.idArea,
-                        ZonaA: colaborador.idZonaAnt,
+                        id: contacto.id,
+                        nombre: contacto.cargo,
+                        apellido: contacto.cargo,
+                        cargo: contacto.cargo,
+                        email: contacto.email,
+                        celularA: contacto.celularA,
+                        celularB: contacto.celularB,
+                        idPunto: contacto.idPunto,
                         }
-                        })
+                        })*/
             }
 
         } catch (error) {

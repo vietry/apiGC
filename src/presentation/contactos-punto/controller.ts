@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { CreateContactoPuntoDto, CustomError, PaginationDto } from "../../domain";
+import { ContactoPuntoService } from "../services/contacto-punto.service";
 
 
 
@@ -9,7 +10,7 @@ export class ContactoPuntoController{
 
     // DI
     constructor(
-        //private readonly colaboradorService: ColaboradorService,
+        private readonly contactoPuntoService: ContactoPuntoService,
     ){}
 
     private handleError = (res: Response, error: unknown) => {
@@ -27,12 +28,10 @@ export class ContactoPuntoController{
         const [error, createContactoPuntoDto] = CreateContactoPuntoDto.create(req.body);
         if(error) return res.status(400).json({error});
 
-        //this.colaboradorService.createColaborador(createColaboradorDto!, req.body.user)
-            //.then(colaborador => res.status(201).json(colaborador))
-            //.catch( error => this.handleError(res, error));
+        this.contactoPuntoService.createContactoPunto(createContactoPuntoDto!)
+            .then(contactoPunto => res.status(201).json(contactoPunto))
+            .catch( error => this.handleError(res, error));
 
-
-        res.json('Create Contacto punto')
     }
 
     getContactosPunto = async (req: Request, res: Response) => {
@@ -41,10 +40,11 @@ export class ContactoPuntoController{
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if(error) return res.status(400).json({error});
 
-
-
-        
         res.json('Get Contacto punto')
+
+        this.contactoPuntoService.getContactos(paginationDto!)
+        .then(contactoPunto => res.status(200).json(contactoPunto))
+        .catch( error => this.handleError(res, error));
     }
 
  
