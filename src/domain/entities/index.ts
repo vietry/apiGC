@@ -3,3 +3,4 @@ export * from './usuario.entity';
 export * from './colaborador.entity';
 export * from './gte.entity';
 export * from './punto_contacto.entity';
+export * from './demoplot.entity';

@@ -24,12 +24,14 @@ export class AuthService{
           if (existUser) throw CustomError.badRequest('El email ya existe');
 
           try {
-
+            const currentDate = new Date();
             const hashedPassword = BcryptAdapter.hash(registerUsuarioDto.password);
             const user = await prisma.usuario.create({
                 data: {
                   ...registerUsuarioDto,
                   password: hashedPassword,
+                  createdAt: currentDate,
+                  updatedAt: currentDate,
                 },
               });
               
