@@ -1,5 +1,5 @@
 
-export class CreateDemoPlotDto {
+export class CreateDemoplotDto {
 
     private constructor(
         public readonly titulo: string | null,
@@ -21,7 +21,7 @@ export class CreateDemoPlotDto {
         public readonly idGte: number,
     ) {}
 
-    static async create(object: { [key: string]: any }): Promise<[string?, CreateDemoPlotDto?]> {
+    static async create(object: { [key: string]: any }): Promise<[string?, CreateDemoplotDto?]> {
         const {
             titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
@@ -63,7 +63,7 @@ export class CreateDemoPlotDto {
 
         return [
             undefined,
-            new CreateDemoPlotDto(
+            new CreateDemoplotDto(
                 titulo,
                 objetivo,
                 hasCultivoNumber,
