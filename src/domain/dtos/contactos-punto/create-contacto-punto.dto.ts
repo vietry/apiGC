@@ -1,3 +1,4 @@
+import { Validators } from "../../../config";
 
 
 
@@ -10,23 +11,27 @@ export class CreateContactoPuntoDto{
         public readonly email: string | null,
         public readonly celularA: string | null,
         public readonly celularB: string | null,
-        public readonly punto: number, //ID
+        public readonly idPunto: number, //ID
     ){}
 
-    static create(object: { [key: string]: any }): [string?, CreateContactoPuntoDto?] {
+    static async create(object: { [key: string]: any }): Promise<[string?, CreateContactoPuntoDto?]> {
         const { nombre, apellido, cargo, correo, celularA, celularB, idPunto } = object;
+
+        let idPuntoNumber = idPunto;
 
         if (!nombre) return ['Nombre faltante'];
         if (!apellido) return ['Apellido faltante'];
         if (!cargo) return ['Cargo faltante'];
         if (!idPunto) return ['idPunto faltante'];
 
-        let idPuntoNumber = idPunto;
-
         if (typeof idPunto !== 'number') {
             idPuntoNumber = parseInt(idPunto);
             if (isNaN(idPuntoNumber)) return ['idPunto debe ser un número válido'];
         }
+
+        const isUnique = await Validators.isPuntoID(idPuntoNumber);
+        if (!isUnique) return ['Invalid idPunto'];
+
 
         return [
             undefined,

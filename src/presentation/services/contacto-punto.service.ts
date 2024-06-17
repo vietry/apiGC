@@ -10,19 +10,32 @@ export class ContactoPuntoService{
     constructor(){}
 
     async createContactoPunto( createContactoPuntoDto: CreateContactoPuntoDto){
-        //const colaboradorExists = await prisma.colaborador.findFirst({where: {email: createColaboradorDto.cargo}});
+
+        const nombreApellido = `${createContactoPuntoDto.nombre} ${createContactoPuntoDto.apellido}`;
+
+        const contactoExists = await prisma.contactoPunto.findFirst({
+            where: {
+                AND: [
+                    { nombre: createContactoPuntoDto.nombre },
+                    { apellido: createContactoPuntoDto.apellido }
+                  ]
+                }
+              });
+            
+        if ( contactoExists ) throw CustomError.badRequest( `Contacto ${nombreApellido} already exists` );
+
         try {
             const currentDate = new Date();
 
             const contacto = await prisma.contactoPunto.create({
                 data: {
-                    nombre: createContactoPuntoDto.cargo,
-                    apellido: createContactoPuntoDto.cargo,
+                    nombre: createContactoPuntoDto.nombre,
+                    apellido: createContactoPuntoDto.apellido,
                     cargo: createContactoPuntoDto.cargo,
                     email: createContactoPuntoDto.email,
                     celularA: createContactoPuntoDto.celularA,
                     celularB: createContactoPuntoDto.celularB,
-                    idPunto: createContactoPuntoDto.punto,
+                    idPunto: createContactoPuntoDto.idPunto,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -57,7 +70,16 @@ export class ContactoPuntoService{
                 await prisma.contactoPunto.count(),
                 await prisma.contactoPunto.findMany({
                     skip: ((page -1) * limit),
-                    take: limit
+                    take: limit,
+                    include: {
+                        //PuntoContacto: true,
+                        PuntoContacto: {
+                            select: {
+                                id: true,
+                                nombre: true,
+                                numDoc: true
+                        }}
+                    },
                 })
             ])
 

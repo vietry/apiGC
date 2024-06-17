@@ -11,7 +11,7 @@
 
         static async generateToken( 
             payload: Object, 
-            duration: string = '2h'): Promise<string | null>{
+            duration: string = '8h'): Promise<string | null>{
 
             return new Promise((resolve) => {
 

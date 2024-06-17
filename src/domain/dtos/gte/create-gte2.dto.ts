@@ -1,16 +1,17 @@
+import { Validators } from "../../../config";
 
-export class CreateGteDto{
+export class CreateGteDto2{
 
     private constructor(
         public readonly activo: boolean | null,
         public readonly idSubZona: number,
-        public readonly colaborador: string, //ID
-        public readonly usuario: string, //ID
+        public readonly idColaborador: number, //ID
+        public readonly idUsuario: number, //ID
         
     ){}
 
-    static create( props: { [key: string]: any } ): [string?, CreateGteDto?]{
-        const { activo, idSubZona, colaborador, usuario } = props;
+    static async create( props: { [key: string]: any } ): Promise<[string?, CreateGteDto2?]>{
+        const { activo, idSubZona, idColaborador, idUsuario } = props;
 
         let idSubZonaNumber = idSubZona;
 
@@ -21,12 +22,16 @@ export class CreateGteDto{
         if ( typeof idSubZona !== 'number' ) {
             idSubZonaNumber =  parseInt(idSubZona)
         }
-        if(!colaborador) return ['Missing colaborador'];
-        if(!usuario) return ['Missing usuario'];
+        if(!idColaborador) return ['Missing colaborador'];
+        if(!idUsuario) return ['Missing usuario'];
+
+        const isUnique = await Validators.isColaboradorID(idColaborador);
+        if (!isUnique) return ['Invalid idPunto'];
+
 
         return [
             undefined,
-            new CreateGteDto(!!activo, idSubZonaNumber, colaborador, usuario)
+            new CreateGteDto2(!!activo, idSubZonaNumber, idColaborador, idUsuario)
         ]
     }
     

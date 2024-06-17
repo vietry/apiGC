@@ -1,26 +1,22 @@
 import { prisma } from "../../data/sqlserver";
 import { ColaboradorEntity, CreateGteDto, CustomError, PaginationDto, UsuarioEntity } from "../../domain";
+import { CreateGteDto2 } from "../../domain/dtos/gte/create-gte2.dto";
 
-export class GteService{
+export class GteService2{
 
     //DI
     constructor(){}
 
-    async createGte( createGteDto: CreateGteDto, user: UsuarioEntity){
-
-        const colaboradorExists = await prisma.colaborador.findFirst({where: {id: createGteDto.idColaborador}});
-        if ( !colaboradorExists ) throw CustomError.badRequest( `IdColaborador no exists` );
-
+    async createGte( createGteDto2: CreateGteDto2){
         try {
             const currentDate = new Date();
 
             const gte = await prisma.gte.create({
                 data: {
-                    activo: createGteDto.activo,
-                    idSubZona: createGteDto.idSubZona,
-                    //idColaborador: colaborador.id,
-                    idColaborador: createGteDto.idColaborador,
-                    idUsuario: user.id,
+                    activo: createGteDto2.activo,
+                    idSubZona: createGteDto2.idSubZona,
+                    idColaborador: createGteDto2.idColaborador,
+                    idUsuario: createGteDto2.idUsuario,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
