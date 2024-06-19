@@ -1,4 +1,5 @@
 import express, { Router } from 'express';
+import fileUpload from 'express-fileupload';
 import compression from 'compression';
 import path from 'path';
 import ngrok from '@ngrok/ngrok';
@@ -34,6 +35,10 @@ export class Server{
         this.app.use(express.json());
         this.app.use(express.urlencoded({extended: true})); //x-www-form-urlencoded
         this.app.use(compression());
+
+        this.app.use(fileUpload({
+            limits: { fileSize: 50 * 1024 * 1024 },
+          }));
 
         //* Public Folder
         this.app.use(express.static(this.publicPath));

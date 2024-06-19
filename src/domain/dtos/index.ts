@@ -12,3 +12,4 @@ export * from './colaborador/create-colaborador.dto';
 export * from './gte/create-gte.dto';
 export * from './punto-contacto/create-punto-contacto.dto';
 export * from './contactos-punto/create-contacto-punto.dto';
+export * from './demoplot/create-demoplot.dto';

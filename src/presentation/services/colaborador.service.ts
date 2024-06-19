@@ -62,7 +62,16 @@ export class ColaboradorService{
                 await prisma.colaborador.count(),
                 await prisma.colaborador.findMany({
                     skip: ((page -1) * limit),
-                    take: limit
+                    take: limit,
+                    include: {
+                        Usuario: true,
+                        /*PuntoContacto: {
+                            select: {
+                                id: true,
+                                nombre: true,
+                                numDoc: true
+                        }}*/
+                    },
                 })
             ])
 
