@@ -5,7 +5,7 @@ export class FotoDemoplotEntity {
     constructor(
         public id: number,
         public idDemoPlot: number,
-        public rutaFoto: string,
+        public rutaFoto: string | null,
         public tipo: string | null,
         public latitud: number | null,
         public longitud: number | null,
@@ -23,16 +23,7 @@ export class FotoDemoplotEntity {
 
         let latitudNumber = latitud;
         let longitudNumber = longitud;
-        
-        /*if (latitud && typeof latitud !== 'number') {
-            latitudNumber = parseFloat(latitud);
-            if (isNaN(latitudNumber)) throw CustomError.badRequest('latitud must be a valid number');
-        }
-
-        if (longitud && typeof longitud !== 'number') {
-            longitudNumber = parseFloat(longitud);
-            if (isNaN(longitudNumber)) throw CustomError.badRequest('longitud must be a valid number');
-        }*/
+    
         
         return new FotoDemoplotEntity(
             id, idDemoPlot, rutaFoto, tipo, latitudNumber, longitudNumber,

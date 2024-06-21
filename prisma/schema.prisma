@@ -394,15 +394,10 @@ model DemoPlot {
   id               Int             @id(map: "PK__DemoPlot__3213E83F868301D4") @default(autoincrement())
   titulo           String?         @db.VarChar(255)
   objetivo         String?         @db.VarChar(255)
-  hasCultivo       Decimal?        @db.Decimal(6, 2)
   instalacion      DateTime?       @db.DateTime
-  seguimiento      DateTime?       @db.DateTime
   finalizacion     DateTime?       @db.DateTime
   estado           String?         @db.VarChar(10)
-  gradoInfestacion String?         @db.VarChar(5)
-  dosis            Decimal?        @db.Decimal(6, 2)
   validacion       Boolean?
-  resultado        String?         @db.VarChar(15)
   idCultivo        Int
   idContactoP      Int
   idBlanco         Int
@@ -411,6 +406,11 @@ model DemoPlot {
   idGte            Int
   createdAt        DateTime?       @db.DateTime
   updatedAt        DateTime?       @db.DateTime
+  resultado        String?         @db.VarChar(15)
+  seguimiento      DateTime?       @db.DateTime
+  dosis            Decimal?        @db.Decimal(6, 2)
+  gradoInfestacion String?         @db.VarChar(5)
+  hasCultivo       Decimal?        @db.Decimal(6, 2)
   Articulo         Articulo?       @relation(fields: [idArticulo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_Articulo1")
   BlancoBiologico  BlancoBiologico @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   ContactoDelPunto ContactoPunto   @relation(fields: [idContactoP], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_ContactoP1")
@@ -421,9 +421,9 @@ model DemoPlot {
 }
 
 model FotoDemoPlot {
-  id         Int       @id(map: "PK__FotoDemo__3213E83F59004C34") @default(autoincrement())
+  id         Int       @id(map: "PK__FotoDemo__3213E83F4F33722F") @default(autoincrement())
   idDemoPlot Int
-  rutaFoto   String    @db.VarChar(50)
+  rutaFoto   String?   @db.VarChar(50)
   tipo       String?   @db.VarChar(5)
   latitud    Decimal?  @db.Decimal(10, 6)
   longitud   Decimal?  @db.Decimal(10, 6)
@@ -511,12 +511,12 @@ model ContactoPunto {
   nombre        String        @db.VarChar(45)
   apellido      String        @db.VarChar(45)
   cargo         String        @db.VarChar(20)
-  email         String?       @db.VarChar(30)
   celularA      String?       @db.VarChar(20)
   celularB      String?       @db.VarChar(20)
   idPunto       Int
   createdAt     DateTime?     @db.DateTime
   updatedAt     DateTime?     @db.DateTime
+  email         String?       @db.VarChar(30)
   PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onUpdate: NoAction, map: "fk_Contacto_PuntoContacto")
   DemoPlot      DemoPlot[]
 }

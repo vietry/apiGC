@@ -43,7 +43,7 @@ export class FileUploadService{
             return {fileName};
 
         } catch (error) {
-            //console.log({error});
+
             throw error;
         }
 
