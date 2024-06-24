@@ -1,32 +1,24 @@
 import { prisma } from "../../data/sqlserver";
 import { CreateFotoDemoplotDto, CustomError, PaginationDto } from "../../domain";
-import { FileUploadService } from './file-upload.service';
+
 import { UploadedFile } from 'express-fileupload';
+import { FotoDemoplotEntity } from "../../domain/entities/fotoDemoplot.entity";
 
 export class FotoDemoplotService {
-    constructor(
-        private readonly fileUploadService: FileUploadService,
-    ) {}
+    constructor() {}
 
-    async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, file: UploadedFile) {
+    async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, foto: FotoDemoplotEntity) {
         try {
             // Subir el archivo
-            const uploadResult = await this.fileUploadService.uploadSingle(file, 'uploads/fotos');
-            if (!uploadResult.fileName) {
-                throw new Error('Error uploading file');
-            }
-
-            // Actualizar rutaFoto en el DTO
-            const rutaFoto = `uploads/fotos/${uploadResult.fileName}`;
 
             // Guardar en la base de datos
             const fotoDemoplot = await prisma.fotoDemoPlot.create({
                 data: {
-                    idDemoPlot: createFotoDemoplotDto.idDemoPlot,
-                    rutaFoto: rutaFoto,
-                    tipo: createFotoDemoplotDto.tipo,
-                    latitud: createFotoDemoplotDto.latitud,
-                    longitud: createFotoDemoplotDto.longitud,
+                    idDemoPlot: foto.idDemoPlot,
+                    rutaFoto: foto.rutaFoto,
+                    tipo: foto.tipo,
+                    latitud: foto.latitud,
+                    longitud: foto.longitud,
                     createdAt: new Date(),
                     updatedAt: new Date(),
                 },

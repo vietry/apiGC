@@ -19,7 +19,7 @@ export class FotoDemoplotEntity {
         } = object;
 
         if (!idDemoPlot) throw CustomError.badRequest('idDemoPlot is required');
-        if (!rutaFoto) throw CustomError.badRequest('rutaFoto is required');
+        //if (!rutaFoto) throw CustomError.badRequest('rutaFoto is required');
 
         let latitudNumber = latitud;
         let longitudNumber = longitud;

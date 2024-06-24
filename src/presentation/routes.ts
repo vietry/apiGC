@@ -8,6 +8,7 @@ import { ContactoPuntoRoutes } from "./contactos-punto/routes";
 import { DemoplotRoutes } from "./demoplots/routes";
 import { FileUploadRoutes } from "./file-upload/routes";
 import { ImageRoutes } from "./images/routes";
+//import { FotoDemoplotRoutes } from "./fotos-demoplot/routes";
 
 export class AppRoutes {
     static get routes(): Router{
@@ -22,6 +23,7 @@ export class AppRoutes {
         router.use('/api/demoplots', DemoplotRoutes.routes);
         router.use('/api/upload', FileUploadRoutes.routes);
         router.use('/api/images', ImageRoutes.routes);
+        //router.use('/api/fotodemoplot', FotoDemoplotRoutes.routes);
 
 
 
