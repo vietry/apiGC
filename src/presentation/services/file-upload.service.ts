@@ -80,8 +80,8 @@ export class FileUploadService{
         const currentDate = new Date();
         const rutaFoto = `${folder}/${uploadResult.fileName}`;
         const tipo = file.mimetype.split('/').at(1) ?? '';
-        
-        
+        console.log(rutaFoto)
+        console.log(tipo)
         const fotoDemoplot = await prisma.fotoDemoPlot.create({
             data: {
                 idDemoPlot: createFotoDemoplotDto.idDemoPlot,
