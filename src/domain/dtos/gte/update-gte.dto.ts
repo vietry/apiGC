@@ -38,10 +38,6 @@ export class UpdateGteDto {
             activoBoolean = Boolean(activo);
         }
 
-        if (typeof idUsuario !== 'number') {
-            idSubZonaNumber = parseInt(idUsuario);
-            if (isNaN(idUsuarioNumber)) return ['idUsuario debe ser un número válido'];
-        }
 
         if (typeof idSubZona !== 'number') {
             idSubZonaNumber = parseInt(idSubZona);
@@ -51,6 +47,11 @@ export class UpdateGteDto {
         if (typeof idColaborador !== 'number') {
             idColaboradorNum = parseInt(idColaborador);
             if (isNaN(idColaboradorNum)) return ['idColaborador debe ser un número válido'];
+        }
+
+        if (typeof idUsuario !== 'number') {
+            idSubZonaNumber = parseInt(idUsuario);
+            if (isNaN(idUsuarioNumber)) return ['idUsuario debe ser un número válido'];
         }
 
         return [undefined, new UpdateGteDto(id,  activoBoolean, idSubZonaNumber, idColaboradorNum, idUsuarioNumber, //updatedAt

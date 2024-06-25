@@ -51,11 +51,7 @@ export class GteService{
             const updatedGte = await prisma.gte.update({
                 where: { id: updateGteDto.id },
                 data: {
-                    //...updateGteDto.values,
-                    activo: updateGteDto.activo,
-                    idSubZona: updateGteDto.idSubZona,
-                    idColaborador: updateGteDto.idColaborador,
-                    idUsuario: updateGteDto.idUsuario,
+                    ...updateGteDto.values, // Usar valores directamente del DTO
                     updatedAt: new Date(),
                 },
             });
@@ -85,7 +81,27 @@ export class GteService{
                 await prisma.gte.count(),
                 await prisma.gte.findMany({
                     skip: ((page -1) * limit),
-                    take: limit
+                    take: limit,
+                    include: {
+                        //Usuario: true,
+                        Colaborador: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        nombres: true,
+                                        apellidos: true
+                                }},
+                                cargo: true,
+                            }
+                        },
+                        Usuario: {
+                            select: {
+                                
+                                nombres: true,
+                                apellidos: true,
+                                email: true,
+                        }}
+                    },
                 })
             ])
 
@@ -97,15 +113,17 @@ export class GteService{
                 next: `/api/gtes?page${(page + 1)}&limit=${limit}`,
                 prev: (page - 1 > 0)  ? `/api/gtes?page${(page - 1)}&limit=${limit}`: null ,
 
-                gtes: gtes.map((gte) => {
+                gtes: gtes
+                    /*gtes.map((gte) => {
                     return {
                         id: gte.id,
                         activo:  gte.activo,
                         SubZona: gte.idSubZona,
                         Colaborar: gte.idColaborador,
                         Usuario: gte.idUsuario,
+                        
                         }
-                        })
+                        })*/
             }
 
         } catch (error) {

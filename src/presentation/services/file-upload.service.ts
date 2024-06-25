@@ -101,4 +101,25 @@ export class FileUploadService{
         return uploadResult;
     }
 
+    async uploadMultiCreateFotoDemoPlot(
+        files: UploadedFile[],
+        createFotoDemoplotDtos: CreateFotoDemoplotDto[],
+        folder: string = 'uploads/demoplots',
+        validExtensions: string[] = ['png', 'jpg', 'jpeg']
+    ) {
+        const results = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const dto = createFotoDemoplotDtos[i];
+
+            const uploadResult = await this.uploadAndCreateFotoDemoPlot(file, dto, folder, validExtensions);
+            results.push(uploadResult);
+        }
+
+        return results;
+    }
+
+    
+
 }
