@@ -421,8 +421,10 @@ model DemoPlot {
 }
 
 model FotoDemoPlot {
-  id         Int       @id(map: "PK__FotoDemo__3213E83FB4437D00") @default(autoincrement())
+  id         Int       @id(map: "PK__FotoDemo__3213E83FFAFCFDE8") @default(autoincrement())
   idDemoPlot Int
+  nombre     String?   @db.VarChar(50)
+  comentario String?   @db.VarChar(255)
   rutaFoto   String?   @db.VarChar(255)
   tipo       String?   @db.VarChar(10)
   latitud    Decimal?  @db.Decimal(10, 6)

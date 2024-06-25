@@ -7,7 +7,7 @@ import { FotoDemoplotEntity } from "../../domain/entities/fotoDemoplot.entity";
 export class FotoDemoplotService {
     constructor() {}
 
-    async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, foto: FotoDemoplotEntity) {
+    /*async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, foto: FotoDemoplotEntity) {
         try {
             // Subir el archivo
 
@@ -29,9 +29,9 @@ export class FotoDemoplotService {
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
-    }
+    }*/
 
-    async getFotoDemoplots(paginationDto: PaginationDto) {
+    async getFotosDemoplots(paginationDto: PaginationDto) {
         const { page, limit } = paginationDto;
 
         try {
@@ -58,8 +58,46 @@ export class FotoDemoplotService {
                 page,
                 limit,
                 total,
-                next: `/api/fotodemoplots?page=${page + 1}&limit=${limit}`,
-                prev: page - 1 > 0 ? `/api/fotodemoplots?page=${page - 1}&limit=${limit}` : null,
+                next: `/api/fotosdemoplots?page=${page + 1}&limit=${limit}`,
+                prev: page - 1 > 0 ? `/api/fotosdemoplots?page=${page - 1}&limit=${limit}` : null,
+                fotoDemoplots,
+            };
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getFotosByIdDemoplot(idDemoPlot: number,paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
+
+        try {
+            const [total, fotoDemoplots] = await Promise.all([
+                prisma.fotoDemoPlot.count(),
+                prisma.fotoDemoPlot.findMany({
+                    where: {idDemoPlot: idDemoPlot},
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    include: {
+                        DemoPlot: {
+                            select: {
+                                id: true,
+                                idCultivo: true,
+                                idGte: true,
+                                idBlanco: true,
+                                gradoInfestacion: true,
+                            }
+                        }
+                    },
+                }),
+            ]);
+
+            return {
+                page,
+                limit,
+                total,
+                next: `/api/fotosdemoplots/${idDemoPlot}?page=${page + 1}&limit=${limit}`,
+                prev: page - 1 > 0 ? `/api/fotodemoplots/${idDemoPlot}?page=${page - 1}&limit=${limit}` : null,
                 fotoDemoplots,
             };
 

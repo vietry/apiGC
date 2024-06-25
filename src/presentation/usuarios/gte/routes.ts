@@ -12,6 +12,7 @@ export class GteRoutes {
 
         router.get('/',controller.getGtes);
         router.post('/',[ AuthMiddleware.validateJWT] ,controller.createGte);
+        router.put('/:id', /*[AuthMiddleware.validateJWT],*/ controller.updateGte);
 
         return router;
     }

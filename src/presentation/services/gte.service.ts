@@ -1,5 +1,6 @@
 import { prisma } from "../../data/sqlserver";
-import { ColaboradorEntity, CreateGteDto, CustomError, PaginationDto, UsuarioEntity } from "../../domain";
+import { ColaboradorEntity, CreateGteDto, CustomError, PaginationDto, UpdateGteDto, UsuarioEntity } from "../../domain";
+
 
 export class GteService{
 
@@ -41,6 +42,37 @@ export class GteService{
         }
 
     }
+
+    async updateGte(updateGteDto: UpdateGteDto) {
+        const gteExists = await prisma.gte.findFirst({ where: { id: updateGteDto.id } });
+        if (!gteExists) throw CustomError.badRequest(`GTE with id ${updateGteDto.id} does not exist`);
+
+        try {
+            const updatedGte = await prisma.gte.update({
+                where: { id: updateGteDto.id },
+                data: {
+                    //...updateGteDto.values,
+                    activo: updateGteDto.activo,
+                    idSubZona: updateGteDto.idSubZona,
+                    idColaborador: updateGteDto.idColaborador,
+                    idUsuario: updateGteDto.idUsuario,
+                    updatedAt: new Date(),
+                },
+            });
+
+            return  updatedGte;
+            /*{
+                id: updatedGte.id,
+                activo: updatedGte.activo,
+                SubZona: updatedGte.idSubZona,
+                Colaborar: updatedGte.idColaborador,
+                Usuario: updatedGte.idUsuario,
+            };*/
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
 
     async getGtes(paginationDto: PaginationDto){
 

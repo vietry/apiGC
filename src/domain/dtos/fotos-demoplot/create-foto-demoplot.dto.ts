@@ -2,6 +2,8 @@ export class CreateFotoDemoplotDto {
 
     private constructor(
         public readonly idDemoPlot: number,
+        public readonly nombre: string | null,
+        public readonly comentario: string | null,
         //public readonly rutaFoto: string | null,
         //public readonly tipo: string | null,
         public readonly latitud: number | null,
@@ -9,14 +11,14 @@ export class CreateFotoDemoplotDto {
     ) {}
 
     static async create(object: { [key: string]: any }): Promise<[string?, CreateFotoDemoplotDto?]> {
-        const { idDemoPlot, /*rutaFoto, tipo,*/ latitud, longitud } = object;
+        const { idDemoPlot, nombre, comentario, /*rutaFoto, tipo,*/ latitud, longitud } = object;
 
         let idDemoPlotNumber = idDemoPlot;
         let latitudNumber = latitud;
         let longitudNumber = longitud;
 
         if (!idDemoPlot) return ['idDemoPlot faltante'];
-        //if (!rutaFoto) return ['rutaFoto faltante'];
+        if (!comentario) return ['comentario faltante'];
 
         if (typeof idDemoPlot !== 'number') {
             idDemoPlotNumber = parseInt(idDemoPlot);
@@ -37,6 +39,8 @@ export class CreateFotoDemoplotDto {
             undefined,
             new CreateFotoDemoplotDto(
                 idDemoPlotNumber, 
+                nombre,
+                comentario,
                 //rutaFoto, 
                 //tipo, 
                 latitudNumber, 

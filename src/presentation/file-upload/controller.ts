@@ -9,7 +9,7 @@ export class FileUploadController{
     // DI
     constructor(
         private readonly fileUploadService: FileUploadService,
-        private readonly fotoDemoplotService: FotoDemoplotService
+        
     ){}
 
     private handleError = (res: Response, error: unknown) => {
@@ -44,11 +44,10 @@ export class FileUploadController{
     }
 
     uploadAndCreateFotoDemoPlot = async (req: Request, res: Response) => {
-        //const file = req.files?.file as UploadedFile;
+        
         const file = req.body.files.at(0) as UploadedFile;
-        //const { idDemoPlot, latitud, longitud } = req.body;
-
         const [error, createFotoDenoplotDto] = await CreateFotoDemoplotDto.create(req.body);
+        
         if(error) return res.status(400).json({error});
         console.log({createFotoDenoplotDto})
 
@@ -59,25 +58,6 @@ export class FileUploadController{
             .catch( error => this.handleError(res, error));
 
     }
-
-
-    /*uploadAndCreateFotoDemoPlot = async (req: Request, res: Response) => {
-        const  type  = req.params;
-        const { idDemoPlot, tipo, latitud, longitud, rutaFoto } = req.body;
-        const file = req.body.files.at(0) as UploadedFile;
-        const [error, createFotoDemoplotDto] = await CreateFotoDemoplotDto.create(req.body);
-        if(error) return res.status(400).json({error});
-
-        this.fileUploadService
-            .uploadAndCreateFotoDemoPlot(file, idDemoPlot, tipo, latitud, longitud, rutaFoto, `uploads/${type}`)
-            .then((uploaded) => res.json(uploaded))
-            .catch((error) => this.handleError(res, error));
-
-        this.fotoDemoplotService.createFotoDemoplot(createFotoDemoplotDto!, req.body)
-            .then(fotoDemoplot => res.status(201).json(fotoDemoplot))
-            .catch( error => this.handleError(res, error));
-
-    };*/
 
  
 }

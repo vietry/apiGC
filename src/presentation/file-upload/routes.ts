@@ -3,7 +3,7 @@ import { FileUploadController } from "./controller";
 import { FileUploadService } from "../services/file-upload.service";
 import { FileUploadMiddleware } from "../middlewares/file-upload.middelware";
 import { TypeMiddleware } from "../middlewares/type.middleware";
-import { FotoDemoplotService } from "../services/foto-demoplot.service";
+
 
 
 export class FileUploadRoutes {
@@ -11,8 +11,7 @@ export class FileUploadRoutes {
         const router = Router();
         
         const controller = new FileUploadController(
-            new FileUploadService(),
-            new FotoDemoplotService()
+            new FileUploadService()
         );
 
         router.use(FileUploadMiddleware.containFiles);

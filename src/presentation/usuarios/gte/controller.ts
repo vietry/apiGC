@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateGteDto, CustomError, PaginationDto } from "../../../domain";
+import { CreateGteDto, CustomError, PaginationDto, UpdateGteDto } from "../../../domain";
 import { GteService } from "../../services";
 
 export class GteController{
@@ -25,6 +25,16 @@ export class GteController{
         this.gteService.createGte(createGteDto!, req.body.user)
             .then(gte => res.status(201).json(gte))
             .catch( error => this.handleError(res, error));
+    }
+
+    updateGte = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        const [error, updateGteDto] = UpdateGteDto.create({ ...req.body, id });
+        if (error) return res.status(400).json({ error });
+
+        this.gteService.updateGte(updateGteDto!)
+            .then(gte => res.status(200).json(gte))
+            .catch(error => this.handleError(res, error));
     }
 
     getGtes = async (req: Request, res: Response) => {
