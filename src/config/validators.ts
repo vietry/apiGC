@@ -21,6 +21,13 @@ export class Validators {
       });
       return colaborador !== null;
     }
+
+    static async isDemoplotID(id: number): Promise<boolean> {
+      const demoplot = await prisma.demoPlot.findUnique({
+        where: { id:  id },
+      });
+      return demoplot !== null;
+    }
   
   
   }

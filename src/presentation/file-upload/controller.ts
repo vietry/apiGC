@@ -49,7 +49,6 @@ export class FileUploadController{
         const [error, createFotoDenoplotDto] = await CreateFotoDemoplotDto.create(req.body);
         
         if(error) return res.status(400).json({error});
-        console.log({createFotoDenoplotDto})
 
         //const fotoDemoplot = await this.fileUploadService.uploadAndCreateFotoDemoPlot(file, createFotoDenoplotDto!);
 
@@ -58,6 +57,5 @@ export class FileUploadController{
             .catch( error => this.handleError(res, error));
 
     }
-
  
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateDemoplotDto, CustomError, PaginationDto } from "../../domain";
+import { CreateDemoplotDto, CustomError, PaginationDto, UpdateDemoplotDto } from "../../domain";
 import { DemoplotService } from "../services/demoplot.service";
 
 
@@ -41,6 +41,16 @@ export class DemoplotController{
         this.demoplotService.getDemoplots(paginationDto!)
         .then(contactoPunto => res.status(200).json(contactoPunto))
         .catch( error => this.handleError(res, error));
+    }
+
+    updateDemoplot = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        const [error, updateDemoplotDto] = await UpdateDemoplotDto.create({ ...req.body, id });
+        if (error) return res.status(400).json({ error });
+
+        this.demoplotService.updateDemoplot(updateDemoplotDto!)
+            .then(demoplot => res.status(200).json(demoplot))
+            .catch(error => this.handleError(res, error));
     }
 
  

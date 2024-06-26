@@ -13,6 +13,7 @@ export class DemoplotRoutes {
 
         router.get('/',controller.getDemoplots);
         router.post('/',controller.createDemoplot);
+        router.put('/:id',controller.updateDemoplot);
 
         return router;
     }

@@ -25,8 +25,6 @@ export class AppRoutes {
         router.use('/api/images', ImageRoutes.routes);
         router.use('/api/fotosdemoplots', FotoDemoplotRoutes.routes);
 
-
-
         return router;
     }
 }

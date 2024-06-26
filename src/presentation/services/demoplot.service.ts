@@ -1,5 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { CreateDemoplotDto, CustomError, PaginationDto } from "../../domain";
+import { CreateDemoplotDto, CustomError, PaginationDto, UpdateDemoplotDto } from "../../domain";
 
 export class DemoplotService {
 
@@ -39,6 +39,26 @@ export class DemoplotService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async updateDemoplot(updateDemoplotDto: UpdateDemoplotDto) {
+        const demoplotExists = await prisma.demoPlot.findFirst({ where: { id: updateDemoplotDto.id } });
+        if (!demoplotExists) throw CustomError.badRequest(`Demoplot with id ${updateDemoplotDto.id} does not exist`);
+
+        try {
+            const updatedDemoplot = await prisma.demoPlot.update({
+                where: { id: updateDemoplotDto.id },
+                data: {
+                    ...updateDemoplotDto.values,
+                    updatedAt: new Date(),
+                },
+            });
+
+            return updatedDemoplot;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
 
     async getDemoplots(paginationDto: PaginationDto) {
         const { page, limit } = paginationDto;

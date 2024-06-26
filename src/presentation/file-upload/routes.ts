@@ -22,6 +22,7 @@ export class FileUploadRoutes {
         router.post('/single/:type',controller.uploadFile);
         router.post('/multiple/:type',controller.uploadMultipleFiles);
         router.post('/foto/:type', controller.uploadAndCreateFotoDemoPlot);
+
         return router;
     }
 }

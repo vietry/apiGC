@@ -12,10 +12,10 @@ export class UpdateGteDto {
     get values() {
         const returnObj: {[key: string]: any} = {};
 
-        if (this.idUsuario !== undefined) returnObj.idUsuario = this.idUsuario;
-        if (this.activo !== undefined) returnObj.activo = this.activo;
-        if (this.idSubZona !== undefined) returnObj.idSubZona = this.idSubZona;
-        if (this.idColaborador !== undefined) returnObj.idColaborador = this.idColaborador;
+        if (this.idUsuario) returnObj.idUsuario = this.idUsuario;
+        if (this.activo) returnObj.activo = this.activo;
+        if (this.idSubZona) returnObj.idSubZona = this.idSubZona;
+        if (this.idColaborador) returnObj.idColaborador = this.idColaborador;
         //if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
 
         return returnObj;
@@ -39,17 +39,17 @@ export class UpdateGteDto {
         }
 
 
-        if (typeof idSubZona !== 'number') {
+        if (idSubZona !== undefined && typeof idSubZona !== 'number') {
             idSubZonaNumber = parseInt(idSubZona);
             if (isNaN(idSubZonaNumber)) return ['idSubZona debe ser un número válido'];
         }
 
-        if (typeof idColaborador !== 'number') {
+        if (idColaborador !== undefined && typeof idColaborador !== 'number') {
             idColaboradorNum = parseInt(idColaborador);
             if (isNaN(idColaboradorNum)) return ['idColaborador debe ser un número válido'];
         }
 
-        if (typeof idUsuario !== 'number') {
+        if (idUsuario !== undefined && typeof idUsuario !== 'number') {
             idSubZonaNumber = parseInt(idUsuario);
             if (isNaN(idUsuarioNumber)) return ['idUsuario debe ser un número válido'];
         }
