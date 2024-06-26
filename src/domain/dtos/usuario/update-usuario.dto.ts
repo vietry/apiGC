@@ -1,3 +1,5 @@
+import { Validators } from "../../../config";
+
 export class UpdateUsuarioDto {
 
     private constructor(
@@ -35,6 +37,14 @@ export class UpdateUsuarioDto {
 
         if (!id || isNaN(Number(id))){
             return ['Invalid or missing ID'];
+        }
+
+        if (email !== undefined) {
+            if (!Validators.email.test(email)) return ['El email no es válido'];
+        }
+
+        if (password !== undefined) {
+            if (password.length < 6) return ['El password es muy corto'];
         }
 
         return [undefined, new UpdateUsuarioDto(id, nombres, apellidos, password, celular, email, rol, idFoto, createdAt, updatedAt)];

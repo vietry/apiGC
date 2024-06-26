@@ -1,3 +1,4 @@
+import { BcryptAdapter } from "../../config";
 import { prisma } from "../../data/sqlserver";
 import { CreateUsuarioDto, CustomError, UsuarioDatasource, UsuarioEntity, UpdateUsuarioDto } from "../../domain";
 
@@ -39,12 +40,48 @@ export class UsuarioDatasourceImpl implements UsuarioDatasource{
 
     async updateById(updateUsuarioDto: UpdateUsuarioDto): Promise<UsuarioEntity> {
         await this.findById(updateUsuarioDto.id);
-        const updatedUsuario = await prisma.usuario.update({
-            where: {id: updateUsuarioDto.id},
-            data: updateUsuarioDto!.values
-        });
 
-        return UsuarioEntity.fromObject(updatedUsuario);
+        const emailUsuarioExists = await prisma.usuario.findFirst({
+            where: {
+                email: updateUsuarioDto.email,
+                NOT: {
+                    id: updateUsuarioDto.id, // Asegúrate de que no está intentando usar su propio email
+                }
+                }
+              });
+            
+        if ( emailUsuarioExists ) throw CustomError.badRequest( `The user with email:${updateUsuarioDto.email} already exists` );
+
+        try {
+
+
+            const updateData = { ...updateUsuarioDto.values };
+
+            // Hash the password if it's being updated
+            if (updateUsuarioDto.password) {
+                updateData.password = BcryptAdapter.hash(updateUsuarioDto.password);
+            }
+    
+            /*const updatedUsuario = await prisma.usuario.update({
+                where: {id: updateUsuarioDto.id},
+                data: updateUsuarioDto!.values
+            });*/
+    
+            const updatedUsuario = await prisma.usuario.update({
+                where: { id: updateUsuarioDto.id },
+                data: {
+                    ...updateData,
+                    updatedAt: new Date()
+                },
+            });
+    
+            return UsuarioEntity.fromObject(updatedUsuario);
+            
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+
+
 
     }
 

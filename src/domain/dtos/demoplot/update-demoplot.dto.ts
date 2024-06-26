@@ -69,37 +69,37 @@ export class UpdateDemoplotDto {
         let idGteNumber = idGte;
         let idArticuloNumber = idArticulo;
 
-        if (typeof hasCultivo !== 'number') {
+        if (hasCultivo !== undefined && typeof hasCultivo !== 'number') {
             hasCultivoNumber = parseFloat(hasCultivo);
             if (isNaN(hasCultivoNumber)) return ['hasCultivo debe ser un número válido'];
         }
 
-        if (typeof dosis !== 'number') {
+        if (dosis !== undefined && typeof dosis !== 'number') {
             dosisNumber = parseFloat(dosis);
             if (isNaN(dosisNumber)) return ['dosis debe ser un número válido'];
         }
 
-        if (hasCultivo && typeof idCultivo !== 'number') {
+        if (idCultivo !== undefined && typeof idCultivo !== 'number') {
             idCultivoNumber = parseInt(idCultivo);
             if (isNaN(idCultivoNumber)) return ['idCultivo debe ser un número válido'];
         }
 
-        if (typeof idContactoP !== 'number') {
+        if (idContactoP !== undefined && typeof idContactoP !== 'number') {
             idContactoPNumber = parseInt(idContactoP);
             if (isNaN(idContactoPNumber)) return ['idContactoP debe ser un número válido'];
         }
 
-        if (typeof idBlanco !== 'number') {
+        if (idBlanco !== undefined && typeof idBlanco !== 'number') {
             idBlancoNumber = parseInt(idBlanco);
             if (isNaN(idBlancoNumber)) return ['idBlanco debe ser un número válido'];
         }
 
-        if (typeof idGte !== 'number') {
+        if (idGte !== undefined && typeof idGte !== 'number') {
             idGteNumber = parseInt(idGte);
             if (isNaN(idGteNumber)) return ['idGte debe ser un número válido'];
         }
 
-        if (typeof idArticulo !== 'number') {
+        if (idArticulo !== undefined && typeof idArticulo !== 'number') {
             idArticuloNumber = parseInt(idArticulo);
             if (isNaN(idArticuloNumber)) return ['idArticulo debe ser un número válido'];
         }

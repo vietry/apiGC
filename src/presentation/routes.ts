@@ -9,6 +9,7 @@ import { DemoplotRoutes } from "./demoplots/routes";
 import { FileUploadRoutes } from "./file-upload/routes";
 import { ImageRoutes } from "./images/routes";
 import { FotoDemoplotRoutes } from "./fotos-demoplot/routes";
+import { UsuarioRoutes } from "./usuarios/routes";
 
 export class AppRoutes {
     static get routes(): Router{
@@ -16,6 +17,7 @@ export class AppRoutes {
 
         router.use('/api/todos', TodoRoutes.routes);
         router.use('/api/auth', AuthRoutes.routes);
+        router.use('/api/usuarios', UsuarioRoutes.routes);
         router.use('/api/colaboradores', ColaboradorRoutes.routes);
         router.use('/api/gtes', GteRoutes.routes);
         router.use('/api/puntoscontacto', PuntoContactoRoutes.routes);
