@@ -11,6 +11,7 @@ export class PuntoContactoRoutes {
 
         router.get('/',controller.getPuntosContacto);
         router.post('/',controller.createPuntoContacto);
+        router.put('/:id',controller.updatePuntoContacto);
 
         return router;
     }

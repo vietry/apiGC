@@ -1,6 +1,4 @@
 
-
-
 export class CreateColaboradorDTO{
 
     private constructor(

@@ -45,10 +45,27 @@ export class GteController{
 
 
         this.gteService.getGtes(paginationDto!)
-            .then(colaboradores => res.status(200).json(colaboradores))
+            .then(gtes => res.status(200).json(gtes))
             .catch( error => this.handleError(res, error));
-        
-        //res.json('Get colaboradores')
+    
+    }
+
+    getGteById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        this.gteService.getGteById(id)
+            .then(gte => res.status(200).json(gte))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getGteByColaboradorId = async (req: Request, res: Response) => {
+        const idColaborador = +req.params.idColaborador;
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        this.gteService.getGteByColaboradorId(idColaborador, paginationDto!)
+            .then(gtes => res.status(200).json(gtes))
+            .catch(error => this.handleError(res, error));
     }
 
  

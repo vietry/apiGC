@@ -1,8 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { CreateFotoDemoplotDto, CustomError, PaginationDto } from "../../domain";
-
-import { UploadedFile } from 'express-fileupload';
-import { FotoDemoplotEntity } from "../../domain/entities/fotoDemoplot.entity";
+import { CustomError, PaginationDto } from "../../domain";
 
 export class FotoDemoplotService {
     constructor() {}
@@ -68,13 +65,38 @@ export class FotoDemoplotService {
         }
     }
 
+    async getFotoDemoplotById(id: number) {
+        try {
+            const fotoDemoplot = await prisma.fotoDemoPlot.findUnique({
+                where: { id },
+                include: {
+                    DemoPlot: {
+                        select: {
+                            id: true,
+                            idCultivo: true,
+                            idGte: true,
+                            idBlanco: true,
+                            gradoInfestacion: true,
+                        }
+                    }
+                }
+            });
+
+            if (!fotoDemoplot) throw CustomError.badRequest(`FotoDemoPlot with id ${id} does not exist`);
+
+            return fotoDemoplot;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getFotosByIdDemoplot(idDemoPlot: number,paginationDto: PaginationDto) {
         const { page, limit } = paginationDto;
 
         try {
             const [total, fotoDemoplots] = await Promise.all([
-                prisma.fotoDemoPlot.count(),
-                prisma.fotoDemoPlot.findMany({
+                await prisma.fotoDemoPlot.count({ where: { idDemoPlot: idDemoPlot } }),
+                await prisma.fotoDemoPlot.findMany({
                     where: {idDemoPlot: idDemoPlot},
                     skip: (page - 1) * limit,
                     take: limit,
@@ -96,8 +118,8 @@ export class FotoDemoplotService {
                 page,
                 limit,
                 total,
-                next: `/api/fotosdemoplots/${idDemoPlot}?page=${page + 1}&limit=${limit}`,
-                prev: page - 1 > 0 ? `/api/fotodemoplots/${idDemoPlot}?page=${page - 1}&limit=${limit}` : null,
+                next: `/api/fotosdemoplots/demoplot/${idDemoPlot}?page=${page + 1}&limit=${limit}`,
+                prev: page - 1 > 0 ? `/api/fotosdemoplots/demoplot/${idDemoPlot}?page=${page - 1}&limit=${limit}` : null,
                 fotoDemoplots,
             };
 

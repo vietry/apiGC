@@ -12,6 +12,7 @@ export class ColaboradorRoutes {
 
         router.get('/',controller.getColaboradores);
         router.post('/',[ AuthMiddleware.validateJWT] ,controller.createColaborador);
+        router.put('/:id',[ AuthMiddleware.validateJWT], controller.updateColaborador);
 
         return router;
     }

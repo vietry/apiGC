@@ -1,10 +1,10 @@
 import { prisma } from "../../data/sqlserver";
-import { PuntoContactoEntity, CreatePuntoContactoDTO, CustomError, PaginationDto, GteEntity } from "../../domain";
+import { CreatePuntoContactoDto, CustomError, PaginationDto, UpdatePuntoContactoDto } from "../../domain";
 
 export class PuntoContactoService {
     constructor() {}
 
-    async createPuntoContacto(createPuntoContactoDto: CreatePuntoContactoDTO/*, gte: GteEntity*/) {
+    async createPuntoContacto(createPuntoContactoDto: CreatePuntoContactoDto/*, gte: GteEntity*/) {
         try {
             const currentDate = new Date();
 
@@ -39,6 +39,26 @@ export class PuntoContactoService {
 
             };
 
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+
+    async updatePuntoContacto(updatePuntoContactoDto: UpdatePuntoContactoDto) {
+        const puntoContactoExists = await prisma.puntoContacto.findFirst({ where: { id: updatePuntoContactoDto.id } });
+        if (!puntoContactoExists) throw CustomError.badRequest(`PuntoContacto with id ${updatePuntoContactoDto.id} does not exist`);
+
+        try {
+            const updatedPuntoContacto = await prisma.puntoContacto.update({
+                where: { id: updatePuntoContactoDto.id },
+                data: {
+                    ...updatePuntoContactoDto.values, // Usar valores directamente del DTO
+                    updatedAt: new Date(),
+                },
+            });
+
+            return updatedPuntoContacto;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

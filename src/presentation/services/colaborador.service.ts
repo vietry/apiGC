@@ -1,5 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { ColaboradorEntity, CreateColaboradorDTO, CustomError, PaginationDto, UsuarioEntity } from "../../domain";
+import { ColaboradorEntity, CreateColaboradorDTO, CustomError, PaginationDto, UpdateColaboradorDTO, UsuarioEntity } from "../../domain";
 
 export class ColaboradorService{
 
@@ -21,22 +21,6 @@ export class ColaboradorService{
                     updatedAt: currentDate,
                 },
             });
-            /*const colaborador = new ColaboradorEntity(
-                
-                createColaboradorDto.cargo,
-                createColaboradorDto.idArea,
-                createColaboradorDto.idZonaAnt,
-                user.id,
-
-            );
-
-            await prisma.colaborador.create({
-                data: {
-                    ...colaborador,
-                    createdAt: currentDate,
-                    updatedAt: currentDate, 
-                }
-            });*/
 
             return {
                 id: colaborador.id,
@@ -49,6 +33,26 @@ export class ColaboradorService{
             throw CustomError.internalServer(`${error}`)
         }
 
+    }
+
+
+    async updateColaborador(updateColaboradorDto: UpdateColaboradorDTO) {
+        const colaboradorExists = await prisma.colaborador.findFirst({ where: { id: updateColaboradorDto.id } });
+        if (!colaboradorExists) throw CustomError.badRequest(`Colaborador with id ${updateColaboradorDto.id} does not exist`);
+
+        try {
+            const updatedColaborador = await prisma.colaborador.update({
+                where: { id: updateColaboradorDto.id },
+                data: {
+                    ...updateColaboradorDto.values, // Usar valores directamente del DTO
+                    updatedAt: new Date(),
+                },
+            });
+
+            return updatedColaborador;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
     }
 
     async getColaboradores(paginationDto: PaginationDto){

@@ -2,7 +2,7 @@
 
 
 import { prisma } from "../../data/sqlserver";
-import { CreateContactoPuntoDto, CustomError, PaginationDto } from "../../domain";
+import { CreateContactoPuntoDto, CustomError, PaginationDto, UpdateContactoPuntoDto } from "../../domain";
 
 export class ContactoPuntoService{
 
@@ -59,13 +59,32 @@ export class ContactoPuntoService{
 
     }
 
+    async updateContactoPunto(updateContactoPuntoDto: UpdateContactoPuntoDto) {
+        const contactoExists = await prisma.contactoPunto.findFirst({ where: { id: updateContactoPuntoDto.id } });
+        if (!contactoExists) throw CustomError.badRequest(`ContactoPunto with id ${updateContactoPuntoDto.id} does not exist`);
+
+        try {
+            const updatedContacto = await prisma.contactoPunto.update({
+                where: { id: updateContactoPuntoDto.id },
+                data: {
+                    ...updateContactoPuntoDto.values,
+                    updatedAt: new Date(),
+                },
+            });
+
+            return updatedContacto;
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getContactos(paginationDto: PaginationDto){
 
         const {page, limit} = paginationDto;
 
         try {
-            //const colaboradores = await prisma.colaborador.findMany({where: {idUsuario: 1}});
-
+            
             const [total, contactos] = await Promise.all([
                 await prisma.contactoPunto.count(),
                 await prisma.contactoPunto.findMany({
@@ -111,6 +130,67 @@ export class ContactoPuntoService{
             throw CustomError.internalServer(`${error}`)
         }
 
+    }
+
+    async getContactoById(id: number) {
+        try {
+            const contacto = await prisma.contactoPunto.findUnique({
+                where: { id },
+                include: {
+                    PuntoContacto: {
+                        select: {
+                            id: true,
+                            nombre: true,
+                            numDoc: true
+                        }
+                    }
+                }
+            });
+
+            if (!contacto) throw CustomError.badRequest(`ContactoPunto with id ${id} does not exist`);
+
+            return contacto;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getContactoByPuntoId(idPunto: number, paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
+
+        try {
+            const [total, contactos] = await Promise.all([
+                await prisma.contactoPunto.count({ where: { idPunto: idPunto } }),
+                await prisma.contactoPunto.findMany({
+                    where: { idPunto: idPunto },
+                    skip: ((page - 1) * limit),
+                    take: limit,
+                    include: {
+                        PuntoContacto: {
+                            select: {
+                                id: true,
+                                nombre: true,
+                                numDoc: true
+                            }
+                        }
+                    },
+                })
+            ]);
+
+            if (!contactos || contactos.length === 0) throw CustomError.badRequest(`No ContactoPunto found with PuntoContacto id ${idPunto}`);
+
+            return {
+                page: page,
+                limit: limit,
+                total: total,
+                next: `/api/contactospunto?idPunto=${idPunto}&page=${(page + 1)}&limit=${limit}`,
+                prev: (page - 1 > 0) ? `/api/contactospunto?idPunto=${idPunto}&page=${(page - 1)}&limit=${limit}` : null,
+                colaboradores: contactos,
+            };
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
     }
 
 }

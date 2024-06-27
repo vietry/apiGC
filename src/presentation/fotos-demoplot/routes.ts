@@ -9,12 +9,10 @@ export class FotoDemoplotRoutes {
         const fotoDemoplotService = new FotoDemoplotService();
         const controller = new FotoDemoplotController(fotoDemoplotService);
 
-        // api/fotodemoplots/single
-        //router.post('/single', controller.createFotoDemoplot);
-
         // api/fotodemoplots
         router.get('/', controller.getFotosDemoplots);
-        router.get('/:idDemoPlot', controller.getFotosByIdDemoplot);
+        router.get('/:id', controller.getFotoDemoplotById);
+        router.get('/demoplot/:idDemoPlot', controller.getFotosByIdDemoplot);
 
         return router;
     }

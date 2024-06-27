@@ -1,5 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { ColaboradorEntity, CreateGteDto, CustomError, PaginationDto, UpdateGteDto, UsuarioEntity } from "../../domain";
+import { CreateGteDto, CustomError, PaginationDto, UpdateGteDto, UsuarioEntity } from "../../domain";
 
 
 export class GteService{
@@ -75,8 +75,7 @@ export class GteService{
         const {page, limit} = paginationDto;
 
         try {
-            //const colaboradores = await prisma.colaborador.findMany({where: {idUsuario: 1}});
-
+           
             const [total, gtes] = await Promise.all([
                 await prisma.gte.count(),
                 await prisma.gte.findMany({
@@ -130,6 +129,88 @@ export class GteService{
             throw CustomError.internalServer(`${error}`)
         }
 
+    }
+
+    async getGteById(id: number) {
+        try {
+            const gte = await prisma.gte.findUnique({
+                where: { id },
+                include: {
+                    Colaborador: {
+                        select: {
+                            Usuario: {
+                                select: {
+                                    nombres: true,
+                                    apellidos: true
+                                }
+                            },
+                            cargo: true,
+                        }
+                    },
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true,
+                            email: true,
+                        }
+                    }
+                },
+            });
+
+            if (!gte) throw CustomError.badRequest(`GTE with id ${id} does not exist`);
+
+            return gte;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getGteByColaboradorId(idColaborador: number, paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
+
+        try {
+            const [total, gtes] = await Promise.all([
+                await prisma.gte.count({ where: { idColaborador: idColaborador } }),
+                await prisma.gte.findMany({
+                    where: { idColaborador: idColaborador },
+                    skip: ((page - 1) * limit),
+                    take: limit,
+                    include: {
+                        Colaborador: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        nombres: true,
+                                        apellidos: true
+                                    }
+                                },
+                                cargo: true,
+                            }
+                        },
+                        Usuario: {
+                            select: {
+                                nombres: true,
+                                apellidos: true,
+                                email: true,
+                            }
+                        }
+                    },
+                })
+            ]);
+
+            if (!gtes || gtes.length === 0) throw CustomError.badRequest(`No GTE found with Colaborador id ${idColaborador}`);
+
+            return {
+                page: page,
+                limit: limit,
+                total: total,
+                next: `/api/gtes?idColaborador=${idColaborador}&page=${(page + 1)}&limit=${limit}`,
+                prev: (page - 1 > 0) ? `/api/gtes?idColaborador=${idColaborador}&page=${(page - 1)}&limit=${limit}` : null,
+                gtes: gtes,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
     }
 
 }

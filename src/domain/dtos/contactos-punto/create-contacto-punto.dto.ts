@@ -1,7 +1,5 @@
 import { Validators } from "../../../config";
 
-
-
 export class CreateContactoPuntoDto{
 
     private constructor(

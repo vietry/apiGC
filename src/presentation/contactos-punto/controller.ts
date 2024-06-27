@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateContactoPuntoDto, CustomError, PaginationDto } from "../../domain";
+import { CreateContactoPuntoDto, CustomError, PaginationDto, UpdateContactoPuntoDto } from "../../domain";
 import { ContactoPuntoService } from "../services/contacto-punto.service";
 
 
@@ -34,7 +34,17 @@ export class ContactoPuntoController{
 
     }
 
-    getContactosPunto = async (req: Request, res: Response) => {
+    updateContactoPunto = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        const [error, updateContactoPuntoDto] = await UpdateContactoPuntoDto.create({ ...req.body, id });
+        if (error) return res.status(400).json({ error });
+
+        this.contactoPuntoService.updateContactoPunto(updateContactoPuntoDto!)
+            .then(contactoPunto => res.status(200).json(contactoPunto))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getContactosPuntos = async (req: Request, res: Response) => {
         
         const {page = 1, limit= 10 } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
@@ -44,6 +54,24 @@ export class ContactoPuntoController{
         this.contactoPuntoService.getContactos(paginationDto!)
         .then(contactoPunto => res.status(200).json(contactoPunto))
         .catch( error => this.handleError(res, error));
+    }
+
+    getContactoById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        this.contactoPuntoService.getContactoById(id)
+            .then(contactoPunto => res.status(200).json(contactoPunto))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getContactoByPuntoId = async (req: Request, res: Response) => {
+        const idPunto = +req.params.idPunto;
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        this.contactoPuntoService.getContactoByPuntoId(idPunto, paginationDto!)
+            .then(contactoPunto => res.status(200).json(contactoPunto))
+            .catch(error => this.handleError(res, error));
     }
 
  

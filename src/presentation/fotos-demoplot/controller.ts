@@ -30,6 +30,13 @@ export class FotoDemoplotController {
 
     }
 
+    getFotoDemoplotById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        this.fotoDemoplotService.getFotoDemoplotById(id)
+            .then(foto => res.status(200).json(foto))
+            .catch(error => this.handleError(res, error));
+    }
+
     getFotosByIdDemoplot = async (req: Request, res: Response) => {
         const { idDemoPlot } = req.params;
         const { page = 1, limit = 10 } = req.query;

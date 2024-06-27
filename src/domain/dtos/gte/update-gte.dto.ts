@@ -16,7 +16,6 @@ export class UpdateGteDto {
         if (this.activo) returnObj.activo = this.activo;
         if (this.idSubZona) returnObj.idSubZona = this.idSubZona;
         if (this.idColaborador) returnObj.idColaborador = this.idColaborador;
-        //if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
 
         return returnObj;
     }

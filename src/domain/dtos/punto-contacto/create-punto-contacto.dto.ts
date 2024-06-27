@@ -1,4 +1,4 @@
-export class CreatePuntoContactoDTO {
+export class CreatePuntoContactoDto {
     private constructor(
         public readonly nombre: string,
         public readonly tipoDoc: string | null,
@@ -11,7 +11,7 @@ export class CreatePuntoContactoDTO {
         public readonly idGte: number
     ) {}
 
-    static create(object: { [key: string]: any }): [string?, CreatePuntoContactoDTO?] {
+    static create(object: { [key: string]: any }): [string?, CreatePuntoContactoDto?] {
         const {
             nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte
         } = object;
@@ -33,7 +33,7 @@ export class CreatePuntoContactoDTO {
 
         return [
             undefined,
-            new CreatePuntoContactoDTO(
+            new CreatePuntoContactoDto(
                 nombre, tipoDoc, numDoc, hectareasNumber, tipo, dirReferencia, lider, activo, idGteNumber
             )
         ];

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CustomError, CreateColaboradorDTO, ColaboradorEntity, PaginationDto } from "../../../domain";
+import { CustomError, CreateColaboradorDTO, PaginationDto, UpdateColaboradorDTO } from "../../../domain";
 import { ColaboradorService } from "../../services/colaborador.service";
 
 
@@ -29,6 +29,16 @@ export class ColaboradorController{
             .catch( error => this.handleError(res, error));
     }
 
+    updateColaborador = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        const [error, updateColaboradorDto] = UpdateColaboradorDTO.create({ ...req.body, id });
+        if (error) return res.status(400).json({ error });
+
+        this.colaboradorService.updateColaborador(updateColaboradorDto!)
+            .then(colaborador => res.status(200).json(colaborador))
+            .catch(error => this.handleError(res, error));
+    }
+
     getColaboradores = async (req: Request, res: Response) => {
         
         const {page = 1, limit= 10 } = req.query;
@@ -40,7 +50,6 @@ export class ColaboradorController{
             .then(colaboradores => res.status(200).json(colaboradores))
             .catch( error => this.handleError(res, error));
         
-        //res.json('Get colaboradores')
     }
 
  

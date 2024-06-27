@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AuthMiddleware } from "../middlewares/auth.middleware";
+//import { AuthMiddleware } from "../middlewares/auth.middleware";
 import { ContactoPuntoController } from "./controller";
 import { ContactoPuntoService } from "../services/contacto-punto.service";
 
@@ -11,8 +11,11 @@ export class ContactoPuntoRoutes {
         const controller = new ContactoPuntoController(contactoPuntoService);
 
 
-        router.get('/',controller.getContactosPunto);
+        router.get('/',controller.getContactosPuntos);
+        router.get('/:id',controller.getContactoById);
+        router.get('/punto/:idPunto',controller.getContactoByPuntoId);
         router.post('/',controller.createContactoPunto);
+        router.put('/:id',controller.updateContactoPunto);
 
         return router;
     }
