@@ -49,4 +49,26 @@ export class PuntoContactoController {
             .then(puntosContacto => res.status(200).json(puntosContacto))
             .catch(error => this.handleError(res, error));
     }
+
+    getPuntoContactoById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.puntoContactoService.getPuntoContactoById(id)
+            .then(puntoContacto => res.status(200).json(puntoContacto))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getPuntosContactoByGteId = async (req: Request, res: Response) => {
+        const idGte = +req.params.idGte;
+        if (isNaN(idGte)) return res.status(400).json({ error: 'Invalid ID' });
+
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        this.puntoContactoService.getPuntosContactoByGteId(idGte, paginationDto!)
+            .then(puntosContacto => res.status(200).json(puntosContacto))
+            .catch(error => this.handleError(res, error));
+        }
 }

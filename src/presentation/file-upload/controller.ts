@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateFotoDemoplotDto, CustomError } from '../../domain';
+import { CreateFotoDemoplotDto, CustomError, UpdateFotoDemoplotDto } from '../../domain';
 import { FileUploadService } from '../services/file-upload.service';
 import { UploadedFile } from 'express-fileupload';
 import { FotoDemoplotService } from '../services/foto-demoplot.service';
@@ -56,6 +56,25 @@ export class FileUploadController{
             .then(foto => res.status(201).json(foto))
             .catch( error => this.handleError(res, error));
 
+    }
+
+    uploadAndUpdateFotoDemoPlot = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        const file = req.body.files.at(0) as UploadedFile;
+        const [error, updateFotoDemoplotDto] = await UpdateFotoDemoplotDto.create({ ...req.body, id });
+
+        if (error) return res.status(400).json({ error });
+
+        this.fileUploadService.uploadAndUpdateFotoDemoPlot(file, updateFotoDemoplotDto!)
+            .then(foto => res.status(200).json(foto))
+            .catch(error => this.handleError(res, error));
+    }
+
+    deleteFile = async (req: Request, res: Response) => {
+        const { type, img } = req.params;
+        this.fileUploadService.deleteFile(type, img)
+            .then(response => res.status(200).json(response))
+            .catch(error => this.handleError(res, error));
     }
  
 }

@@ -10,6 +10,8 @@ export class PuntoContactoRoutes {
         const controller = new PuntoContactoController(puntoContactoService);
 
         router.get('/',controller.getPuntosContacto);
+        router.get('/:id', controller.getPuntoContactoById);
+        router.get('/gte/:idGte', controller.getPuntosContactoByGteId);
         router.post('/',controller.createPuntoContacto);
         router.put('/:id',controller.updatePuntoContacto);
 

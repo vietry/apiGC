@@ -100,4 +100,58 @@ export class PuntoContactoService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async getPuntoContactoById(id: number) {
+        try {
+            const puntoContacto = await prisma.puntoContacto.findUnique({
+                where: { id }
+            });
+
+            if (!puntoContacto) throw CustomError.badRequest(`PuntoContacto with id ${id} does not exist`);
+
+            return puntoContacto;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getPuntosContactoByGteId(idGte: number, paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
+
+        try {
+            const [total, puntosContacto] = await Promise.all([
+                prisma.puntoContacto.count({ where: { idGte } }),
+                prisma.puntoContacto.findMany({
+                    where: { idGte },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                })
+            ]);
+
+            if (!puntosContacto || puntosContacto.length === 0) throw CustomError.badRequest(`No PuntoContacto found with Gte id ${idGte}`);
+
+            return {
+                page: page,
+                limit: limit,
+                total: total,
+                next: `/api/puntoscontacto?idGte=${idGte}&page=${page + 1}&limit=${limit}`,
+                prev: (page - 1 > 0) ? `/api/puntoscontacto?idGte=${idGte}&page=${(page - 1)}&limit=${limit}` : null,
+                puntosContacto: puntosContacto.map(puntoContacto => ({
+                    id: puntoContacto.id,
+                    nombre: puntoContacto.nombre,
+                    tipoDoc: puntoContacto.tipoDoc,
+                    numDoc: puntoContacto.numDoc,
+                    tipo: puntoContacto.tipo,
+                    referencia: puntoContacto.dirReferencia,
+                    lider: puntoContacto.lider,
+                    activo: puntoContacto.activo,
+                    idGte: puntoContacto.idGte,
+                    hectareas: puntoContacto.hectareas,
+                }))
+            };
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 }

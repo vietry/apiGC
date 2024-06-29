@@ -10,8 +10,8 @@ export class ImageRoutes{
         const router = Router();
         const controller = new ImageController();
 
-        router.get('/:type/:img', controller.getImage)
-
+        router.get('/:type/:img', controller.getImage);
+        //router.delete('/delete/:type/:img', controller.deleteFile);
         
         return router;
 

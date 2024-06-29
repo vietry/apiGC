@@ -2,7 +2,7 @@ import path from 'path';
 import  fs from 'fs';
 import { UploadedFile } from 'express-fileupload';
 import { Uuid } from '../../config';
-import { CreateFotoDemoplotDto, CustomError } from '../../domain';
+import { CreateFotoDemoplotDto, CustomError, UpdateFotoDemoplotDto } from '../../domain';
 import { prisma } from '../../data/sqlserver';
 
 
@@ -99,6 +99,55 @@ export class FileUploadService{
         //console.log(fotoDemoplot)
 
         return uploadResult;
+    }
+
+    async uploadAndUpdateFotoDemoPlot(
+        file: UploadedFile,
+        updateFotoDemoplotDto: UpdateFotoDemoplotDto,
+        folder: string = 'uploads/demoplots',
+        validExtensions: string[] = ['png', 'jpg', 'jpeg']
+    ) {
+        const fotoExists = await prisma.fotoDemoPlot.findFirst({ where: { id: updateFotoDemoplotDto.id } });
+        if (!fotoExists) throw CustomError.badRequest(`FotoDemoPlot with id ${updateFotoDemoplotDto.id} does not exist`);
+
+        const uploadResult = await this.uploadSingle(file, folder, validExtensions);
+
+        const currentDate = new Date();
+        const nombreFoto = uploadResult.fileName;
+        const rutaFoto = `${folder}/${uploadResult.fileName}`;
+        const tipo = file.mimetype.split('/').at(1) ?? '';
+
+        const updatedFotoDemoplot = await prisma.fotoDemoPlot.update({
+            where: { id: updateFotoDemoplotDto.id },
+            data: {
+                ...updateFotoDemoplotDto.values,
+                nombre: nombreFoto,
+                rutaFoto: rutaFoto,
+                tipo: tipo,
+                updatedAt: currentDate,
+            }
+        });
+
+        return {
+            ...uploadResult,
+            updatedFotoDemoplot
+        };
+    }
+
+    async deleteFile(type: string, img: string) {
+        const imagePath = path.resolve(__dirname, `../../../uploads/${type}/${img}`);
+        console.log(imagePath);
+
+        if (!fs.existsSync(imagePath)) {
+            throw CustomError.badRequest('Image not found');
+        }
+
+        try {
+            fs.unlinkSync(imagePath);
+            return { message: 'File deleted successfully' };
+        } catch (error) {
+            throw CustomError.internalServer(`Error deleting file: ${error}`);
+        }
     }
 
 }

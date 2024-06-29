@@ -52,5 +52,13 @@ export class ColaboradorController{
         
     }
 
+    getColaboradorById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.colaboradorService.getColaboradorById(id)
+            .then(colaborador => res.status(200).json(colaborador))
+            .catch(error => this.handleError(res, error));
+    }
  
 }

@@ -53,5 +53,26 @@ export class DemoplotController{
             .catch(error => this.handleError(res, error));
     }
 
+    getDemoplotById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.demoplotService.getDemoplotById(id)
+            .then(demoplot => res.status(200).json(demoplot))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getDemoplotsByGteId = async (req: Request, res: Response) => {
+        const idGte = +req.params.idGte;
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        if (isNaN(idGte)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.demoplotService.getDemoplotsByGteId(idGte, paginationDto!)
+            .then(demoplots => res.status(200).json(demoplots))
+            .catch(error => this.handleError(res, error));
+    }
  
 }

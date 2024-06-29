@@ -12,6 +12,8 @@ export class DemoplotRoutes {
         const controller = new DemoplotController(demoplotService);
 
         router.get('/',controller.getDemoplots);
+        router.get('/:id',controller.getDemoplotById);
+        router.get('/gte/:idGte',controller.getDemoplotsByGteId);
         router.post('/',controller.createDemoplot);
         router.put('/:id',controller.updateDemoplot);
 

@@ -19,3 +19,4 @@ export * from './contactos-punto/update-contacto-punto.dto';
 export * from './demoplot/create-demoplot.dto';
 export * from './demoplot/update-demoplot.dto';
 export * from './fotos-demoplot/create-foto-demoplot.dto';
+export * from './fotos-demoplot/update-foto-demoplot.dto';

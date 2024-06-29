@@ -103,4 +103,21 @@ export class ColaboradorService{
 
     }
 
+    async getColaboradorById(id: number) {
+        try {
+            const colaborador = await prisma.colaborador.findUnique({
+                where: { id },
+                include: {
+                    Usuario: true,
+                },
+            });
+
+            if (!colaborador) throw CustomError.badRequest(`Colaborador with id ${id} does not exist`);
+
+            return colaborador;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
 }

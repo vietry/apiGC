@@ -119,4 +119,66 @@ export class DemoplotService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async getDemoplotById(id: number) {
+        try {
+            const demoplot = await prisma.demoPlot.findUnique({
+                where: { id },
+                include: {
+                    Articulo: true,
+                    BlancoBiologico: true,
+                    ContactoDelPunto: true,
+                    Cultivo: true,
+                    Gte: true,
+                    Distrito: true,
+                    FotoDemoPlot: true
+                },
+            });
+
+            if (!demoplot) throw CustomError.badRequest(`Demoplot with id ${id} does not exist`);
+
+            return demoplot;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getDemoplotsByGteId(idGte: number, paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
+
+        try {
+            const [total, demoplots] = await Promise.all([
+                prisma.demoPlot.count({ where: { idGte } }),
+                prisma.demoPlot.findMany({
+                    where: { idGte },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    include: {
+                        Articulo: true,
+                        BlancoBiologico: true,
+                        ContactoDelPunto: true,
+                        Cultivo: true,
+                        Gte: true,
+                        Distrito: true,
+                        FotoDemoPlot: true
+                    },
+                }),
+            ]);
+
+            if (!demoplots || demoplots.length === 0) throw CustomError.badRequest(`No Demoplots found with Gte id ${idGte}`);
+
+            return {
+                page,
+                limit,
+                total,
+                next: `/api/demoplots/gte/${idGte}?page=${page + 1}&limit=${limit}`,
+                prev: page - 1 > 0 ? `/api/demoplots/gte/${idGte}?page=${page - 1}&limit=${limit}` : null,
+                demoplots,
+            };
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
 }
