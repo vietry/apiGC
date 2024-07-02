@@ -8,13 +8,16 @@ export class RegisterUsuarioDto{
         public email: string,
         public emailValidado: boolean = false,
         public password: string,
-        public rol: string = 'USUARIO',
+        public rol: string = 'user',
+        //public rol: string,
         
     ){}
 
 static create(object: {[key: string]: any}): [string?, RegisterUsuarioDto?] {
 
     const { nombres, apellidos, email, emailValidado, password, rol} = object;
+
+    let rolUser = rol;
 
     if(!nombres) return ['Nombres faltante'];
     if(!apellidos) return ['Apellidos faltante'];

@@ -50,7 +50,7 @@ export class UsuarioDatasourceImpl implements UsuarioDatasource{
                 }
               });
             
-        if ( emailUsuarioExists ) throw CustomError.badRequest( `The user with email:${updateUsuarioDto.email} already exists` );
+        if ( !emailUsuarioExists ) throw CustomError.badRequest( `The user with email:${updateUsuarioDto.email} already exists` );
 
         try {
 
