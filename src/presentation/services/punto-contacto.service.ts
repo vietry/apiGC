@@ -72,7 +72,19 @@ export class PuntoContactoService {
                 prisma.puntoContacto.count(),
                 prisma.puntoContacto.findMany({
                     skip: (page - 1) * limit,
-                    take: limit
+                    take: limit,
+                    include: {
+                        Gte: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        id: true,
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
                 })
             ]);
 
@@ -93,6 +105,7 @@ export class PuntoContactoService {
                     activo: puntoContacto.activo,
                     idGte: puntoContacto.idGte,
                     hectareas: puntoContacto.hectareas,
+                    idUsuario: puntoContacto.Gte.Usuario.id
                 }))
             };
 
@@ -125,6 +138,18 @@ export class PuntoContactoService {
                     where: { idGte },
                     skip: (page - 1) * limit,
                     take: limit,
+                    include: {
+                        Gte: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        id: true,
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
                 })
             ]);
 
@@ -147,6 +172,7 @@ export class PuntoContactoService {
                     activo: puntoContacto.activo,
                     idGte: puntoContacto.idGte,
                     hectareas: puntoContacto.hectareas,
+                    idUsuario: puntoContacto.Gte.Usuario.id
                 }))
             };
 

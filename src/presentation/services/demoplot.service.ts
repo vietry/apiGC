@@ -70,12 +70,44 @@ export class DemoplotService {
                     skip: (page - 1) * limit,
                     take: limit,
                     include: {
-                        Articulo: true,
-                        BlancoBiologico: true,
+                        Articulo: {
+                            select: {
+                                nombre: true
+                            }
+                        },
+                        BlancoBiologico: {
+                            select: {
+                                cientifico: true,
+                                estandarizado: true
+                            }
+                        },
                         ContactoDelPunto: true,
                         Cultivo: true,
-                        Gte: true,
-                        Distrito: true,
+                        Gte: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        nombres: true
+                                    }
+                                }
+                            }
+                        },
+                        Distrito: {
+                            
+                            select: {
+                                nombre: true,
+                                Provincia: {
+                                    select: {
+                                        nombre: true,
+                                        Departamento: {
+                                            select: {
+                                                nombre: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         FotoDemoPlot: true
                     },
                 }),
@@ -85,9 +117,44 @@ export class DemoplotService {
                 page: page,
                 limit: limit,
                 total: total,
-                next: `/api/demoplots?page=${page + 1}&limit=${limit}`,
-                prev: page - 1 > 0 ? `/api/demoplots?page=${page - 1}&limit=${limit}` : null,
-                demoplots: demoplots.map(demoplot => ({
+                next: `/v1/demoplots?page=${page + 1}&limit=${limit}`,
+                prev: page - 1 > 0 ? `/v1/demoplots?page=${page - 1}&limit=${limit}` : null,
+                demoplots: demoplots.map((demoplot) => {
+                    return {
+                        id: demoplot.id,
+                        titulo: demoplot.titulo,
+                        objetivo: demoplot.objetivo,
+                        hasCultivo: demoplot.hasCultivo,
+                        instalacion: demoplot.instalacion,
+                        seguimiento: demoplot.seguimiento,
+                        finalizacion: demoplot.finalizacion,
+                        estado: demoplot.estado,
+                        gradoInfestacion: demoplot.gradoInfestacion,
+                        dosis: demoplot.dosis,
+                        validacion: demoplot.validacion,
+                        resultado: demoplot.resultado,
+                        idCultivo: demoplot.idCultivo,
+                        idContactoP: demoplot.idContactoP,
+                        idBlanco: demoplot.idBlanco,
+                        idDistrito: demoplot.idDistrito,
+                        idArticulo: demoplot.idArticulo,
+                        idGte: demoplot.idGte,
+                        Articulo: demoplot.Articulo,
+                        articulo: demoplot.Articulo?.nombre,
+                        BlancoBiologico: demoplot.BlancoBiologico,
+                        ContactoDelPunto: demoplot.ContactoDelPunto,
+                        Cultivo: demoplot.Cultivo,
+                        Gte: demoplot.Gte,
+                        //Distrito: demoplot.Distrito,
+                        FotoDemoPlot: demoplot.FotoDemoPlot,
+                        nombreGte: demoplot.Gte.Usuario.nombres,
+                        departamento: demoplot.Distrito.Provincia.Departamento.nombre,
+                        provincia: demoplot.Distrito.Provincia.nombre,
+                        distrito: demoplot.Distrito.nombre
+                    }
+                })
+                
+                /*demoplots.map((demoplot) => ({ 
                     id: demoplot.id,
                     titulo: demoplot.titulo,
                     objetivo: demoplot.objetivo,
@@ -112,8 +179,12 @@ export class DemoplotService {
                     Cultivo: demoplot.Cultivo,
                     Gte: demoplot.Gte,
                     Distrito: demoplot.Distrito,
-                    FotoDemoPlot: demoplot.FotoDemoPlot
-                }))
+                    FotoDemoPlot: demoplot.FotoDemoPlot,
+                    nombreGte: demoplot.Gte.Usuario.nombres,
+                    departamento: demoplot.Distrito.Provincia.Departamento.nombre,
+                    provincia: demoplot.Distrito.Provincia.nombre,
+                    distrito: demoplot.Distrito.nombre
+                }))*/
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

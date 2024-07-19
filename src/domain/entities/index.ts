@@ -4,3 +4,6 @@ export * from './colaborador.entity';
 export * from './gte.entity';
 export * from './punto_contacto.entity';
 export * from './demoplot.entity';
+export * from './articulo.entity';
+export * from './blanco.entity';
+export * from './cultivo.entity';

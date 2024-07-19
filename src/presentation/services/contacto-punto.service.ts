@@ -96,7 +96,14 @@ export class ContactoPuntoService{
                             select: {
                                 id: true,
                                 nombre: true,
-                                numDoc: true
+                                tipoDoc: true,
+                                numDoc: true,
+                                Gte: {
+                                    select: {
+                                        id: true,
+                                    
+                                    }
+                                }
                         }}
                     },
                 })
@@ -107,23 +114,29 @@ export class ContactoPuntoService{
                 page: page,
                 limit: limit,
                 total: total,
-                next: `/api/contactospunto?page${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0)  ? `/api/contactospunto?page${(page - 1)}&limit=${limit}`: null ,
+                next: `/api/contactospuntos?page${(page + 1)}&limit=${limit}`,
+                prev: (page - 1 > 0)  ? `/api/contactospuntos?page${(page - 1)}&limit=${limit}`: null ,
 
-                colaboradores: contactos,
+                contactos: 
+                //contactos,
                 
-                /*contactos.map((contacto) => {
+                contactos.map((contacto) => {
                     return {
                         id: contacto.id,
-                        nombre: contacto.cargo,
-                        apellido: contacto.cargo,
+                        nombre: contacto.nombre,
+                        apellido: contacto.apellido,
                         cargo: contacto.cargo,
                         email: contacto.email,
                         celularA: contacto.celularA,
                         celularB: contacto.celularB,
                         idPunto: contacto.idPunto,
+                        punto: contacto.PuntoContacto.nombre,
+                        tipoDocPunto: contacto.PuntoContacto.tipoDoc,
+                        numDocPunto: contacto.PuntoContacto.numDoc,
+                        idGte: contacto.PuntoContacto.Gte.id
+
                         }
-                        })*/
+                        })
             }
 
         } catch (error) {

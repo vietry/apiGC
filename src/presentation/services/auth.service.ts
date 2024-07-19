@@ -67,9 +67,12 @@ export class AuthService{
         if (!token) throw CustomError.internalServer('Error while creating JWT');
     
         return {
-          user: userEntity,
+          user: {
+              ...userEntity,
+              token: token,
+          },
           token: token,
-        };
+      };
       }
 
       private sendEmailValidationLink = async (email: string) => {
@@ -122,5 +125,9 @@ export class AuthService{
         return true;
 
     }
+
+ 
+
+  
 
 }

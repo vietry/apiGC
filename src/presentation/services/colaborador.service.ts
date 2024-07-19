@@ -84,8 +84,8 @@ export class ColaboradorService{
                 page: page,
                 limit: limit,
                 total: total,
-                next: `/api/colaboradores?page${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0)  ? `/api/colaboradores?page${(page - 1)}&limit=${limit}`: null ,
+                next: `/v1/colaboradores?page${(page + 1)}&limit=${limit}`,
+                prev: (page - 1 > 0)  ? `/v1/colaboradores?page${(page - 1)}&limit=${limit}`: null ,
 
                 colaboradores: colaboradores.map((colaborador) => {
                     return {

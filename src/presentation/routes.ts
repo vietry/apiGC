@@ -10,6 +10,14 @@ import { FileUploadRoutes } from "./file-upload/routes";
 import { ImageRoutes } from "./images/routes";
 import { FotoDemoplotRoutes } from "./fotos-demoplot/routes";
 import { UsuarioRoutes } from "./usuarios/routes";
+import { CultivoRoutes } from "./cultivos/routes";
+import { BlancoBiologicoRoutes } from "./blancos/routes";
+import { ArticuloRoutes } from "./articulos/routes";
+import { VegetacionRoutes } from "./vegetacion/routes";
+import { DistritoRoutes } from "./distritos/routes";
+import { VariedadRoutes } from "./variedades/routes";
+import { ProvinciaRoutes } from "./provincias/routes";
+import { FamiliaRoutes } from "./familias/routes";
 
 export class AppRoutes {
     static get routes(): Router{
@@ -21,11 +29,19 @@ export class AppRoutes {
         router.use('/api/colaboradores', ColaboradorRoutes.routes);
         router.use('/api/gtes', GteRoutes.routes);
         router.use('/api/puntoscontacto', PuntoContactoRoutes.routes);
-        router.use('/api/contactospunto', ContactoPuntoRoutes.routes);
+        router.use('/api/contactospuntos', ContactoPuntoRoutes.routes);
         router.use('/api/demoplots', DemoplotRoutes.routes);
         router.use('/api/upload', FileUploadRoutes.routes);
         router.use('/api/images', ImageRoutes.routes);
         router.use('/api/fotosdemoplots', FotoDemoplotRoutes.routes);
+        router.use('/api/cultivos', CultivoRoutes.routes);
+        router.use('/api/blancos', BlancoBiologicoRoutes.routes);
+        router.use('/api/articulos', ArticuloRoutes.routes);
+        router.use('/api/vegetacion', VegetacionRoutes.routes);
+        router.use('/api/variedades', VariedadRoutes.routes);
+        router.use('/api/distritos', DistritoRoutes.routes);
+        router.use('/api/provincias', ProvinciaRoutes.routes);
+        router.use('/api/familias', FamiliaRoutes.routes);
 
         return router;
     }

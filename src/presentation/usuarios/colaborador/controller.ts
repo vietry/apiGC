@@ -45,7 +45,6 @@ export class ColaboradorController{
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if(error) return res.status(400).json({error});
 
-
         this.colaboradorService.getColaboradores(paginationDto!)
             .then(colaboradores => res.status(200).json(colaboradores))
             .catch( error => this.handleError(res, error));
