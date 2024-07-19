@@ -27,7 +27,7 @@ export class DemoplotService {
                     idContactoP: createDemoplotDto.idContactoP,
                     idBlanco: createDemoplotDto.idBlanco,
                     idDistrito: createDemoplotDto.idDistrito,
-                    idArticulo: createDemoplotDto.idArticulo,
+                    idFamilia: createDemoplotDto.idFamilia,
                     idGte: createDemoplotDto.idGte,
                     createdAt: currentDate,
                     updatedAt: currentDate,
@@ -70,7 +70,7 @@ export class DemoplotService {
                     skip: (page - 1) * limit,
                     take: limit,
                     include: {
-                        Articulo: {
+                        Familia: {
                             select: {
                                 nombre: true
                             }
@@ -137,10 +137,10 @@ export class DemoplotService {
                         idContactoP: demoplot.idContactoP,
                         idBlanco: demoplot.idBlanco,
                         idDistrito: demoplot.idDistrito,
-                        idArticulo: demoplot.idArticulo,
+                        idFamilia: demoplot.idFamilia,
                         idGte: demoplot.idGte,
-                        Articulo: demoplot.Articulo,
-                        articulo: demoplot.Articulo?.nombre,
+
+                        Familia: demoplot.Familia?.nombre,
                         BlancoBiologico: demoplot.BlancoBiologico,
                         ContactoDelPunto: demoplot.ContactoDelPunto,
                         Cultivo: demoplot.Cultivo,
@@ -171,9 +171,9 @@ export class DemoplotService {
                     idContactoP: demoplot.idContactoP,
                     idBlanco: demoplot.idBlanco,
                     idDistrito: demoplot.idDistrito,
-                    idArticulo: demoplot.idArticulo,
+                    idFamilia: demoplot.idFamilia,
                     idGte: demoplot.idGte,
-                    Articulo: demoplot.Articulo,
+                    Familia: demoplot.Familia,
                     BlancoBiologico: demoplot.BlancoBiologico,
                     ContactoDelPunto: demoplot.ContactoDelPunto,
                     Cultivo: demoplot.Cultivo,
@@ -196,7 +196,7 @@ export class DemoplotService {
             const demoplot = await prisma.demoPlot.findUnique({
                 where: { id },
                 include: {
-                    Articulo: true,
+                    Familia: true,
                     BlancoBiologico: true,
                     ContactoDelPunto: true,
                     Cultivo: true,
@@ -225,7 +225,7 @@ export class DemoplotService {
                     skip: (page - 1) * limit,
                     take: limit,
                     include: {
-                        Articulo: true,
+                        Familia: true,
                         BlancoBiologico: true,
                         ContactoDelPunto: true,
                         Cultivo: true,

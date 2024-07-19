@@ -19,7 +19,7 @@ export class DemoPlotEntity {
         public idContactoP: number,
         public idBlanco: number,
         public idDistrito: string,
-        public idArticulo: number | null,
+        public idFamilia: number | null,
         public idGte: number,
         // public createdAt: Date | null,
         // public updatedAt: Date | null
@@ -29,7 +29,7 @@ export class DemoPlotEntity {
         const {
             id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,
             estado, gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP,
-            idBlanco, idDistrito, idArticulo, idGte, /* createdAt, updatedAt */
+            idBlanco, idDistrito, idFamilia, idGte, /* createdAt, updatedAt */
         } = object;
 
         if (!gradoInfestacion) throw CustomError.badRequest('GradoInfestacion is required');
@@ -45,7 +45,7 @@ export class DemoPlotEntity {
         return new DemoPlotEntity(
             id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,
             estado, gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP,
-            idBlanco, idDistrito, idArticulo, idGte, 
+            idBlanco, idDistrito, idFamilia, idGte, 
             // createdAt, updatedAt
         );
     }

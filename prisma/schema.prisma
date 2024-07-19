@@ -65,7 +65,6 @@ model Articulo {
   Empresa        Empresa          @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fkArticulo_Empresa1")
   Familia        Familia?         @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkArticulo_Familia1")
   Linea          Linea?           @relation(fields: [idLinea], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fkArticulo_Linea1")
-  DemoPlot       DemoPlot[]
   VisitaArticulo VisitaArticulo[]
 }
 
@@ -403,7 +402,6 @@ model DemoPlot {
   idContactoP      Int
   idBlanco         Int
   idDistrito       String          @db.VarChar(6)
-  idArticulo       Int?
   idGte            Int
   createdAt        DateTime?       @db.DateTime
   updatedAt        DateTime?       @db.DateTime
@@ -413,7 +411,6 @@ model DemoPlot {
   gradoInfestacion String?         @db.VarChar(5)
   hasCultivo       Decimal?        @db.Decimal(6, 2)
   idFamilia        Int?
-  Articulo         Articulo?       @relation(fields: [idArticulo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_Articulo1")
   BlancoBiologico  BlancoBiologico @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   ContactoDelPunto ContactoPunto   @relation(fields: [idContactoP], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_ContactoP1")
   Cultivo          Cultivo         @relation(fields: [idCultivo], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Cultivo1")

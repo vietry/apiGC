@@ -72,7 +72,8 @@ export class FamiliaService {
                 enfoque: familia.enfoque,
                 createdAt: familia.createdAt,
                 updatedAt: familia.updatedAt,
-                empresaNombre: familia.Empresa.nomEmpresa
+                empresaNombre: familia.Empresa.nomEmpresa,
+                codiEmpresa: `0${familia.Empresa.nomEmpresa}`
             }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

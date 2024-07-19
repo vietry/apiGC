@@ -19,7 +19,7 @@ export class UpdateDemoplotDto {
         public readonly idContactoP?: number,
         public readonly idBlanco?: number,
         public readonly idDistrito?: string,
-        public readonly idArticulo?: number | null,
+        public readonly idFamilia?: number | null,
         public readonly idGte?: number,
         // public readonly updatedAt?: Date | null
     ) {}
@@ -42,7 +42,7 @@ export class UpdateDemoplotDto {
         if (this.idContactoP ) returnObj.idContactoP = this.idContactoP;
         if (this.idBlanco ) returnObj.idBlanco = this.idBlanco;
         if (this.idDistrito ) returnObj.idDistrito = this.idDistrito;
-        if (this.idArticulo ) returnObj.idArticulo = this.idArticulo;
+        if (this.idFamilia ) returnObj.idFamilia = this.idFamilia;
         if (this.idGte ) returnObj.idGte = this.idGte;
         // if (this.updatedAt ) returnObj.updatedAt = this.updatedAt;
 
@@ -52,7 +52,7 @@ export class UpdateDemoplotDto {
     static async create(props: {[key: string]: any}): Promise<[string?, UpdateDemoplotDto?]> {
         const { id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idArticulo, idGte } = props;
+            idDistrito, idFamilia, idGte } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -67,7 +67,7 @@ export class UpdateDemoplotDto {
         let idContactoPNumber = idContactoP;
         let idBlancoNumber = idBlanco;
         let idGteNumber = idGte;
-        let idArticuloNumber = idArticulo;
+        let idFamiliaNumber = idFamilia;
 
         if (hasCultivo !== undefined && typeof hasCultivo !== 'number') {
             hasCultivoNumber = parseFloat(hasCultivo);
@@ -99,9 +99,9 @@ export class UpdateDemoplotDto {
             if (isNaN(idGteNumber)) return ['idGte debe ser un número válido'];
         }
 
-        if (idArticulo !== undefined && typeof idArticulo !== 'number') {
-            idArticuloNumber = parseInt(idArticulo);
-            if (isNaN(idArticuloNumber)) return ['idArticulo debe ser un número válido'];
+        if (idFamilia !== undefined && typeof idFamilia !== 'number') {
+            idFamiliaNumber = parseInt(idFamilia);
+            if (isNaN(idFamiliaNumber)) return ['idFamilia debe ser un número válido'];
         }
 
         return [undefined, new UpdateDemoplotDto(
@@ -121,7 +121,7 @@ export class UpdateDemoplotDto {
             idContactoPNumber,
             idBlancoNumber,
             idDistrito,
-            idArticuloNumber,
+            idFamiliaNumber,
             idGteNumber
         )];
     }

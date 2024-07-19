@@ -17,7 +17,7 @@ export class CreateDemoplotDto {
         public readonly idContactoP: number,
         public readonly idBlanco: number,
         public readonly idDistrito: string,
-        public readonly idArticulo: number | null,
+        public readonly idFamilia: number | null,
         public readonly idGte: number,
     ) {}
 
@@ -25,7 +25,7 @@ export class CreateDemoplotDto {
         const {
             titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idArticulo, idGte
+            idDistrito, idFamilia, idGte
         } = object;
 
         if (!idCultivo) return ['idCultivo faltante'];
@@ -51,13 +51,13 @@ export class CreateDemoplotDto {
         const idContactoPNumber = parseInt(idContactoP);
         const idBlancoNumber = parseInt(idBlanco);
         const idGteNumber = parseInt(idGte);
-        const idArticuloNumber = parseInt(idArticulo);
+        const idFamiliaNumber = parseInt(idFamilia);
 
         if (isNaN(idCultivoNumber)) return ['idCultivo debe ser un número válido'];
         if (isNaN(idContactoPNumber)) return ['idContactoP debe ser un número válido'];
         if (isNaN(idBlancoNumber)) return ['idBlanco debe ser un número válido'];
         if (isNaN(idGteNumber)) return ['idGte debe ser un número válido'];
-        if (isNaN(idArticuloNumber)) return ['idArticulo debe ser un número válido'];
+        if (isNaN(idFamiliaNumber)) return ['idFamilia debe ser un número válido'];
 
         // Validar si los IDs existen en la base de datos usando validadores
 
@@ -79,7 +79,7 @@ export class CreateDemoplotDto {
                 idContactoPNumber,
                 idBlancoNumber,
                 idDistrito,
-                idArticuloNumber,
+                idFamiliaNumber,
                 idGteNumber
             )
         ];
