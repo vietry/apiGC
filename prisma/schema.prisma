@@ -216,6 +216,7 @@ model Familia {
   createdAt DateTime?  @db.DateTime
   updatedAt DateTime?  @db.DateTime
   Articulo  Articulo[]
+  DemoPlot  DemoPlot[]
   Empresa   Empresa    @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Empresa_Familia1")
 }
 
@@ -411,10 +412,12 @@ model DemoPlot {
   dosis            Decimal?        @db.Decimal(6, 2)
   gradoInfestacion String?         @db.VarChar(5)
   hasCultivo       Decimal?        @db.Decimal(6, 2)
+  idFamilia        Int?
   Articulo         Articulo?       @relation(fields: [idArticulo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_Articulo1")
   BlancoBiologico  BlancoBiologico @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   ContactoDelPunto ContactoPunto   @relation(fields: [idContactoP], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_ContactoP1")
   Cultivo          Cultivo         @relation(fields: [idCultivo], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Cultivo1")
+  Familia          Familia?        @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_Familia1")
   Gte              Gte             @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Gte1")
   Distrito         Distrito        @relation(fields: [idDistrito], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Provincia1")
   FotoDemoPlot     FotoDemoPlot[]
