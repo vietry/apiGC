@@ -39,11 +39,8 @@ export class FotoDemoplotController {
 
     getFotosByIdDemoplot = async (req: Request, res: Response) => {
         const { idDemoPlot } = req.params;
-        const { page = 1, limit = 10 } = req.query;
-        const [error, paginationDto] = PaginationDto.create(+page, +limit);
-        if (error) return res.status(400).json({ error });
-
-        this.fotoDemoplotService.getFotosByIdDemoplot(+idDemoPlot, paginationDto!)
+   
+        this.fotoDemoplotService.getFotosByIdDemoplot(+idDemoPlot)
             .then(fotoDemoplot => res.status(200).json(fotoDemoplot))
             .catch(error => this.handleError(res, error));
 
