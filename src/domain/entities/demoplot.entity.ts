@@ -7,6 +7,7 @@ export class DemoPlotEntity {
         public titulo: string | null,
         public objetivo: string | null,
         public hasCultivo: number | null,
+        public programacion: Date | null,
         public instalacion: Date | null,
         public seguimiento: Date | null,
         public finalizacion: Date | null,
@@ -15,6 +16,7 @@ export class DemoPlotEntity {
         public dosis: number | null,
         public validacion: boolean | null,
         public resultado: string | null,
+        public diaCampo: boolean | null,
         public idCultivo: number,
         public idContactoP: number,
         public idBlanco: number,
@@ -24,11 +26,11 @@ export class DemoPlotEntity {
         // public createdAt: Date | null,
         // public updatedAt: Date | null
     ) {}
-
+    
     public static fromObject(object: { [key: string]: any }): DemoPlotEntity {
         const {
-            id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,
-            estado, gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP,
+            id, titulo, objetivo, hasCultivo, programacion, instalacion, seguimiento, finalizacion,
+            estado, gradoInfestacion, dosis, validacion, resultado,diaCampo , idCultivo, idContactoP,
             idBlanco, idDistrito, idFamilia, idGte, /* createdAt, updatedAt */
         } = object;
 
@@ -43,8 +45,8 @@ export class DemoPlotEntity {
         if (!idGte) throw CustomError.badRequest('idGte is required');
 
         return new DemoPlotEntity(
-            id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,
-            estado, gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP,
+            id, titulo, objetivo, hasCultivo, programacion, instalacion, seguimiento, finalizacion,
+            estado, gradoInfestacion, dosis, validacion, resultado, diaCampo, idCultivo, idContactoP,
             idBlanco, idDistrito, idFamilia, idGte, 
             // createdAt, updatedAt
         );

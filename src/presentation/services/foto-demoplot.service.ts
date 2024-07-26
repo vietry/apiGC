@@ -90,16 +90,10 @@ export class FotoDemoplotService {
         }
     }
 
-    async getFotosByIdDemoplot(idDemoPlot: number,paginationDto: PaginationDto) {
-        const { page, limit } = paginationDto;
-
-        try {
-            const [total, fotoDemoplots] = await Promise.all([
-                await prisma.fotoDemoPlot.count({ where: { idDemoPlot: idDemoPlot } }),
-                await prisma.fotoDemoPlot.findMany({
-                    where: {idDemoPlot: idDemoPlot},
-                    skip: (page - 1) * limit,
-                    take: limit,
+        async getFotosByIdDemoplot(idDemoPlot: number) {
+            try {
+                const fotosDemoplots = await prisma.fotoDemoPlot.findMany({
+                    where: { idDemoPlot: idDemoPlot },
                     include: {
                         DemoPlot: {
                             select: {
@@ -111,20 +105,22 @@ export class FotoDemoplotService {
                             }
                         }
                     },
-                }),
-            ]);
-
-            return {
-                page,
-                limit,
-                total,
-                next: `/api/fotosdemoplots/demoplot/${idDemoPlot}?page=${page + 1}&limit=${limit}`,
-                prev: page - 1 > 0 ? `/api/fotosdemoplots/demoplot/${idDemoPlot}?page=${page - 1}&limit=${limit}` : null,
-                fotoDemoplots,
-            };
-
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
+                });
+        
+                return fotosDemoplots.map((foto) => ({
+                    id: foto.id,
+                    nombre: foto.nombre,
+                    comentario: foto.comentario,
+                    rutaFoto: foto.rutaFoto,
+                    tipo: foto.tipo,
+                    latitud: foto.latitud,
+                    longitud: foto.longitud,
+                    createdAt: foto.createdAt,
+                    updatedAt: foto.updatedAt,
+                    idDemoPlot: foto.idDemoPlot
+                }));
+            } catch (error) {
+                throw CustomError.internalServer(`${error}`);
+            }
         }
-    }
 }

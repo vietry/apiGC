@@ -23,6 +23,8 @@ export class DemoplotService {
                     dosis: createDemoplotDto.dosis,
                     validacion: createDemoplotDto.validacion,
                     resultado: createDemoplotDto.resultado,
+                    programacion: createDemoplotDto.programacion,
+                    diaCampo: createDemoplotDto.diaCampo,
                     idCultivo: createDemoplotDto.idCultivo,
                     idContactoP: createDemoplotDto.idContactoP,
                     idBlanco: createDemoplotDto.idBlanco,
@@ -81,8 +83,24 @@ export class DemoplotService {
                                 estandarizado: true
                             }
                         },
-                        ContactoDelPunto: true,
-                        Cultivo: true,
+                        ContactoDelPunto: {
+                            select: {
+                                nombre: true,
+                                PuntoContacto: true
+                                
+                            }
+                        },
+                        Cultivo: {
+                            select: {
+
+                                Variedad: {
+                                    select: {
+                                        nombre: true,
+                                        Vegetacion: true
+                                    }
+                                }
+                            }
+                        },
                         Gte: {
                             select: {
                                 Usuario: {
@@ -108,6 +126,7 @@ export class DemoplotService {
                                 }
                             }
                         },
+                        
                         FotoDemoPlot: true
                     },
                 }),
@@ -133,58 +152,30 @@ export class DemoplotService {
                         dosis: demoplot.dosis,
                         validacion: demoplot.validacion,
                         resultado: demoplot.resultado,
+                        programacion: demoplot.programacion,
+                        diaCampo: demoplot.diaCampo,
                         idCultivo: demoplot.idCultivo,
                         idContactoP: demoplot.idContactoP,
                         idBlanco: demoplot.idBlanco,
                         idDistrito: demoplot.idDistrito,
                         idFamilia: demoplot.idFamilia,
                         idGte: demoplot.idGte,
-
-                        Familia: demoplot.Familia?.nombre,
-                        BlancoBiologico: demoplot.BlancoBiologico,
-                        ContactoDelPunto: demoplot.ContactoDelPunto,
-                        Cultivo: demoplot.Cultivo,
-                        Gte: demoplot.Gte,
-                        //Distrito: demoplot.Distrito,
+                        familia: demoplot.Familia?.nombre,
+                        blancoCientifico: demoplot.BlancoBiologico.cientifico,
+                        blancoComun: demoplot.BlancoBiologico.estandarizado,
+                        contacto: demoplot.ContactoDelPunto.nombre,
+                        punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                        cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                        variedad: demoplot.Cultivo.Variedad.nombre,
                         FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: demoplot.Gte.Usuario.nombres,
                         departamento: demoplot.Distrito.Provincia.Departamento.nombre,
                         provincia: demoplot.Distrito.Provincia.nombre,
-                        distrito: demoplot.Distrito.nombre
+                        distrito: demoplot.Distrito.nombre,
+                        createdAt: demoplot.createdAt,
+                        updatedAt: demoplot.updatedAt
                     }
                 })
-                
-                /*demoplots.map((demoplot) => ({ 
-                    id: demoplot.id,
-                    titulo: demoplot.titulo,
-                    objetivo: demoplot.objetivo,
-                    hasCultivo: demoplot.hasCultivo,
-                    instalacion: demoplot.instalacion,
-                    seguimiento: demoplot.seguimiento,
-                    finalizacion: demoplot.finalizacion,
-                    estado: demoplot.estado,
-                    gradoInfestacion: demoplot.gradoInfestacion,
-                    dosis: demoplot.dosis,
-                    validacion: demoplot.validacion,
-                    resultado: demoplot.resultado,
-                    idCultivo: demoplot.idCultivo,
-                    idContactoP: demoplot.idContactoP,
-                    idBlanco: demoplot.idBlanco,
-                    idDistrito: demoplot.idDistrito,
-                    idFamilia: demoplot.idFamilia,
-                    idGte: demoplot.idGte,
-                    Familia: demoplot.Familia,
-                    BlancoBiologico: demoplot.BlancoBiologico,
-                    ContactoDelPunto: demoplot.ContactoDelPunto,
-                    Cultivo: demoplot.Cultivo,
-                    Gte: demoplot.Gte,
-                    Distrito: demoplot.Distrito,
-                    FotoDemoPlot: demoplot.FotoDemoPlot,
-                    nombreGte: demoplot.Gte.Usuario.nombres,
-                    departamento: demoplot.Distrito.Provincia.Departamento.nombre,
-                    provincia: demoplot.Distrito.Provincia.nombre,
-                    distrito: demoplot.Distrito.nombre
-                }))*/
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -196,19 +187,103 @@ export class DemoplotService {
             const demoplot = await prisma.demoPlot.findUnique({
                 where: { id },
                 include: {
-                    Familia: true,
-                    BlancoBiologico: true,
-                    ContactoDelPunto: true,
-                    Cultivo: true,
-                    Gte: true,
-                    Distrito: true,
+                    Familia: {
+                        select: {
+                            nombre: true
+                        }
+                    },
+                    BlancoBiologico: {
+                        select: {
+                            cientifico: true,
+                            estandarizado: true
+                        }
+                    },
+                    ContactoDelPunto: {
+                        select: {
+                            nombre: true,
+                            PuntoContacto: true
+                            
+                        }
+                    },
+                    Cultivo: {
+                        select: {
+
+                            Variedad: {
+                                select: {
+                                    nombre: true,
+                                    Vegetacion: true
+                                }
+                            }
+                        }
+                    },
+                    Gte: {
+                        select: {
+                            Usuario: {
+                                select: {
+                                    nombres: true
+                                }
+                            }
+                        }
+                    },
+                    Distrito: {
+                        
+                        select: {
+                            nombre: true,
+                            Provincia: {
+                                select: {
+                                    nombre: true,
+                                    Departamento: {
+                                        select: {
+                                            nombre: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    
                     FotoDemoPlot: true
                 },
             });
 
             if (!demoplot) throw CustomError.badRequest(`Demoplot with id ${id} does not exist`);
 
-            return demoplot;
+            return {
+                id: demoplot.id,
+                titulo: demoplot.titulo,
+                objetivo: demoplot.objetivo,
+                hasCultivo: demoplot.hasCultivo,
+                instalacion: demoplot.instalacion,
+                seguimiento: demoplot.seguimiento,
+                finalizacion: demoplot.finalizacion,
+                estado: demoplot.estado,
+                gradoInfestacion: demoplot.gradoInfestacion,
+                dosis: demoplot.dosis,
+                validacion: demoplot.validacion,
+                resultado: demoplot.resultado,
+                programacion: demoplot.programacion,
+                diaCampo: demoplot.diaCampo,
+                idCultivo: demoplot.idCultivo,
+                idContactoP: demoplot.idContactoP,
+                idBlanco: demoplot.idBlanco,
+                idDistrito: demoplot.idDistrito,
+                idFamilia: demoplot.idFamilia,
+                idGte: demoplot.idGte,
+                familia: demoplot.Familia?.nombre,
+                blancoCientifico: demoplot.BlancoBiologico.cientifico,
+                blancoComun: demoplot.BlancoBiologico.estandarizado,
+                contacto: demoplot.ContactoDelPunto.nombre,
+                punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                variedad: demoplot.Cultivo.Variedad.nombre,
+                nombreGte: demoplot.Gte.Usuario.nombres,
+                departamento: demoplot.Distrito.Provincia.Departamento.nombre,
+                provincia: demoplot.Distrito.Provincia.nombre,
+                distrito: demoplot.Distrito.nombre,
+                fotosDemoplot: demoplot.FotoDemoPlot,
+                createdAt: demoplot.createdAt,
+                        updatedAt: demoplot.updatedAt
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -251,5 +326,63 @@ export class DemoplotService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+
+    async countDemoplotsByGte(idUsuario: number) {
+        try {
+            // Obtener el Gte que corresponde al idUsuario
+            const gte = await prisma.gte.findFirst({
+                where: { idUsuario },
+                select: { id: true }
+            });
+    
+            if (!gte) throw CustomError.badRequest(`Gte with idUsuario ${idUsuario} does not exist`);
+    
+            const demoplotCounts = await prisma.demoPlot.groupBy({
+                by: ['estado'],
+                where: { idGte: gte.id },
+                _count: {
+                    estado: true
+                }
+            });
+    
+            // Inicializar los contadores en cero
+            const counts = {
+                programados: 0,
+                seguimiento: 0,
+                completados: 0,
+                cancelados: 0,
+                reprogramados: 0
+            };
+    
+            // Asignar los valores de los contadores según los resultados de la consulta
+            demoplotCounts.forEach(demoplot => {
+                switch (demoplot.estado) {
+                    case 'Programado':
+                        counts.programados = demoplot._count.estado;
+                        break;
+                    case 'Seguimiento':
+                        counts.seguimiento = demoplot._count.estado;
+                        break;
+                    case 'Completado':
+                        counts.completados = demoplot._count.estado;
+                        break;
+                    case 'Cancelado':
+                        counts.cancelados = demoplot._count.estado;
+                        break;
+                    case 'Reprogramado':
+                        counts.reprogramados = demoplot._count.estado;
+                        break;
+                    default:
+                        break;
+                }
+            });
+    
+            return counts;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
 
 }

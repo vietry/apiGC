@@ -14,6 +14,7 @@ export class DemoplotRoutes {
         router.get('/',controller.getDemoplots);
         router.get('/:id',controller.getDemoplotById);
         router.get('/gte/:idGte',controller.getDemoplotsByGteId);
+        router.get('/count/:idUsuario', controller.countDemoplotsByGte);
         router.post('/',controller.createDemoplot);
         router.put('/:id',controller.updateDemoplot);
 

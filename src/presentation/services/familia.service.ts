@@ -66,14 +66,14 @@ export class FamiliaService {
 
             return familias.map((familia) => ({
                 id: familia.id,
-                codigo: familia.codigo,
-                nombre: familia.nombre,
+                codigo:  familia.codigo.trim(),
+                nombre: familia.nombre.trim(),
                 idEmpresa: familia.idEmpresa,
                 enfoque: familia.enfoque,
                 createdAt: familia.createdAt,
                 updatedAt: familia.updatedAt,
                 empresaNombre: familia.Empresa.nomEmpresa,
-                codiEmpresa: `0${familia.Empresa.nomEmpresa}`
+                codiEmpresa: `0${familia.Empresa.id}`
             }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

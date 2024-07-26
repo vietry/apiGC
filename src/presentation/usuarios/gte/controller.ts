@@ -50,6 +50,8 @@ export class GteController{
     
     }
 
+
+
     getGteById = async (req: Request, res: Response) => {
         const id = +req.params.id;
         this.gteService.getGteById(id)
@@ -65,6 +67,13 @@ export class GteController{
 
         this.gteService.getGteByColaboradorId(idColaborador, paginationDto!)
             .then(gtes => res.status(200).json(gtes))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getGteByUsuarioId = async (req: Request, res: Response) => {
+        const idUsuario = +req.params.idUsuario;
+        this.gteService.getGteByUsuarioId(idUsuario)
+            .then(gte => res.status(200).json(gte))
             .catch(error => this.handleError(res, error));
     }
 

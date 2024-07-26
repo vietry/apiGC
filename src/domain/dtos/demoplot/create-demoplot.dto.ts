@@ -19,13 +19,15 @@ export class CreateDemoplotDto {
         public readonly idDistrito: string,
         public readonly idFamilia: number | null,
         public readonly idGte: number,
+        public readonly programacion: Date | null,
+        public readonly diaCampo: boolean | null,
     ) {}
 
     static async create(object: { [key: string]: any }): Promise<[string?, CreateDemoplotDto?]> {
         const {
             titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idFamilia, idGte
+            idDistrito, idFamilia, idGte, programacion, diaCampo
         } = object;
 
         if (!idCultivo) return ['idCultivo faltante'];
@@ -80,7 +82,9 @@ export class CreateDemoplotDto {
                 idBlancoNumber,
                 idDistrito,
                 idFamiliaNumber,
-                idGteNumber
+                idGteNumber,
+                programacion, 
+                diaCampo
             )
         ];
     }

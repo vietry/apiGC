@@ -74,5 +74,16 @@ export class DemoplotController{
             .then(demoplots => res.status(200).json(demoplots))
             .catch(error => this.handleError(res, error));
     }
+
+    countDemoplotsByGte = async (req: Request, res: Response) => {
+        const idUsuario = +req.params.idUsuario;
+
+        if (isNaN(idUsuario)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.demoplotService.countDemoplotsByGte(idUsuario)
+            .then(counts => res.status(200).json(counts))
+            .catch(error => this.handleError(res, error));
+    }
+
  
 }

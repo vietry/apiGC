@@ -87,6 +87,7 @@ export class GteService{
                             select: {
                                 Usuario: {
                                     select: {
+                                        id: true,
                                         nombres: true,
                                         apellidos: true
                                 }},
@@ -99,6 +100,12 @@ export class GteService{
                                 nombres: true,
                                 apellidos: true,
                                 email: true,
+                        }},
+                        SubZona: {
+                            select: {
+                                codi: true,
+                                nombre: true,
+                                
                         }}
                     },
                 })
@@ -112,17 +119,19 @@ export class GteService{
                 next: `/api/gtes?page${(page + 1)}&limit=${limit}`,
                 prev: (page - 1 > 0)  ? `/api/gtes?page${(page - 1)}&limit=${limit}`: null ,
 
-                gtes: gtes
-                    /*gtes.map((gte) => {
+                gtes: gtes.map((gte) => {
                     return {
                         id: gte.id,
                         activo:  gte.activo,
-                        SubZona: gte.idSubZona,
-                        Colaborar: gte.idColaborador,
-                        Usuario: gte.idUsuario,
-                        
+                        idSubZona: gte.idSubZona,
+                        idColaborador: gte.idColaborador,
+                        idUsuario: gte.idUsuario,
+                        nombres: gte.Usuario.nombres,
+                        apellidos: gte.Usuario.apellidos,
+                        email: gte.Usuario.email,
+                        subZona: gte.SubZona.nombre
                         }
-                        })*/
+                        })
             }
 
         } catch (error) {
@@ -159,7 +168,7 @@ export class GteService{
 
             if (!gte) throw CustomError.badRequest(`GTE with id ${id} does not exist`);
 
-            return gte;
+            return ;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -193,7 +202,13 @@ export class GteService{
                                 apellidos: true,
                                 email: true,
                             }
-                        }
+                        },
+                        SubZona: {
+                            select: {
+                                codi: true,
+                                nombre: true,
+                                
+                        }}
                     },
                 })
             ]);
@@ -212,5 +227,56 @@ export class GteService{
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async getGteByUsuarioId(idUsuario: number) {
+        try {
+            const gte = await prisma.gte.findFirst({
+                where: { idUsuario: idUsuario },
+                include: {
+                    Colaborador: {
+                        select: {
+                            Usuario: {
+                                select: {
+                                    nombres: true,
+                                    apellidos: true
+                                }
+                            },
+                            cargo: true,
+                        }
+                    },
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true,
+                            email: true,
+                        }
+                    },
+                    SubZona: {
+                        select: {
+                            codi: true,
+                            nombre: true,
+                        }
+                    }
+                },
+            });
+    
+            if (!gte) throw CustomError.badRequest(`No GTE found with Usuario id ${idUsuario}`);
+    
+            return {
+                id: gte.id,
+                activo: gte.activo,
+                idSubZona: gte.idSubZona,
+                idColaborador: gte.idColaborador,
+                idUsuario: gte.idUsuario,
+                nombres: gte.Usuario.nombres,
+                apellidos: gte.Usuario.apellidos,
+                email: gte.Usuario.email,
+                subZona: gte.SubZona.nombre
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+    
 
 }

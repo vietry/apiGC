@@ -69,8 +69,18 @@ export class CultivoService {
                     skip: ((page - 1) * limit),
                     take: limit,
                     include: {
-                        Fundo: true,
-                        Variedad: true,
+                        Fundo: {
+                            select: {
+                                nombre: true,
+                                PuntoContacto: true
+                            }
+                        },
+                        Variedad: {
+                            select: {
+                                nombre: true,
+                                Vegetacion: true
+                            }
+                        }
                     },
                 })
             ]);
@@ -91,6 +101,10 @@ export class CultivoService {
                         observacion: cultivo.observacion,
                         idFundo: cultivo.idFundo,
                         idVariedad: cultivo.idVariedad,
+                        variedad: cultivo.Variedad.nombre,
+                        vegetacion:cultivo.Variedad.Vegetacion.nombre,
+                        idVegetacion:cultivo.Variedad.Vegetacion.id,
+                        idPunto: cultivo.Fundo.PuntoContacto?.id
                     };
                 })
             };

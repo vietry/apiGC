@@ -20,17 +20,17 @@ export class CreateFotoDemoplotDto {
         if (!idDemoPlot) return ['idDemoPlot faltante'];
         if (!comentario) return ['comentario faltante'];
 
-        if (typeof idDemoPlot !== 'number') {
+        if (idDemoPlot !== undefined && typeof idDemoPlot !== 'number') {
             idDemoPlotNumber = parseInt(idDemoPlot);
             if (isNaN(idDemoPlotNumber)) return ['idDemoPlot debe ser un número válido'];
         }
 
-        if (typeof latitud !== 'number') {
+        if (latitud !== undefined && typeof latitud !== 'number') {
             latitudNumber = parseFloat(latitud);
             if (isNaN(latitudNumber)) return ['latitud debe ser un número válido'];
         }
 
-        if (typeof longitud !== 'number') {
+        if (longitud !== undefined && typeof longitud !== 'number') {
             longitudNumber = parseFloat(longitud);
             if (isNaN(longitudNumber)) return ['longitud debe ser un número válido'];
         }

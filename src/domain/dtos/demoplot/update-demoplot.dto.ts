@@ -21,6 +21,8 @@ export class UpdateDemoplotDto {
         public readonly idDistrito?: string,
         public readonly idFamilia?: number | null,
         public readonly idGte?: number,
+        public readonly programacion?: Date | null,
+        public readonly diaCampo?: boolean | null,
         // public readonly updatedAt?: Date | null
     ) {}
 
@@ -44,6 +46,8 @@ export class UpdateDemoplotDto {
         if (this.idDistrito ) returnObj.idDistrito = this.idDistrito;
         if (this.idFamilia ) returnObj.idFamilia = this.idFamilia;
         if (this.idGte ) returnObj.idGte = this.idGte;
+        if (this.programacion ) returnObj.programacion = this.programacion;
+        if (this.diaCampo ) returnObj.diaCampo = this.diaCampo;
         // if (this.updatedAt ) returnObj.updatedAt = this.updatedAt;
 
         return returnObj;
@@ -52,7 +56,7 @@ export class UpdateDemoplotDto {
     static async create(props: {[key: string]: any}): Promise<[string?, UpdateDemoplotDto?]> {
         const { id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idFamilia, idGte } = props;
+            idDistrito, idFamilia, idGte, programacion, diaCampo } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -122,7 +126,9 @@ export class UpdateDemoplotDto {
             idBlancoNumber,
             idDistrito,
             idFamiliaNumber,
-            idGteNumber
+            idGteNumber,
+            programacion,
+            diaCampo
         )];
     }
 }
