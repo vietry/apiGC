@@ -85,5 +85,19 @@ export class DemoplotController{
             .catch(error => this.handleError(res, error));
     }
 
+    countDemoplotsByMesAnioGte = async (req: Request, res: Response) => {
+        const idUsuario = +req.params.idUsuario;
+        const mes = +req.params.mes; // Parámetro del mes
+        const anio = +req.params.anio; // Parámetro del año
+
+        if (isNaN(idUsuario) || isNaN(mes) || isNaN(anio)) {
+            return res.status(400).json({ error: 'Invalid parameters' });
+        }
+
+        this.demoplotService.countDemoplotsByMonthAnioGte(idUsuario, mes, anio)
+            .then(counts => res.status(200).json(counts))
+            .catch(error => this.handleError(res, error));
+    }
+
  
 }

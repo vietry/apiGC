@@ -8,6 +8,16 @@ export class ColaboradorService{
 
     async createColaborador( createColaboradorDto: CreateColaboradorDTO, user: UsuarioEntity){
         //const colaboradorExists = await prisma.colaborador.findFirst({where: {email: createColaboradorDto.cargo}});
+        
+        const usuarioExists = await prisma.usuario.findFirst({where: {id: user.id}});
+        if ( !usuarioExists ) throw CustomError.badRequest( `Usuario no exists` );
+
+        const gteExists = await prisma.gte.findFirst({where: {idUsuario: user.id}});
+        if ( gteExists ) throw CustomError.badRequest( `Gte with IdUsuario already  exists` );
+
+        const colaboradorExists = await prisma.colaborador.findFirst({where: {idUsuario: user.id}});
+        if ( colaboradorExists ) throw CustomError.badRequest( `Colaborador no exists` );
+        
         try {
             const currentDate = new Date();
 

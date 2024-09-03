@@ -38,6 +38,7 @@ export class CreateDemoplotDto {
 
         let hasCultivoNumber = hasCultivo;
         let dosisNumber = dosis;
+        let programacionDate = programacion;
 
         if (hasCultivo && typeof hasCultivo !== 'number') {
             hasCultivoNumber = parseFloat(hasCultivo);
@@ -49,6 +50,11 @@ export class CreateDemoplotDto {
             if (isNaN(dosisNumber)) return ['dosis debe ser un número válido'];
         }
 
+        if (programacion && typeof programacion === 'string') {
+            programacionDate = new Date(programacion);
+            if (isNaN(programacionDate.getTime())) return ['programacion debe ser una fecha válida'];
+        }
+        
         const idCultivoNumber = parseInt(idCultivo);
         const idContactoPNumber = parseInt(idContactoP);
         const idBlancoNumber = parseInt(idBlanco);

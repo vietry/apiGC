@@ -16,3 +16,5 @@ export * from './distrito.service';
 export * from './provincia.service';
 export * from './articulo.service';
 export * from './familia.service';
+export * from './fundos.service';
+export * from './puntos-ubigeos.service';

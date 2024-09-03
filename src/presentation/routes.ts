@@ -18,6 +18,8 @@ import { DistritoRoutes } from "./distritos/routes";
 import { VariedadRoutes } from "./variedades/routes";
 import { ProvinciaRoutes } from "./provincias/routes";
 import { FamiliaRoutes } from "./familias/routes";
+import { FundoRoutes } from "./fundos/routes";
+import { PuntoUbigeoRoutes } from "./puntos-ubigeos/routes";
 
 export class AppRoutes {
     static get routes(): Router{
@@ -42,6 +44,8 @@ export class AppRoutes {
         router.use('/api/distritos', DistritoRoutes.routes);
         router.use('/api/provincias', ProvinciaRoutes.routes);
         router.use('/api/familias', FamiliaRoutes.routes);
+        router.use('/api/fundos', FundoRoutes.routes);
+        router.use('/api/puntosubigeos', PuntoUbigeoRoutes.routes);
 
         return router;
     }

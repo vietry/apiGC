@@ -7,6 +7,7 @@ export class UpdateContactoPuntoDto {
         public readonly nombre?: string,
         public readonly apellido?: string,
         public readonly cargo?: string,
+        public readonly tipo?: string,
         public readonly email?: string | null,
         public readonly celularA?: string | null,
         public readonly celularB?: string | null,
@@ -19,6 +20,7 @@ export class UpdateContactoPuntoDto {
         if (this.nombre) returnObj.nombre = this.nombre;
         if (this.apellido) returnObj.apellido = this.apellido;
         if (this.cargo) returnObj.cargo = this.cargo;
+        if (this.tipo) returnObj.tipo = this.tipo;
         if (this.email) returnObj.email = this.email;
         if (this.celularA) returnObj.celularA = this.celularA;
         if (this.celularB) returnObj.celularB = this.celularB;
@@ -28,7 +30,7 @@ export class UpdateContactoPuntoDto {
     }
 
     static async create(props: { [key: string]: any }): Promise<[string?, UpdateContactoPuntoDto?]> {
-        const { id, nombre, apellido, cargo, email, celularA, celularB, idPunto } = props;
+        const { id, nombre, apellido, cargo, tipo, email, celularA, celularB, idPunto } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -53,6 +55,7 @@ export class UpdateContactoPuntoDto {
                 nombre,
                 apellido,
                 cargo,
+                tipo,
                 email,
                 celularA,
                 celularB,

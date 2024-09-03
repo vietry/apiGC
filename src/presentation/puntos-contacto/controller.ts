@@ -59,7 +59,7 @@ export class PuntoContactoController {
             .catch(error => this.handleError(res, error));
     }
 
-    getPuntosContactoByGteId = async (req: Request, res: Response) => {
+    /*getPuntosContactoByGteId = async (req: Request, res: Response) => {
         const idGte = +req.params.idGte;
         if (isNaN(idGte)) return res.status(400).json({ error: 'Invalid ID' });
 
@@ -70,5 +70,14 @@ export class PuntoContactoController {
         this.puntoContactoService.getPuntosContactoByGteId(idGte, paginationDto!)
             .then(puntosContacto => res.status(200).json(puntosContacto))
             .catch(error => this.handleError(res, error));
+        }*/
+
+    getPuntosContactoByGteId = async (req: Request, res: Response) => {
+            const idGte = +req.params.idGte;
+            if (isNaN(idGte)) return res.status(400).json({ error: 'Invalid ID' });
+
+            this.puntoContactoService.getPuntosContactoByGteId(idGte)
+                .then(puntosContacto => res.status(200).json(puntosContacto))
+                .catch(error => this.handleError(res, error));
         }
 }

@@ -1,12 +1,12 @@
 import { prisma } from "../../data/sqlserver";
-import { CultivoEntity, CustomError, PaginationDto, UsuarioEntity } from "../../domain";
+import { CreateCultivoDto, CultivoEntity, CustomError, PaginationDto, UpdateCultivoDto, UsuarioEntity } from "../../domain";
 
 export class CultivoService {
 
     // DI
     constructor() {}
 
-    /*async createCultivo(createCultivoDto: CreateCultivoDTO, user: UsuarioEntity) {
+    async createCultivo(createCultivoDto: CreateCultivoDto) {
         try {
             const currentDate = new Date();
 
@@ -40,7 +40,7 @@ export class CultivoService {
         }
     }
 
-    async updateCultivo(updateCultivoDto: UpdateCultivoDTO) {
+    async updateCultivo(updateCultivoDto: UpdateCultivoDto) {
         const cultivoExists = await prisma.cultivo.findFirst({ where: { id: updateCultivoDto.id } });
         if (!cultivoExists) throw CustomError.badRequest(`Cultivo with id ${updateCultivoDto.id} does not exist`);
 
@@ -57,24 +57,27 @@ export class CultivoService {
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
-    }*/
+    }
 
-    async getCultivos(paginationDto: PaginationDto) {
-        const { page, limit } = paginationDto;
-
+    async getCultivos() {
+        
         try {
-            const [total, cultivos] = await Promise.all([
-                await prisma.cultivo.count(),
-                await prisma.cultivo.findMany({
-                    skip: ((page - 1) * limit),
-                    take: limit,
+            const cultivos = await prisma.cultivo.findMany({
                     include: {
                         Fundo: {
                             select: {
                                 nombre: true,
-                                PuntoContacto: true
+                                centroPoblado: true,
+                                PuntoContacto: {
+                                    select: {
+                                        idDistrito: true,
+                                        id: true
+                                    }
+                                },
+                                ContactoPunto: true
                             }
                         },
+                        
                         Variedad: {
                             select: {
                                 nombre: true,
@@ -82,15 +85,11 @@ export class CultivoService {
                             }
                         }
                     },
-                })
-            ]);
+                });
+            
 
             return {
-                page: page,
-                limit: limit,
-                total: total,
-                next: `/v1/cultivos?page${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0) ? `/v1/cultivos?page${(page - 1)}&limit=${limit}` : null,
+
                 cultivos: cultivos.map((cultivo) => {
                     return {
                         id: cultivo.id,
@@ -100,11 +99,15 @@ export class CultivoService {
                         mesFinal: cultivo.mesFinal,
                         observacion: cultivo.observacion,
                         idFundo: cultivo.idFundo,
+                        fundo: cultivo.Fundo.nombre,
+                        centroPoblado: cultivo.Fundo.centroPoblado,
                         idVariedad: cultivo.idVariedad,
                         variedad: cultivo.Variedad.nombre,
                         vegetacion:cultivo.Variedad.Vegetacion.nombre,
+                        idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
                         idVegetacion:cultivo.Variedad.Vegetacion.id,
-                        idPunto: cultivo.Fundo.PuntoContacto?.id
+                        idPunto: cultivo.Fundo.PuntoContacto?.id,
+                        idDistrito: cultivo.Fundo.PuntoContacto?.idDistrito
                     };
                 })
             };
@@ -127,6 +130,138 @@ export class CultivoService {
             if (!cultivo) throw CustomError.badRequest(`Cultivo with id ${id} does not exist`);
 
             return cultivo;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getCultivosByPuntoContactoId(idPuntoContacto: number) {
+        try {
+            const cultivos = await prisma.cultivo.findMany({
+                where: {
+                    Fundo: {
+                        PuntoContacto: {
+                            id: idPuntoContacto
+                        }
+                    }
+                },
+                include: {
+                    Fundo: {
+                        select: {
+                            nombre: true,
+                            centroPoblado: true,
+                            PuntoContacto: {
+                                select: {
+                                    id: true,
+                                    idDistrito: true,
+                                    
+                                }
+                            },
+                            ContactoPunto: true
+                        }
+                    },
+                    Variedad: {
+                        select: {
+                            nombre: true,
+                            Vegetacion: {
+                                select: {
+                                    nombre: true,
+                                    id: true
+                                }
+                            }
+                        }
+                    }
+                },
+            });
+    
+            return {cultivos: cultivos.map((cultivo) => {
+                return {
+                    id: cultivo.id,
+                    certificacion: cultivo.certificacion,
+                    hectareas: cultivo.hectareas,
+                    mesInicio: cultivo.mesInicio,
+                    mesFinal: cultivo.mesFinal,
+                    observacion: cultivo.observacion,
+                    idFundo: cultivo.idFundo,
+                    fundo: cultivo.Fundo.nombre,
+                    centroPoblado: cultivo.Fundo.centroPoblado,
+                    idVariedad: cultivo.idVariedad,
+                    variedad: cultivo.Variedad.nombre,
+                    vegetacion: cultivo.Variedad.Vegetacion.nombre,
+                    idVegetacion: cultivo.Variedad.Vegetacion.id,
+                    idPunto: cultivo.Fundo.PuntoContacto?.id,
+                    idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
+                    idDistrito: cultivo.Fundo.PuntoContacto?.idDistrito
+
+                };
+            })};
+    
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getCultivosByContactoPuntoId(idContactoPunto: number) {
+        try {
+            const cultivos = await prisma.cultivo.findMany({
+                where: {
+                    Fundo: {
+                        ContactoPunto: {
+                            id: idContactoPunto
+                        }
+                    }
+                },
+                include: {
+                    Fundo: {
+                        select: {
+                            nombre: true,
+                            centroPoblado: true,
+                            PuntoContacto: {
+                                select: {
+                                    id: true,
+                                    idDistrito: true,
+                                    
+                                }
+                            },
+                            ContactoPunto: true
+                        }
+                    },
+                    Variedad: {
+                        select: {
+                            nombre: true,
+                            Vegetacion: {
+                                select: {
+                                    nombre: true,
+                                    id: true
+                                }
+                            }
+                        }
+                    }
+                },
+            });
+    
+            return {cultivos: cultivos.map((cultivo) => {
+                return {
+                    id: cultivo.id,
+                    certificacion: cultivo.certificacion,
+                    hectareas: cultivo.hectareas,
+                    mesInicio: cultivo.mesInicio,
+                    mesFinal: cultivo.mesFinal,
+                    observacion: cultivo.observacion,
+                    idFundo: cultivo.idFundo,
+                    fundo: cultivo.Fundo.nombre,
+                    centroPoblado: cultivo.Fundo.centroPoblado,
+                    idVariedad: cultivo.idVariedad,
+                    variedad: cultivo.Variedad.nombre,
+                    vegetacion: cultivo.Variedad.Vegetacion.nombre,
+                    idVegetacion: cultivo.Variedad.Vegetacion.id,
+                    idPunto: cultivo.Fundo.PuntoContacto?.id,
+                    idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
+                    idDistrito: cultivo.Fundo.PuntoContacto?.idDistrito
+
+                };
+            })};
+    
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

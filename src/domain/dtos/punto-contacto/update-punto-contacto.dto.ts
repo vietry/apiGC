@@ -9,7 +9,8 @@ export class UpdatePuntoContactoDto {
         public readonly dirReferencia?: string | null,
         public readonly lider?: boolean | null,
         public readonly activo?: boolean,
-        public readonly idGte?: number
+        public readonly idGte?: number,
+        public readonly idDistrito?: string,
     ) {}
 
     get values() {
@@ -24,13 +25,14 @@ export class UpdatePuntoContactoDto {
         if (this.lider ) returnObj.lider = this.lider;
         if (this.activo ) returnObj.activo = this.activo;
         if (this.idGte ) returnObj.idGte = this.idGte;
+        if (this.idDistrito ) returnObj.idDistrito = this.idDistrito;
 
         return returnObj;
     }
 
     static create(props: { [key: string]: any }): [string?, UpdatePuntoContactoDto?] {
         const {
-            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte
+            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito
         } = props;
 
         if (!id || isNaN(Number(id))) {
@@ -57,7 +59,7 @@ export class UpdatePuntoContactoDto {
         }
 
         return [undefined, new UpdatePuntoContactoDto(
-            id, nombre, tipoDoc, numDoc, hectareasNumber, tipo, dirReferencia, lider, activo, idGteNumber
+            id, nombre, tipoDoc, numDoc, hectareasNumber, tipo, dirReferencia, lider, activo, idGteNumber, idDistrito
         )];
     }
 }

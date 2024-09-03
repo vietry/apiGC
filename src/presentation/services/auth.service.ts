@@ -1,5 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { JwtAdapter, BcryptAdapter, envs } from '../../config';
+import { JwtAdapter, BcryptAdapter, envs, Validators } from '../../config';
 import { CustomError, RegisterUsuarioDto, UsuarioEntity } from "../../domain";
 import { LoginUsuarioDto } from "../../domain/dtos/auth/login-user.dto";
 import { EmailService } from "./email.service";
@@ -53,22 +53,59 @@ export class AuthService{
           }
     }
 
+    /*public async registerMultipleUsuarios(registerUsuarioDtos: RegisterUsuarioDto[]) {
+      try {
+        const results = [];
+    
+        for (const registerUsuarioDto of registerUsuarioDtos) {
+          const userResult = await this.registerUsuario(registerUsuarioDto);
+          results.push(userResult);
+        }
+    
+        return results;
+      } catch (error) {
+        throw CustomError.internalServer(`Error al registrar usuarios: ${error}`);
+      }
+    }*/
+      public async registerMultiUsuario(registerUsuariosDto: RegisterUsuarioDto[]) {
+        const resultados: { success: boolean; user?: any; error?: string }[] = [];
+
+        for (const registerUsuarioDto of registerUsuariosDto) {
+            try {
+                const result = await this.registerUsuario(registerUsuarioDto);
+                resultados.push({ success: true, user: result.user });
+            } catch (error) {
+                resultados.push({ success: false, error: 'Unknown error' });
+            }
+        }
+
+        return resultados;
+    }
+
 
     public async loginUser(loginUsuarioDto: LoginUsuarioDto) {
+
         const user = await prisma.usuario.findFirst({ where: { email: loginUsuarioDto.email } });
-        if (!user) throw CustomError.badRequest('Email not exist');
+        if (!user) throw CustomError.badRequest('El email no existe');
     
         const isMatching = BcryptAdapter.compare(loginUsuarioDto.password, user.password);
-        if (!isMatching) throw CustomError.badRequest('Password is not valid');
+        if (!isMatching) throw CustomError.badRequest('La contraseña no es válida');
     
         const { password, ...userEntity } = UsuarioEntity.fromObject(user);
     
         const token = await JwtAdapter.generateToken({ id: user.id, email: user.email });
         if (!token) throw CustomError.internalServer('Error while creating JWT');
-    
+        const tipoUser = await Validators.getTipoUsuario(user.id);
+        //const tipoUsuario = await this.getTipoUsuario(user.id);
+        
+        
+        
+
         return {
           user: {
               ...userEntity,
+              idTipo: tipoUser.idTipo,
+              tipo: tipoUser.tipo,
               token: token,
           },
           token: token,
@@ -126,7 +163,19 @@ export class AuthService{
 
     }
 
- 
+    /*public async getTipoUsuario(idUsuario: number): Promise<{ idTipo: number; tipo: string }> {
+      const colaborador = await prisma.colaborador.findFirst({ where: { idUsuario } });
+      if (colaborador) {
+          return { idTipo: colaborador.id, tipo: 'colaborador' };
+      }
+
+      const gte = await prisma.gte.findFirst({ where: { idUsuario } });
+      if (gte) {
+          return { idTipo: gte.id, tipo: 'gte' };
+      }
+
+      throw CustomError.badRequest('No related entity found for this user.');
+  }*/
 
   
 

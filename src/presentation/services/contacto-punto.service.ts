@@ -32,6 +32,7 @@ export class ContactoPuntoService{
                     nombre: createContactoPuntoDto.nombre,
                     apellido: createContactoPuntoDto.apellido,
                     cargo: createContactoPuntoDto.cargo,
+                    tipo: createContactoPuntoDto.tipo,
                     email: createContactoPuntoDto.email,
                     celularA: createContactoPuntoDto.celularA,
                     celularB: createContactoPuntoDto.celularB,
@@ -88,8 +89,8 @@ export class ContactoPuntoService{
             const [total, contactos] = await Promise.all([
                 await prisma.contactoPunto.count(),
                 await prisma.contactoPunto.findMany({
-                    skip: ((page -1) * limit),
-                    take: limit,
+                    //skip: ((page -1) * limit),
+                    //take: limit,
                     include: {
                         //PuntoContacto: true,
                         PuntoContacto: {
@@ -111,11 +112,11 @@ export class ContactoPuntoService{
 
             return {
 
-                page: page,
-                limit: limit,
+                //page: page,
+                //limit: limit,
                 total: total,
-                next: `/api/contactospuntos?page${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0)  ? `/api/contactospuntos?page${(page - 1)}&limit=${limit}`: null ,
+                //next: `/api/contactospuntos?page${(page + 1)}&limit=${limit}`,
+                //prev: (page - 1 > 0)  ? `/api/contactospuntos?page${(page - 1)}&limit=${limit}`: null ,
 
                 contactos: 
                 //contactos,
@@ -126,6 +127,7 @@ export class ContactoPuntoService{
                         nombre: contacto.nombre,
                         apellido: contacto.apellido,
                         cargo: contacto.cargo,
+                        tipo: contacto.tipo,
                         email: contacto.email,
                         celularA: contacto.celularA,
                         celularB: contacto.celularB,
@@ -168,7 +170,7 @@ export class ContactoPuntoService{
         }
     }
 
-    async getContactoByPuntoId(idPunto: number, paginationDto: PaginationDto) {
+    /*async getContactoByPuntoId(idPunto: number, paginationDto: PaginationDto) {
         const { page, limit } = paginationDto;
 
         try {
@@ -204,6 +206,52 @@ export class ContactoPuntoService{
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
-    }
+    }*/
+
+
+        async getContactoByPuntoId(idPunto: number) {
+            try {
+                const contactos = await prisma.contactoPunto.findMany({
+                    where: { idPunto: idPunto },
+                    include: {
+                        PuntoContacto: {
+                            select: {
+                                id: true,
+                                nombre: true,
+                                numDoc: true,
+                                tipoDoc: true,
+                                Gte: {
+                                    select: {
+                                        id: true,
+                                    
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+        
+                if (contactos.length === 0) throw CustomError.badRequest(`No ContactoPunto found with PuntoContacto id ${idPunto}`);
+        
+                return {contactos: contactos.map(contacto => ({
+                    id: contacto.id,
+                    nombre: contacto.nombre,
+                    apellido: contacto.apellido,
+                    cargo: contacto.cargo,
+                    tipo: contacto.tipo,
+                    celularA: contacto.celularA,
+                    celularB: contacto.celularB,
+                    email: contacto.email,
+                    idPuntoContacto: contacto.idPunto,
+                    tipoDoc: contacto.PuntoContacto.tipoDoc,
+                    numDocPunto: contacto.PuntoContacto.numDoc,
+                    idGte: contacto.PuntoContacto.Gte.id
+                    
+                }))};
+            } catch (error) {
+                throw CustomError.internalServer(`${error}`);
+            }
+        }
 
 }
+

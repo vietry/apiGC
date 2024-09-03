@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 
-import { CustomError, PaginationDto } from "../../domain";
+import { CreateCultivoDto, CustomError, PaginationDto, UpdateCultivoDto } from "../../domain";
 import { CultivoService } from "../services";
+
 
 export class CultivoController {
 
@@ -19,24 +20,24 @@ export class CultivoController {
         return res.status(500).json({ error: 'Internal server error - check logs' });
     }
 
-    /*createCultivo = async (req: Request, res: Response) => {
-        const [error, createCultivoDto] = CreateCultivoDTO.create(req.body);
+    createCultivo = async (req: Request, res: Response) => {
+        const [error, createCultivoDto] = await CreateCultivoDto.create(req.body);
         if (error) return res.status(400).json({ error });
 
-        this.cultivoService.createCultivo(createCultivoDto!, req.body.user)
+        this.cultivoService.createCultivo(createCultivoDto!)
             .then(cultivo => res.status(201).json(cultivo))
             .catch(error => this.handleError(res, error));
     }
 
     updateCultivo = async (req: Request, res: Response) => {
         const id = +req.params.id;
-        const [error, updateCultivoDto] = UpdateCultivoDTO.create({ ...req.body, id });
+        const [error, updateCultivoDto] = await UpdateCultivoDto.create({ ...req.body, id });
         if (error) return res.status(400).json({ error });
 
         this.cultivoService.updateCultivo(updateCultivoDto!)
             .then(cultivo => res.status(200).json(cultivo))
             .catch(error => this.handleError(res, error));
-    }*/
+    }
 
     getCultivos = async (req: Request, res: Response) => {
 
@@ -44,7 +45,7 @@ export class CultivoController {
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
 
-        this.cultivoService.getCultivos(paginationDto!)
+        this.cultivoService.getCultivos()
             .then(cultivos => res.status(200).json(cultivos))
             .catch(error => this.handleError(res, error));
     }
@@ -55,6 +56,24 @@ export class CultivoController {
 
         this.cultivoService.getCultivoById(id)
             .then(cultivo => res.status(200).json(cultivo))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getCultivosByPuntoContactoId = async (req: Request, res: Response) => {
+        const idPuntoContacto = +req.params.idPuntoContacto;
+        if (isNaN(idPuntoContacto)) return res.status(400).json({ error: 'Invalid PuntoContacto ID' });
+    
+        this.cultivoService.getCultivosByPuntoContactoId(idPuntoContacto)
+            .then(cultivos => res.status(200).json(cultivos))
+            .catch(error => this.handleError(res, error));
+    }
+    
+    getCultivosByContactoPuntoId = async (req: Request, res: Response) => {
+        const idContactoPunto = +req.params.idContactoPunto;
+        if (isNaN(idContactoPunto)) return res.status(400).json({ error: 'Invalid ContactoPunto ID' });
+    
+        this.cultivoService.getCultivosByContactoPuntoId(idContactoPunto)
+            .then(cultivos => res.status(200).json(cultivos))
             .catch(error => this.handleError(res, error));
     }
 }

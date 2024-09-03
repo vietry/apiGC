@@ -28,6 +28,20 @@ export class Validators {
       });
       return demoplot !== null;
     }
+
+    static async getTipoUsuario(idUsuario: number): Promise<{ idTipo: number; tipo: string }> {
+      const colaborador = await prisma.colaborador.findFirst({ where: { idUsuario } });
+      if (colaborador) {
+          return { idTipo: colaborador.id, tipo: 'colaborador' };
+      }
+
+      const gte = await prisma.gte.findFirst({ where: { idUsuario } });
+      if (gte) {
+          return { idTipo: gte.id, tipo: 'gte' };
+      }
+
+      throw new Error('No related entity found for this user.');
+  }
   
   
   }

@@ -15,6 +15,7 @@ export class GteRoutes {
         router.get('/colaborador/:idColaborador', controller.getGteByColaboradorId);
         router.get('/usuario/:idUsuario', controller.getGteByUsuarioId);
         router.post('/',[ AuthMiddleware.validateJWT] ,controller.createGte);
+        router.post('/admin',[ AuthMiddleware.validateJWT] ,controller.createGteAdmin);
         router.put('/:id', /*[AuthMiddleware.validateJWT],*/ controller.updateGte);
 
         return router;

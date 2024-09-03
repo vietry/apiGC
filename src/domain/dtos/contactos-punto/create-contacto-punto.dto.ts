@@ -6,6 +6,7 @@ export class CreateContactoPuntoDto{
         public readonly nombre: string,
         public readonly apellido: string,
         public readonly cargo: string,
+        public readonly tipo: string,
         public readonly email: string | null,
         public readonly celularA: string | null,
         public readonly celularB: string | null,
@@ -13,13 +14,14 @@ export class CreateContactoPuntoDto{
     ){}
 
     static async create(object: { [key: string]: any }): Promise<[string?, CreateContactoPuntoDto?]> {
-        const { nombre, apellido, cargo, correo, celularA, celularB, idPunto } = object;
+        const { nombre, apellido, cargo, tipo, email, celularA, celularB, idPunto } = object;
 
         let idPuntoNumber = idPunto;
 
         if (!nombre) return ['Nombre faltante'];
         if (!apellido) return ['Apellido faltante'];
         if (!cargo) return ['Cargo faltante'];
+        if (!tipo) return ['Tipo faltante'];
         if (!idPunto) return ['idPunto faltante'];
 
         if (typeof idPunto !== 'number') {
@@ -36,8 +38,9 @@ export class CreateContactoPuntoDto{
             new CreateContactoPuntoDto(
                 nombre, 
                 apellido, 
-                cargo, 
-                correo, 
+                cargo,
+                tipo,
+                email, 
                 celularA, 
                 celularB, 
                 idPuntoNumber

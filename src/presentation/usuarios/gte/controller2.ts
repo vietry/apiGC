@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CreateGteDto, CustomError, PaginationDto } from "../../../domain";
 import { GteService } from "../../services";
-import { GteService2 } from "../../services/gte.service2";
+import { GteService2 } from "../../services/gte2.service";
 import { CreateGteDto2 } from "../../../domain/dtos/gte/create-gte2.dto";
 
 export class GteController2{
@@ -32,6 +32,7 @@ export class GteController2{
             .then(gte => res.status(201).json(gte))
             .catch( error => this.handleError(res, error));
     }
+    
 
     getGtes = async (req: Request, res: Response) => {
         

@@ -87,6 +87,7 @@ export class FileUploadService{
                 idDemoPlot: createFotoDemoplotDto.idDemoPlot,
                 nombre: nombreFoto,
                 comentario: createFotoDemoplotDto.comentario,
+                estado: createFotoDemoplotDto.estado,
                 rutaFoto: rutaFoto,
                 tipo: tipo,
                 latitud: createFotoDemoplotDto.latitud,

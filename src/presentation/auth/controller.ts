@@ -49,4 +49,17 @@ export class AuthController{
 
     }
 
+    registerMultipleUsuarios = (req: Request, res: Response) => {
+        const registerUsuariosDto = req.body;
+        if (!Array.isArray(registerUsuariosDto)) {
+          return res.status(400).json({ error: 'Se esperaba una lista de usuarios' });
+        }
+      
+        this.authService
+          .registerMultiUsuario(registerUsuariosDto)
+          .then((users) => res.json(users))
+          .catch((error) => this.handleError(error, res));
+      };
+      
+
 }

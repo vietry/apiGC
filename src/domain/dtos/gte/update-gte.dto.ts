@@ -3,6 +3,7 @@ export class UpdateGteDto {
     private constructor(
         public readonly id: number,
         public readonly activo?: boolean | null,
+        public readonly tipo?: string | null,
         public readonly idSubZona?: number,
         public readonly idColaborador?: number,
         public readonly idUsuario?: number,
@@ -14,6 +15,7 @@ export class UpdateGteDto {
 
         if (this.idUsuario) returnObj.idUsuario = this.idUsuario;
         if (this.activo) returnObj.activo = this.activo;
+        if (this.tipo) returnObj.tipo = this.tipo;
         if (this.idSubZona) returnObj.idSubZona = this.idSubZona;
         if (this.idColaborador) returnObj.idColaborador = this.idColaborador;
 
@@ -22,7 +24,7 @@ export class UpdateGteDto {
 
     static create(props: {[key: string]: any}): [string?, UpdateGteDto?] {
 
-        const { id, activo, idUsuario, idSubZona, idColaborador, /*updatedAt*/ } = props;
+        const { id, activo, tipo, idUsuario, idSubZona, idColaborador, /*updatedAt*/ } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -53,7 +55,7 @@ export class UpdateGteDto {
             if (isNaN(idUsuarioNumber)) return ['idUsuario debe ser un número válido'];
         }
 
-        return [undefined, new UpdateGteDto(id,  activoBoolean, idSubZonaNumber, idColaboradorNum, idUsuarioNumber, //updatedAt
+        return [undefined, new UpdateGteDto(id,  activoBoolean, tipo, idSubZonaNumber, idColaboradorNum, idUsuarioNumber, //updatedAt
 
         )];
     }

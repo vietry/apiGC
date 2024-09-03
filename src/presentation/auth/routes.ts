@@ -23,6 +23,7 @@ export class AuthRoutes{
 
         router.use('/login', controller.loginUsuario)
         router.use('/register', controller.registerUsuario)
+        router.post('/register-multiple', controller.registerMultipleUsuarios)
         router.use('/check-status', [ AuthMiddleware.validateAndReturnUser])
         router.use('/validate-email/:token', controller.validateEmail)
 

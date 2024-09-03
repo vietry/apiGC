@@ -1,5 +1,6 @@
 import { prisma } from "../../data/sqlserver";
 import { CreateGteDto, CustomError, PaginationDto, UpdateGteDto, UsuarioEntity } from "../../domain";
+import { CreateGteDto2 } from "../../domain/dtos/gte/create-gte2.dto";
 
 
 export class GteService{
@@ -7,9 +8,18 @@ export class GteService{
     //DI
     constructor(){}
 
-    async createGte( createGteDto: CreateGteDto, user: UsuarioEntity){
+    async createGteAdmin( createGteDto2: CreateGteDto2){
 
-        const colaboradorExists = await prisma.colaborador.findFirst({where: {id: createGteDto.idColaborador}});
+        const usuarioExists = await prisma.usuario.findUnique({where: {id: createGteDto2.idUsuario}});
+        if ( !usuarioExists ) throw CustomError.badRequest( `Usuario no exists` );
+
+        const gteExists = await prisma.gte.findFirst({where: {idUsuario: createGteDto2.idUsuario}});
+        if ( gteExists ) throw CustomError.badRequest( `Gte with IdUsuario: ${createGteDto2.idUsuario} already exists` );
+
+        const colabIdUsuarioExists = await prisma.colaborador.findFirst({where: {idUsuario: createGteDto2.idUsuario}});
+        if ( colabIdUsuarioExists ) throw CustomError.badRequest( `Colaborador with IdUsuario already  exists` );
+
+        const colaboradorExists = await prisma.colaborador.findFirst({where: {id: createGteDto2.idColaborador}});
         if ( !colaboradorExists ) throw CustomError.badRequest( `IdColaborador no exists` );
 
         try {
@@ -17,7 +27,55 @@ export class GteService{
 
             const gte = await prisma.gte.create({
                 data: {
+                    activo: createGteDto2.activo,
+                    tipo: createGteDto2.tipo,
+                    idSubZona: createGteDto2.idSubZona,
+                    idColaborador: createGteDto2.idColaborador,
+                    idUsuario: createGteDto2.idUsuario,
+                    createdAt: currentDate,
+                    updatedAt: currentDate,
+                },
+            });
+
+            return {
+                id: gte.id,
+                activo:  gte.activo,
+                tipo: gte.tipo,
+                SubZona: gte.idSubZona,
+                Colaborar: gte.idColaborador,
+                Usuario: gte.idUsuario,
+              
+            }
+            
+        } catch (error) {
+        
+            throw CustomError.internalServer(`${error}`)
+        }
+
+    }
+
+    async createGte( createGteDto: CreateGteDto, user: UsuarioEntity){
+        
+        const usuarioExists = await prisma.usuario.findUnique({where: {id: user.id}});
+        if ( !usuarioExists ) throw CustomError.badRequest( `Usuario no exists` );
+
+        const gteExists = await prisma.gte.findFirst({where: {idUsuario: user.id}});
+        if ( gteExists ) throw CustomError.badRequest( `Gte with IdUsuario: ${user.id} already exists` );
+
+        const colabIdUsuarioExists = await prisma.colaborador.findFirst({where: {idUsuario: user.id}});
+        if ( colabIdUsuarioExists ) throw CustomError.badRequest( `Colaborador with IdUsuario already  exists` );
+
+        const colaboradorExists = await prisma.colaborador.findFirst({where: {id: createGteDto.idColaborador}});
+        if ( !colaboradorExists ) throw CustomError.badRequest( `IdColaborador no exists` );
+
+        try {
+        
+            const currentDate = new Date();
+
+            const gte = await prisma.gte.create({
+                data: {
                     activo: createGteDto.activo,
+                    tipo: createGteDto.tipo,
                     idSubZona: createGteDto.idSubZona,
                     //idColaborador: colaborador.id,
                     idColaborador: createGteDto.idColaborador,
@@ -30,6 +88,7 @@ export class GteService{
             return {
                 id: gte.id,
                 activo:  gte.activo,
+                tipo: gte.tipo,
                 SubZona: gte.idSubZona,
                 Colaborar: gte.idColaborador,
                 Usuario: gte.idUsuario,
@@ -123,13 +182,14 @@ export class GteService{
                     return {
                         id: gte.id,
                         activo:  gte.activo,
+                        tipo: gte.tipo,
                         idSubZona: gte.idSubZona,
                         idColaborador: gte.idColaborador,
                         idUsuario: gte.idUsuario,
-                        nombres: gte.Usuario.nombres,
-                        apellidos: gte.Usuario.apellidos,
-                        email: gte.Usuario.email,
-                        subZona: gte.SubZona.nombre
+                        nombres: gte.Usuario?.nombres,
+                        apellidos: gte.Usuario?.apellidos,
+                        email: gte.Usuario?.email,
+                        subZona: gte.SubZona?.nombre
                         }
                         })
             }
@@ -265,13 +325,14 @@ export class GteService{
             return {
                 id: gte.id,
                 activo: gte.activo,
+                tipo: gte.tipo,
                 idSubZona: gte.idSubZona,
                 idColaborador: gte.idColaborador,
                 idUsuario: gte.idUsuario,
-                nombres: gte.Usuario.nombres,
-                apellidos: gte.Usuario.apellidos,
-                email: gte.Usuario.email,
-                subZona: gte.SubZona.nombre
+                nombres: gte.Usuario?.nombres,
+                apellidos: gte.Usuario?.apellidos,
+                email: gte.Usuario?.email,
+                subZona: gte.SubZona?.nombre
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

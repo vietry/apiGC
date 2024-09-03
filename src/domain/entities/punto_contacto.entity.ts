@@ -13,23 +13,25 @@ export class PuntoContactoEntity {
         public lider: boolean | null,
         public activo: boolean,
         public idGte: number,
+        public idDistrito: string
         //public createdAt: Date | null,
         //public updatedAt: Date | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): PuntoContactoEntity {
         const {
-            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, createdAt, updatedAt
+            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito,createdAt, updatedAt
         } = object;
 
         if (!nombre) throw CustomError.badRequest('Nombre is required');
         if (!activo) throw CustomError.badRequest('Activo is required');
         if (!tipoDoc) throw CustomError.badRequest('Tipo documento is required');
         if (!idGte) throw CustomError.badRequest('idGte is required');
+        if (!idDistrito) throw CustomError.badRequest('idDistrito is required');
         if (!tipo) throw CustomError.badRequest('Tipo is required');
 
         return new PuntoContactoEntity(
-            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, //createdAt, updatedAt
+            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito//createdAt, updatedAt
         );
     }
 }

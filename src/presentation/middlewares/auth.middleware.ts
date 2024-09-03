@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { JwtAdapter } from "../../config";
+import { JwtAdapter, Validators } from "../../config";
 import { prisma } from "../../data/sqlserver";
 import { UsuarioEntity } from "../../domain";
 
@@ -55,10 +55,12 @@ export class AuthMiddleware{
             const { password, ...userEntity } = UsuarioEntity.fromObject(user);
             const newToken = await JwtAdapter.generateToken({ id: user.id, email: user.email });
             if (!newToken) throw res.status(500).json({ error: 'Error while creating JWT'});
-    
+            const tipoUser = await Validators.getTipoUsuario(user.id);
             return res.status(200).json({
                 user: {
                     ...userEntity,
+                    idTipo: tipoUser.idTipo,
+                    tipo: tipoUser.tipo,
                     token: newToken,
                 }
             
@@ -68,5 +70,7 @@ export class AuthMiddleware{
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+
+    
 
 }

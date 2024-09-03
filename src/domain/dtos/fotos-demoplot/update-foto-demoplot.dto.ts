@@ -5,6 +5,7 @@ export class UpdateFotoDemoplotDto {
         public readonly idDemoPlot?: number,
         public readonly nombre?: string | null,
         public readonly comentario?: string | null,
+        public readonly estado?: string | null,
         public readonly latitud?: number | null,
         public readonly longitud?: number | null,
         //public readonly updatedAt?: Date | null
@@ -16,6 +17,7 @@ export class UpdateFotoDemoplotDto {
         if (this.idDemoPlot !== undefined) returnObj.idDemoPlot = this.idDemoPlot;
         if (this.nombre !== undefined) returnObj.nombre = this.nombre;
         if (this.comentario !== undefined) returnObj.comentario = this.comentario;
+        if (this.estado !== undefined) returnObj.estado = this.estado;
         if (this.latitud !== undefined) returnObj.latitud = this.latitud;
         if (this.longitud !== undefined) returnObj.longitud = this.longitud;
         //if (this.updatedAt !== undefined) returnObj.updatedAt = this.updatedAt;
@@ -24,7 +26,7 @@ export class UpdateFotoDemoplotDto {
     }
 
     static async create(props: { [key: string]: any }): Promise<[string?, UpdateFotoDemoplotDto?]> {
-        const { id, idDemoPlot, nombre, comentario, latitud, longitud } = props;
+        const { id, idDemoPlot, nombre, comentario, estado, latitud, longitud } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -56,6 +58,7 @@ export class UpdateFotoDemoplotDto {
                 idDemoPlotNumber,
                 nombre,
                 comentario,
+                estado,
                 latitudNumber,
                 longitudNumber,
                 //updatedAt

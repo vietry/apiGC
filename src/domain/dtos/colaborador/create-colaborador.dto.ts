@@ -19,7 +19,7 @@ export class CreateColaboradorDTO{
     
         if(!cargo) return ['Cargo faltante'];
         if (!idArea) return ['idArea faltante'];
-        if (!idZonaAnt) return ['idZonaAnt faltante'];
+        //if (!idZonaAnt) return ['idZonaAnt faltante'];
         if ( typeof idArea !== 'number' ) {
             idAreaNumber =  parseInt(idArea)
           }

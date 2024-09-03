@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
 import { CreateGteDto, CustomError, PaginationDto, UpdateGteDto } from "../../../domain";
 import { GteService } from "../../services";
+import { CreateGteDto2 } from "../../../domain/dtos/gte/create-gte2.dto";
+import { GteService2 } from "../../services/gte2.service";
 
 export class GteController{
 
     // DI
     constructor(
         private readonly gteService: GteService,
+        
     ){}
 
     private handleError = (res: Response, error: unknown) => {
@@ -23,6 +26,15 @@ export class GteController{
         if(error) return res.status(400).json({error});
 
         this.gteService.createGte(createGteDto!, req.body.user)
+            .then(gte => res.status(201).json(gte))
+            .catch( error => this.handleError(res, error));
+    }
+
+    createGteAdmin = async (req: Request, res: Response) => {
+        const [error, createGteDto2] = await CreateGteDto2.create(req.body);
+        if(error) return res.status(400).json({error});
+
+        this.gteService.createGteAdmin(createGteDto2!)
             .then(gte => res.status(201).json(gte))
             .catch( error => this.handleError(res, error));
     }

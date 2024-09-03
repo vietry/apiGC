@@ -11,8 +11,10 @@ export class CultivoRoutes {
         // Rutas de cultivo
         router.get('/', controller.getCultivos);
         router.get('/:id', controller.getCultivoById);
-        //router.post('/', controller.createCultivo);
-        //router.put('/:id', controller.updateCultivo);
+        router.get('/contacto/:idContactoPunto', controller.getCultivosByContactoPuntoId);
+        router.get('/punto/:idPuntoContacto', controller.getCultivosByPuntoContactoId);
+        router.post('/', controller.createCultivo);
+        router.put('/:id', controller.updateCultivo);
 
         return router;
     }

@@ -111,6 +111,7 @@ export class FotoDemoplotService {
                     id: foto.id,
                     nombre: foto.nombre,
                     comentario: foto.comentario,
+                    estado: foto.estado,
                     rutaFoto: foto.rutaFoto,
                     tipo: foto.tipo,
                     latitud: foto.latitud,

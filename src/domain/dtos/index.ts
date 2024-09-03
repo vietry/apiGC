@@ -20,3 +20,12 @@ export * from './demoplot/create-demoplot.dto';
 export * from './demoplot/update-demoplot.dto';
 export * from './fotos-demoplot/create-foto-demoplot.dto';
 export * from './fotos-demoplot/update-foto-demoplot.dto';
+
+export * from './fundo/create-fundo.dto';
+export * from './fundo/update-fundo.dto';
+
+export * from './punto-ubigeo/create-punto-ubigeo.dto';
+export * from './punto-ubigeo/update-punto-ubigeo.dto';
+
+export * from './cultivo/create-cultivo.dto';
+export * from './cultivo/update-cultivo.dto';

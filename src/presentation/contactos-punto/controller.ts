@@ -65,6 +65,13 @@ export class ContactoPuntoController{
 
     getContactoByPuntoId = async (req: Request, res: Response) => {
         const idPunto = +req.params.idPunto;
+
+        this.contactoPuntoService.getContactoByPuntoId(idPunto)
+            .then(contactoPunto => res.status(200).json(contactoPunto))
+            .catch(error => this.handleError(res, error));
+    }
+    /*getContactoByPuntoId = async (req: Request, res: Response) => {
+        const idPunto = +req.params.idPunto;
         const { page = 1, limit = 10 } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
@@ -72,7 +79,7 @@ export class ContactoPuntoController{
         this.contactoPuntoService.getContactoByPuntoId(idPunto, paginationDto!)
             .then(contactoPunto => res.status(200).json(contactoPunto))
             .catch(error => this.handleError(res, error));
-    }
+    }*/
 
  
 }
