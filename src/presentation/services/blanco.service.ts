@@ -98,19 +98,24 @@ export class BlancoBiologicoService {
                             nombre: true
                         }
                     }
+                }, orderBy: {
+                    estandarizado: 'asc'
                 }
-        });
-
-            return blancosBiologicos.map((blancoBiologico) => ({
+            });
+    
+            // Filtrar los resultados para obtener valores únicos en 'cientifico'
+            const uniqueBlancosBiologicos = Array.from(new Map(
+                blancosBiologicos.map(item => [item.cientifico, item])
+            ).values());
+    
+            return uniqueBlancosBiologicos.map((blancoBiologico) => ({
                 id: blancoBiologico.id,
-                        cientifico: blancoBiologico.cientifico,
-                        estandarizado: blancoBiologico.estandarizado,
-                        idVegetacion: blancoBiologico.idVegetacion,
-                        vegetacion: blancoBiologico.Vegetacion.nombre
-                
+                cientifico: blancoBiologico.cientifico,
+                estandarizado: blancoBiologico.estandarizado,
+                idVegetacion: blancoBiologico.idVegetacion,
+                vegetacion: blancoBiologico.Vegetacion?.nombre
             }));
-            //return variedades;
-
+    
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

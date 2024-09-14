@@ -1,12 +1,14 @@
 import { prisma } from "../../data/sqlserver";
 import { CustomError, PaginationDto } from "../../domain";
+import { CreateVegetacionDto } from "../../domain/dtos/vegetacion/create-vegetacion.dto";
+import { UpdateVegetacionDto } from "../../domain/dtos/vegetacion/update-vegetacion.dto";
 
 export class VegetacionService {
 
     // DI
     constructor() {}
 
-    /*async createVegetacion(createVegetacionDto: CreateVegetacionDTO) {
+    async createVegetacion(createVegetacionDto: CreateVegetacionDto) {
         try {
             const currentDate = new Date();
 
@@ -30,7 +32,7 @@ export class VegetacionService {
         }
     }
 
-    async updateVegetacion(updateVegetacionDto: UpdateVegetacionDTO) {
+    async updateVegetacion(updateVegetacionDto: UpdateVegetacionDto) {
         const vegetacionExists = await prisma.vegetacion.findFirst({ where: { id: updateVegetacionDto.id } });
         if (!vegetacionExists) throw CustomError.badRequest(`Vegetacion with id ${updateVegetacionDto.id} does not exist`);
 
@@ -47,7 +49,7 @@ export class VegetacionService {
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
-    }*/
+    }
 
         async getVegetacion() {
             try {

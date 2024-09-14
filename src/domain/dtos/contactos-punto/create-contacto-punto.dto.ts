@@ -10,11 +10,12 @@ export class CreateContactoPuntoDto{
         public readonly email: string | null,
         public readonly celularA: string | null,
         public readonly celularB: string | null,
-        public readonly idPunto: number, //ID
+        public readonly idPunto: number,
+        public readonly idGte: number | null,
     ){}
 
     static async create(object: { [key: string]: any }): Promise<[string?, CreateContactoPuntoDto?]> {
-        const { nombre, apellido, cargo, tipo, email, celularA, celularB, idPunto } = object;
+        const { nombre, apellido, cargo, tipo, email, celularA, celularB, idPunto, idGte } = object;
 
         let idPuntoNumber = idPunto;
 
@@ -43,7 +44,8 @@ export class CreateContactoPuntoDto{
                 email, 
                 celularA, 
                 celularB, 
-                idPuntoNumber
+                idPuntoNumber,
+                idGte
             )
         ];
     }

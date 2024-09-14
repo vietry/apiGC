@@ -61,6 +61,7 @@ export class AuthMiddleware{
                     ...userEntity,
                     idTipo: tipoUser.idTipo,
                     tipo: tipoUser.tipo,
+                    zona: tipoUser.zona,
                     token: newToken,
                 }
             

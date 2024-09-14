@@ -29,15 +29,27 @@ export class Validators {
       return demoplot !== null;
     }
 
-    static async getTipoUsuario(idUsuario: number): Promise<{ idTipo: number; tipo: string }> {
-      const colaborador = await prisma.colaborador.findFirst({ where: { idUsuario } });
+    static async getTipoUsuario(idUsuario: number): Promise<{ idTipo: number; tipo: string, zona: string }> {
+      const colaborador = await prisma.colaborador.findFirst({ 
+        where: { idUsuario }, 
+        include: {
+          ZonaAnterior: true
+        } });
       if (colaborador) {
-          return { idTipo: colaborador.id, tipo: 'colaborador' };
+          return { idTipo: colaborador.id, tipo: 'colaborador', zona: colaborador.ZonaAnterior?.codigo! };
       }
 
-      const gte = await prisma.gte.findFirst({ where: { idUsuario } });
+      const gte = await prisma.gte.findFirst({ 
+        where: { idUsuario }, 
+        include: {
+          Colaborador: {
+            select: {
+              ZonaAnterior: true
+            }
+          }
+      } });
       if (gte) {
-          return { idTipo: gte.id, tipo: 'gte' };
+          return { idTipo: gte.id, tipo: 'gte', zona: gte.Colaborador?.ZonaAnterior?.codigo! };
       }
 
       throw new Error('No related entity found for this user.');

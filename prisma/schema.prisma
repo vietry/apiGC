@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Foto {
-  id        Int        @id(map: "PK__Foto__3213E83FC514EA43") @default(autoincrement())
+  id        Int        @id(map: "PK__Foto__3213E83F5E33F532") @default(autoincrement())
   ruta      String     @db.VarChar(50)
   tipo      String?    @db.VarChar(5)
   createdAt DateTime?  @db.DateTime
@@ -19,13 +19,13 @@ model Foto {
 }
 
 model Usuario {
-  id            Int           @id(map: "PK__Usuario__3213E83F809DA818") @default(autoincrement())
+  id            Int           @id(map: "PK__Usuario__3213E83FD8E5D762") @default(autoincrement())
   nombres       String        @db.VarChar(45)
   apellidos     String?       @db.VarChar(45)
   email         String        @db.VarChar(40)
-  emailValidado Boolean
+  emailValidado Boolean?
   password      String        @db.VarChar(255)
-  rol           String        @db.VarChar(10)
+  rol           String?       @db.VarChar(10)
   celular       String?       @db.VarChar(15)
   idFoto        Int?
   createdAt     DateTime?     @db.DateTime
@@ -36,7 +36,7 @@ model Usuario {
 }
 
 model Area {
-  id          Int           @id(map: "PK__Area__3213E83FDDCE8637") @default(autoincrement())
+  id          Int           @id(map: "PK__Area__3213E83F02D8CB90") @default(autoincrement())
   nombre      String        @db.VarChar(20)
   createdAt   DateTime?     @db.DateTime
   updatedAt   DateTime?     @db.DateTime
@@ -44,7 +44,7 @@ model Area {
 }
 
 model Articulo {
-  id             Int              @id(map: "PK__Articulo__3213E83F9706ED75") @default(autoincrement())
+  id             Int              @id(map: "PK__Articulo__3213E83FF440143E") @default(autoincrement())
   codigo         String           @db.VarChar(10)
   nombre         String           @db.VarChar(90)
   present        Decimal?         @db.Decimal(8, 3)
@@ -69,7 +69,7 @@ model Articulo {
 }
 
 model Clase {
-  id        Int        @id(map: "PK__Clase__3213E83F0492C067")
+  id        Int        @id(map: "PK__Clase__3213E83F22B49E40")
   codigo    String     @db.VarChar(6)
   nombre    String     @db.VarChar(60)
   idEmpresa Int
@@ -80,7 +80,7 @@ model Clase {
 }
 
 model Cliente {
-  id             Int              @id(map: "PK__Cliente__3213E83F3CD5CEC1") @default(autoincrement())
+  id             Int              @id(map: "PK__Cliente__3213E83F7EB86726") @default(autoincrement())
   codigo         String           @db.VarChar(20)
   nombre         String           @db.VarChar(90)
   createdAt      DateTime?        @db.DateTime
@@ -95,7 +95,7 @@ model Cliente {
 }
 
 model ClienteUbigeo {
-  id         Int       @id(map: "PK__ClienteU__3213E83F1ABC342C") @default(autoincrement())
+  id         Int       @id(map: "PK__ClienteU__3213E83F58A750CC") @default(autoincrement())
   idCliente  Int
   idDistrito String    @db.VarChar(6)
   createdAt  DateTime? @db.DateTime
@@ -106,7 +106,7 @@ model ClienteUbigeo {
 }
 
 model ClienteZonaAnt {
-  id           Int          @id(map: "PK__ClienteZ__3213E83F3EFC8BC1") @default(autoincrement())
+  id           Int          @id(map: "PK__ClienteZ__3213E83FB2C5C43B") @default(autoincrement())
   idEmpresa    Int
   idCliente    Int
   codCliente   String       @db.VarChar(20)
@@ -120,22 +120,24 @@ model ClienteZonaAnt {
 }
 
 model Colaborador {
-  id           Int           @id(map: "PK__Colabora__3213E83F8BBB325E") @default(autoincrement())
-  cargo        String?       @db.VarChar(45)
-  idArea       Int
-  idZonaAnt    Int?
-  idUsuario    Int
-  createdAt    DateTime?     @db.DateTime
-  updatedAt    DateTime?     @db.DateTime
-  Usuario      Usuario       @relation(fields: [idUsuario], references: [id], onUpdate: NoAction, map: "fk_Colaborador_Usuario1")
-  ZonaAnterior ZonaAnterior? @relation(fields: [idZonaAnt], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Zona1")
-  Area         Area          @relation(fields: [idArea], references: [id], onUpdate: NoAction, map: "fk_ColaboradorArea")
-  Gte          Gte[]
-  Visita       Visita[]
+  id                                                         Int               @id(map: "PK__Colabora__3213E83F3F6FEE5F") @default(autoincrement())
+  cargo                                                      String?           @db.VarChar(45)
+  idArea                                                     Int
+  idZonaAnt                                                  Int?
+  idUsuario                                                  Int?
+  createdAt                                                  DateTime?         @db.DateTime
+  updatedAt                                                  DateTime?         @db.DateTime
+  Usuario                                                    Usuario?          @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Usuario1")
+  ZonaAnterior                                               ZonaAnterior?     @relation(fields: [idZonaAnt], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Zona1")
+  Area                                                       Area              @relation(fields: [idArea], references: [id], onUpdate: NoAction, map: "fk_ColaboradorArea")
+  ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador ColaboradorJefe[] @relation("ColaboradorJefe_idColaboradorToColaborador")
+  ColaboradorJefe_ColaboradorJefe_idJefeToColaborador        ColaboradorJefe[] @relation("ColaboradorJefe_idJefeToColaborador")
+  Gte                                                        Gte[]
+  Visita                                                     Visita[]
 }
 
 model Contacto {
-  id        Int       @id(map: "PK__Contacto__3213E83F5C1D6684") @default(autoincrement())
+  id        Int       @id(map: "PK__Contacto__3213E83F32EEC6B3") @default(autoincrement())
   nombre    String    @db.VarChar(45)
   apellido  String    @db.VarChar(45)
   cargo     String    @db.VarChar(20)
@@ -150,7 +152,7 @@ model Contacto {
 }
 
 model Cultivo {
-  id            Int        @id(map: "PK__Cultivo__3213E83F997A6390") @default(autoincrement())
+  id            Int        @id(map: "PK__Cultivo__3213E83F4C6DDF3D") @default(autoincrement())
   certificacion String?    @db.VarChar(20)
   hectareas     Decimal?   @db.Decimal(6, 2)
   mesInicio     String?    @db.VarChar(20)
@@ -168,7 +170,7 @@ model Cultivo {
 }
 
 model Departamento {
-  id        String      @id(map: "PK__Departam__3213E83FBC89D2BE") @db.VarChar(2)
+  id        String      @id(map: "PK__Departam__3213E83F2E429D76") @db.VarChar(2)
   nombre    String      @unique(map: "UQ_nombre_Departamento") @db.VarChar(30)
   Provincia Provincia[]
 
@@ -176,7 +178,7 @@ model Departamento {
 }
 
 model Distrito {
-  id             String          @id(map: "PK__Distrito__3213E83F8DA819A3") @db.VarChar(6)
+  id             String          @id(map: "PK__Distrito__3213E83F67BAA8F6") @db.VarChar(6)
   nombre         String          @db.VarChar(40)
   idProvincia    String          @db.VarChar(4)
   idDepartamento String          @db.VarChar(2)
@@ -189,7 +191,7 @@ model Distrito {
 }
 
 model Division {
-  id        Int        @id(map: "PK__Division__3213E83FFEA24C03")
+  id        Int        @id(map: "PK__Division__3213E83FFBF9B83C")
   codigo    String     @db.VarChar(6)
   nombre    String     @db.VarChar(30)
   idEmpresa Int
@@ -201,7 +203,7 @@ model Division {
 }
 
 model Empresa {
-  id             Int              @id(map: "PK__Empresa__3213E83FEFAFEE2A")
+  id             Int              @id(map: "PK__Empresa__3213E83F9EE8C362")
   nomEmpresa     String           @db.VarChar(15)
   createdAt      DateTime?        @db.DateTime
   updatedAt      DateTime?        @db.DateTime
@@ -213,10 +215,12 @@ model Empresa {
   Division       Division[]
   Familia        Familia[]
   Linea          Linea[]
+  PuntoContacto  PuntoContacto[]
+  ZonaAnterior   ZonaAnterior[]
 }
 
 model Familia {
-  id        Int        @id(map: "PK__Familia__3213E83F9CBCB561") @default(autoincrement())
+  id        Int        @id(map: "PK__Familia__3213E83F108F037C") @default(autoincrement())
   codigo    String     @db.VarChar(7)
   nombre    String     @db.VarChar(60)
   idEmpresa Int
@@ -229,16 +233,16 @@ model Familia {
 }
 
 model Fundo {
-  id              Int            @id(map: "PK__Fundo__3213E83FDB143413") @default(autoincrement())
+  id              Int            @id(map: "PK__Fundo__3213E83F58D9DC08") @default(autoincrement())
   nombre          String?        @db.VarChar(45)
   idClienteUbigeo Int?
   createdAt       DateTime?      @db.DateTime
   updatedAt       DateTime?      @db.DateTime
   idPuntoUbigeo   Int?
   centroPoblado   String?        @db.VarChar(80)
+  idDistrito      String?        @db.VarChar(6)
   idPuntoContacto Int?
   idContactoPunto Int?
-  idDistrito      String?        @db.VarChar(6)
   Cultivo         Cultivo[]
   ClienteUbigeo   ClienteUbigeo? @relation(fields: [idClienteUbigeo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_ClienteUbigeo")
   ContactoPunto   ContactoPunto? @relation(fields: [idContactoPunto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_ContactoPunto1")
@@ -248,7 +252,7 @@ model Fundo {
 }
 
 model Labor {
-  id        Int        @id(map: "PK__Labor__3213E83FB1FE9539") @default(autoincrement())
+  id        Int        @id(map: "PK__Labor__3213E83F08B820FC") @default(autoincrement())
   nombre    String     @db.VarChar(45)
   createdAt DateTime?  @db.DateTime
   updatedAt DateTime?  @db.DateTime
@@ -256,7 +260,7 @@ model Labor {
 }
 
 model LaborVisita {
-  id             Int           @id(map: "PK__LaborVis__3213E83F2FDBB342") @default(autoincrement())
+  id             Int           @id(map: "PK__LaborVis__3213E83F937987C6") @default(autoincrement())
   idVisita       Int
   idSubLabor     Int
   idRepresentada Int?
@@ -268,7 +272,7 @@ model LaborVisita {
 }
 
 model Linea {
-  id        Int        @id(map: "PK__Linea__3213E83F7F6745B2")
+  id        Int        @id(map: "PK__Linea__3213E83F8A21CAFE")
   codigo    String     @db.VarChar(6)
   nombre    String     @db.VarChar(60)
   idEmpresa Int
@@ -279,7 +283,7 @@ model Linea {
 }
 
 model Negocio {
-  id         Int       @id(map: "PK__Negocio__3213E83F6D355A9B") @default(autoincrement())
+  id         Int       @id(map: "PK__Negocio__3213E83F7C05F944") @default(autoincrement())
   nombre     String    @db.VarChar(20)
   idDivision Int
   createdAt  DateTime? @db.DateTime
@@ -288,7 +292,7 @@ model Negocio {
 }
 
 model Provincia {
-  id             String       @id(map: "PK__Provinci__3213E83F0535B019") @db.VarChar(4)
+  id             String       @id(map: "PK__Provinci__3213E83FFA46C972") @db.VarChar(4)
   nombre         String       @unique(map: "UQ_nombre_Provincia") @db.VarChar(30)
   idDepartamento String       @db.VarChar(2)
   Distrito       Distrito[]
@@ -298,7 +302,7 @@ model Provincia {
 }
 
 model Representada {
-  id          Int           @id(map: "PK__Represen__3213E83FA4288CBF")
+  id          Int           @id(map: "PK__Represen__3213E83F7FF6F1BE")
   nombre      String        @db.VarChar(45)
   createdAt   DateTime?     @db.DateTime
   updatedAt   DateTime?     @db.DateTime
@@ -307,7 +311,7 @@ model Representada {
 }
 
 model SubLabor {
-  id          Int           @id(map: "PK__SubLabor__3213E83FF7B59071") @default(autoincrement())
+  id          Int           @id(map: "PK__SubLabor__3213E83F8E81D23F") @default(autoincrement())
   nombre      String        @db.VarChar(45)
   idLabor     Int
   createdAt   DateTime?     @db.DateTime
@@ -317,7 +321,7 @@ model SubLabor {
 }
 
 model Variedad {
-  id           Int        @id(map: "PK__Variedad__3213E83F1398A139") @default(autoincrement())
+  id           Int        @id(map: "PK__Variedad__3213E83F5547455D") @default(autoincrement())
   nombre       String     @db.VarChar(45)
   idVegetacion Int
   idFoto       Int?
@@ -329,7 +333,7 @@ model Variedad {
 }
 
 model Visita {
-  id               Int              @id(map: "PK__Visita__3213E83F2E8B57EE") @default(autoincrement())
+  id               Int              @id(map: "PK__Visita__3213E83FA3BA3D00") @default(autoincrement())
   fechaProgramada  DateTime?        @db.DateTime
   inicioProgramado DateTime?        @db.Time
   finProgramado    DateTime?        @db.Time
@@ -364,7 +368,7 @@ model Visita {
 }
 
 model VisitaArticulo {
-  id         Int       @id(map: "PK__VisitaAr__3213E83F085DD9A3") @default(autoincrement())
+  id         Int       @id(map: "PK__VisitaAr__3213E83F47949C84") @default(autoincrement())
   idVisita   Int
   idArticulo Int
   createdAt  DateTime? @db.DateTime
@@ -374,7 +378,7 @@ model VisitaArticulo {
 }
 
 model ZonaAnterior {
-  id             Int              @id(map: "PK__ZonaAnte__3213E83F5B162B02") @default(autoincrement())
+  id             Int              @id(map: "PK__ZonaAnte__3213E83F557B2F8D") @default(autoincrement())
   idEmpresa      Int
   codigo         String           @db.VarChar(4)
   nombre         String           @db.VarChar(80)
@@ -382,10 +386,11 @@ model ZonaAnterior {
   updatedAt      DateTime?        @db.DateTime
   ClienteZonaAnt ClienteZonaAnt[]
   Colaborador    Colaborador[]
+  Empresa        Empresa          @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Zona_Empresa1")
 }
 
 model Todo {
-  id          Int       @id(map: "PK__Todo__3213E83F79DB49CD") @default(autoincrement())
+  id          Int       @id(map: "PK__Todo__3213E83FEE651EA7") @default(autoincrement())
   text        String    @db.VarChar(45)
   completedAt DateTime? @db.DateTime
   createdAt   DateTime? @db.DateTime
@@ -393,7 +398,7 @@ model Todo {
 }
 
 model BlancoBiologico {
-  id            Int        @id(map: "PK__BlancoBi__3213E83F277429CD") @default(autoincrement())
+  id            Int        @id(map: "PK__BlancoBi__3213E83FFBD81CEA") @default(autoincrement())
   cientifico    String?    @db.VarChar(45)
   estandarizado String?    @db.VarChar(45)
   idVegetacion  Int
@@ -404,7 +409,7 @@ model BlancoBiologico {
 }
 
 model DemoPlot {
-  id               Int             @id(map: "PK__DemoPlot__3213E83F3870EEAA") @default(autoincrement())
+  id               Int             @id(map: "PK__DemoPlot__3213E83F320BC81B") @default(autoincrement())
   titulo           String?         @db.VarChar(255)
   objetivo         String?         @db.VarChar(255)
   instalacion      DateTime?       @db.DateTime
@@ -418,7 +423,7 @@ model DemoPlot {
   idGte            Int
   createdAt        DateTime?       @db.DateTime
   updatedAt        DateTime?       @db.DateTime
-  resultado        String?         @db.VarChar(15)
+  resultado        String?         @db.VarChar(255)
   seguimiento      DateTime?       @db.DateTime
   dosis            Decimal?        @db.Decimal(6, 2)
   gradoInfestacion String?         @db.VarChar(5)
@@ -436,7 +441,7 @@ model DemoPlot {
 }
 
 model FotoDemoPlot {
-  id         Int       @id(map: "PK__FotoDemo__3213E83FFD4DEF13") @default(autoincrement())
+  id         Int       @id(map: "PK__FotoDemo__3213E83F1BF52518") @default(autoincrement())
   idDemoPlot Int
   tipo       String?   @db.VarChar(10)
   latitud    Decimal?  @db.Decimal(10, 6)
@@ -451,14 +456,15 @@ model FotoDemoPlot {
 }
 
 model Gte {
-  id            Int             @id(map: "PK__Gte__3213E83FC2D6A8E6") @default(autoincrement())
+  id            Int             @id(map: "PK__Gte__3213E83FFF0D0701") @default(autoincrement())
   activo        Boolean?
   idSubZona     Int?
   idColaborador Int?
   idUsuario     Int?
   createdAt     DateTime?       @db.DateTime
   updatedAt     DateTime?       @db.DateTime
-  tipo          String?         @db.VarChar(15)
+  tipo          String?         @db.VarChar(20)
+  ContactoPunto ContactoPunto[]
   DemoPlot      DemoPlot[]
   Colaborador   Colaborador?    @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_Colaborador1")
   SubZona       SubZona?        @relation(fields: [idSubZona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_SubZona1")
@@ -467,30 +473,33 @@ model Gte {
 }
 
 model PuntoContacto {
-  id                                              Int             @id(map: "PK__PuntoCon__3213E83F87C955B5") @default(autoincrement())
+  id                                              Int             @id(map: "PK__PuntoCon__3213E83FC6CBF460") @default(autoincrement())
   nombre                                          String          @db.VarChar(90)
   tipoDoc                                         String?         @db.VarChar(3)
-  numDoc                                          String?         @db.VarChar(11)
+  numDoc                                          String?         @db.VarChar(20)
   hectareas                                       Decimal?        @db.Decimal(6, 2)
   tipo                                            String          @db.VarChar(1)
   dirReferencia                                   String?         @db.VarChar(90)
   lider                                           Boolean?
   activo                                          Boolean
-  idGte                                           Int
+  idGte                                           Int?
   createdAt                                       DateTime?       @db.DateTime
   updatedAt                                       DateTime?       @db.DateTime
   idDistrito                                      String?         @db.VarChar(6)
+  idEmpresa                                       Int?
+  codZona                                         String?         @db.VarChar(4)
   ContactoPunto                                   ContactoPunto[]
   Fundo                                           Fundo[]
   Distrito                                        Distrito?       @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Distrito")
-  Gte                                             Gte             @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_PuntoContacto_Gte")
+  Empresa                                         Empresa?        @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Empresa1")
+  Gte                                             Gte?            @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Gte")
   PuntoTienda_PuntoTienda_idPuntoToPuntoContacto  PuntoTienda[]   @relation("PuntoTienda_idPuntoToPuntoContacto")
   PuntoTienda_PuntoTienda_idTiendaToPuntoContacto PuntoTienda[]   @relation("PuntoTienda_idTiendaToPuntoContacto")
   PuntoUbigeo                                     PuntoUbigeo[]
 }
 
 model PuntoTienda {
-  id                                                Int           @id(map: "PK__PuntoTie__3213E83FD437B342") @default(autoincrement())
+  id                                                Int           @id(map: "PK__PuntoTie__3213E83F7906C88D") @default(autoincrement())
   idPunto                                           Int
   idTienda                                          Int
   createdAt                                         DateTime?     @db.DateTime
@@ -500,7 +509,7 @@ model PuntoTienda {
 }
 
 model SubZona {
-  id          Int        @id(map: "PK__SubZona__3213E83F9C3A875C") @default(autoincrement())
+  id          Int        @id(map: "PK__SubZona__3213E83FCC954CB7") @default(autoincrement())
   codi        String     @db.VarChar(3)
   nombre      String?    @db.VarChar(70)
   createdAt   DateTime?  @db.DateTime
@@ -513,7 +522,7 @@ model SubZona {
 }
 
 model Vegetacion {
-  id              Int               @id(map: "PK__Vegetaci__3213E83F1223B404") @default(autoincrement())
+  id              Int               @id(map: "PK__Vegetaci__3213E83FDAAEF8A1") @default(autoincrement())
   nombre          String            @db.VarChar(45)
   updatedAt       DateTime?         @db.DateTime
   createdAt       DateTime?         @db.DateTime
@@ -522,24 +531,26 @@ model Vegetacion {
 }
 
 model ContactoPunto {
-  id            Int           @id(map: "PK__Contacto__3213E83FBBCAE7C7") @default(autoincrement())
+  id            Int           @id(map: "PK__Contacto__3213E83F168140F3") @default(autoincrement())
   nombre        String        @db.VarChar(45)
   apellido      String        @db.VarChar(45)
-  cargo         String        @db.VarChar(20)
+  cargo         String        @db.VarChar(50)
   celularA      String?       @db.VarChar(20)
   celularB      String?       @db.VarChar(20)
   idPunto       Int
   createdAt     DateTime?     @db.DateTime
   updatedAt     DateTime?     @db.DateTime
   email         String?       @db.VarChar(30)
-  tipo          String?       @db.VarChar(10)
+  tipo          String        @db.VarChar(10)
+  idGte         Int?
   PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onUpdate: NoAction, map: "fk_Contacto_PuntoContacto")
+  Gte           Gte?          @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ContactoPunto_Gte1")
   DemoPlot      DemoPlot[]
   Fundo         Fundo[]
 }
 
 model PuntoUbigeo {
-  id            Int           @id(map: "PK__PuntoUbi__3213E83F267A863F") @default(autoincrement())
+  id            Int           @id(map: "PK__PuntoUbi__3213E83FE424B6D1") @default(autoincrement())
   idPunto       Int
   idDistrito    String        @db.VarChar(6)
   createdAt     DateTime?     @db.DateTime
@@ -550,17 +561,18 @@ model PuntoUbigeo {
 }
 
 model ClienteZona {
-  id         Int       @id(map: "PK__ClienteZ__3213E83FFE7ED1ED") @default(autoincrement())
+  id         Int       @id(map: "PK__ClienteZ__3213E83FCFA3D55D") @default(autoincrement())
   idEmpresa  Int?
   codZona    String    @db.VarChar(4)
   codCliente String    @db.VarChar(20)
   createdAt  DateTime? @db.DateTime
   updatedAt  DateTime? @db.DateTime
+  nomCliente String?   @db.VarChar(200)
   Empresa    Empresa?  @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ClienteZona1_Empresa")
 }
 
 model SuperZona {
-  id        Int       @id(map: "PK__SuperZon__3213E83FA73BDFA1")
+  id        Int       @id(map: "PK__SuperZon__3213E83F2126F16C")
   codi      String    @db.VarChar(3)
   nombre    String    @db.VarChar(70)
   createdAt DateTime? @db.DateTime
@@ -569,10 +581,18 @@ model SuperZona {
 }
 
 model Zona {
-  id        Int       @id(map: "PK__Zona__3213E83F432348AD") @default(autoincrement())
+  id        Int       @id(map: "PK__Zona__3213E83F0DD7EB54") @default(autoincrement())
   codi      String    @db.VarChar(3)
   nombre    String    @db.VarChar(70)
   createdAt DateTime? @db.DateTime
   updatedAt DateTime? @db.DateTime
   SubZona   SubZona[]
+}
+
+model ColaboradorJefe {
+  id                                                     Int         @id(map: "PK__Colabora__3213E83F75414E03") @default(autoincrement())
+  idJefe                                                 Int
+  idColaborador                                          Int
+  Colaborador_ColaboradorJefe_idColaboradorToColaborador Colaborador @relation("ColaboradorJefe_idColaboradorToColaborador", fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_ColabJefe_Colab1")
+  Colaborador_ColaboradorJefe_idJefeToColaborador        Colaborador @relation("ColaboradorJefe_idJefeToColaborador", fields: [idJefe], references: [id], onUpdate: NoAction, map: "fk_ColabJefe_Jefe1")
 }

@@ -90,6 +90,10 @@ export class DemoplotService {
                             select: {
                                 nombre: true,
                                 cargo: true,
+                                apellido: true,
+                                email: true,
+                                celularA: true,
+                                tipo: true,
                                 PuntoContacto: true
                                 
                             }
@@ -174,8 +178,11 @@ export class DemoplotService {
                         familia: demoplot.Familia?.nombre,
                         blancoCientifico: demoplot.BlancoBiologico.cientifico,
                         blancoComun: demoplot.BlancoBiologico.estandarizado,
-                        contacto: demoplot.ContactoDelPunto.nombre,
+                        contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
                         cargo: demoplot.ContactoDelPunto.cargo,
+                        tipoContacto: demoplot.ContactoDelPunto.tipo,
+                        emailContacto:demoplot.ContactoDelPunto.email,
+                        celularContacto:demoplot.ContactoDelPunto.celularA,
                         idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
                         punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
@@ -234,6 +241,10 @@ export class DemoplotService {
                             select: {
                                 nombre: true,
                                 cargo: true,
+                                apellido: true,
+                                email: true,
+                                celularA: true,
+                                tipo: true,
                                 PuntoContacto: true
                                 
                             }
@@ -320,8 +331,11 @@ export class DemoplotService {
                         familia: demoplot.Familia?.nombre,
                         blancoCientifico: demoplot.BlancoBiologico.cientifico,
                         blancoComun: demoplot.BlancoBiologico.estandarizado,
-                        contacto: demoplot.ContactoDelPunto.nombre,
+                        contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
                         cargo: demoplot.ContactoDelPunto.cargo,
+                        tipoContacto: demoplot.ContactoDelPunto.tipo,
+                        emailContacto:demoplot.ContactoDelPunto.email,
+                        celularContacto:demoplot.ContactoDelPunto.celularA,
                         idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
                         punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
@@ -364,6 +378,11 @@ export class DemoplotService {
                     ContactoDelPunto: {
                         select: {
                             nombre: true,
+                            cargo: true,
+                            apellido: true,
+                            email: true,
+                            celularA: true,
+                            tipo: true,
                             PuntoContacto: true
                             
                         }
@@ -442,7 +461,11 @@ export class DemoplotService {
                 familia: demoplot.Familia?.nombre,
                 blancoCientifico: demoplot.BlancoBiologico.cientifico,
                 blancoComun: demoplot.BlancoBiologico.estandarizado,
-                contacto: demoplot.ContactoDelPunto.nombre,
+                contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
+                cargo: demoplot.ContactoDelPunto.cargo,
+                tipoContacto: demoplot.ContactoDelPunto.tipo,
+                emailContacto:demoplot.ContactoDelPunto.email,
+                celularContacto:demoplot.ContactoDelPunto.celularA,
                 idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
                 punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
                 idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
@@ -492,7 +515,8 @@ export class DemoplotService {
                 completados: 0,
                 cancelados: 0,
                 reprogramados: 0,
-                diaCampo: 0
+                diaCampo: 0,
+                iniciados: 0,
             };
     
             // Asignar los valores de los contadores según los resultados de la consulta
@@ -517,6 +541,9 @@ export class DemoplotService {
                         break;
                     case 'Día campo':
                         counts.diaCampo = demoplot._count.estado;
+                        break;
+                    case 'Iniciado':
+                        counts.iniciados = demoplot._count.estado;
                         break;
                     default:
                         break;
@@ -565,7 +592,8 @@ export class DemoplotService {
                 completados: 0,
                 cancelados: 0,
                 reprogramados: 0,
-                diaCampo: 0
+                diaCampo: 0,
+                iniciados: 0,
             };
     
             // Asignar los valores de los contadores según los resultados de la consulta
@@ -589,6 +617,9 @@ export class DemoplotService {
                         break;
                     case 'Día campo':
                         counts.diaCampo = demoplot._count.estado;
+                        break;
+                    case 'Iniciado':
+                        counts.iniciados = demoplot._count.estado;
                         break;
                     default:
                         break;

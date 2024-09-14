@@ -12,15 +12,17 @@ export class PuntoContactoEntity {
         public dirReferencia: string | null,
         public lider: boolean | null,
         public activo: boolean,
-        public idGte: number,
-        public idDistrito: string
+        public idGte: number | null,
+        public idDistrito: string,
+        public idEmpresa: number | null,
+        public codZona: string | null,
         //public createdAt: Date | null,
         //public updatedAt: Date | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): PuntoContactoEntity {
         const {
-            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito,createdAt, updatedAt
+            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito,idEmpresa,codZona,createdAt, updatedAt
         } = object;
 
         if (!nombre) throw CustomError.badRequest('Nombre is required');
@@ -31,7 +33,7 @@ export class PuntoContactoEntity {
         if (!tipo) throw CustomError.badRequest('Tipo is required');
 
         return new PuntoContactoEntity(
-            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito//createdAt, updatedAt
+            id, nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito,idEmpresa,codZona//createdAt, updatedAt
         );
     }
 }

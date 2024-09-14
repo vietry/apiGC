@@ -175,7 +175,7 @@ export class GteService{
                 page: page,
                 limit: limit,
                 total: total,
-                next: `/api/gtes?page${(page + 1)}&limit=${limit}`,
+                next: `/v1/gtes?page${(page + 1)}&limit=${limit}`,
                 prev: (page - 1 > 0)  ? `/api/gtes?page${(page - 1)}&limit=${limit}`: null ,
 
                 gtes: gtes.map((gte) => {
@@ -185,6 +185,7 @@ export class GteService{
                         tipo: gte.tipo,
                         idSubZona: gte.idSubZona,
                         idColaborador: gte.idColaborador,
+                        colaborador: `${gte.Colaborador?.Usuario?.nombres} ${gte.Colaborador?.Usuario?.apellidos}`,
                         idUsuario: gte.idUsuario,
                         nombres: gte.Usuario?.nombres,
                         apellidos: gte.Usuario?.apellidos,
@@ -302,6 +303,8 @@ export class GteService{
                                 }
                             },
                             cargo: true,
+                            ZonaAnterior: true,
+
                         }
                     },
                     Usuario: {
@@ -328,6 +331,11 @@ export class GteService{
                 tipo: gte.tipo,
                 idSubZona: gte.idSubZona,
                 idColaborador: gte.idColaborador,
+                idZonaAnt: gte.Colaborador?.ZonaAnterior?.id,
+                codZonaAnt: gte.Colaborador?.ZonaAnterior?.codigo.trim(),
+                //idEmpresa:  `0${gte.Colaborador?.ZonaAnterior?.idEmpresa}`,
+                idEmpresa:  gte.Colaborador?.ZonaAnterior?.idEmpresa,
+                codZona: gte.Colaborador?.ZonaAnterior?.codigo.trim(),
                 idUsuario: gte.idUsuario,
                 nombres: gte.Usuario?.nombres,
                 apellidos: gte.Usuario?.apellidos,

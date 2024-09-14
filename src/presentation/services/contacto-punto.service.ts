@@ -37,6 +37,7 @@ export class ContactoPuntoService{
                     celularA: createContactoPuntoDto.celularA,
                     celularB: createContactoPuntoDto.celularB,
                     idPunto: createContactoPuntoDto.idPunto,
+                    idGte: createContactoPuntoDto.idGte,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -135,7 +136,7 @@ export class ContactoPuntoService{
                         punto: contacto.PuntoContacto.nombre,
                         tipoDocPunto: contacto.PuntoContacto.tipoDoc,
                         numDocPunto: contacto.PuntoContacto.numDoc,
-                        idGte: contacto.PuntoContacto.Gte.id
+                        idGte: contacto.idGte
 
                         }
                         })
@@ -245,7 +246,7 @@ export class ContactoPuntoService{
                     idPuntoContacto: contacto.idPunto,
                     tipoDoc: contacto.PuntoContacto.tipoDoc,
                     numDocPunto: contacto.PuntoContacto.numDoc,
-                    idGte: contacto.PuntoContacto.Gte.id
+                    idGte: contacto.idGte
                     
                 }))};
             } catch (error) {

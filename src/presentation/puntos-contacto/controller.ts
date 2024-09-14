@@ -80,4 +80,18 @@ export class PuntoContactoController {
                 .then(puntosContacto => res.status(200).json(puntosContacto))
                 .catch(error => this.handleError(res, error));
         }
+
+        getPuntosContactoByCodZonaAndGteId = async (req: Request, res: Response) => {
+            const { codZona } = req.params;
+            const idGte = req.query.idGte ? +req.query.idGte : undefined;
+    
+            if (!codZona) return res.status(400).json({ error: 'codZona is required' });
+            if (idGte !== undefined && isNaN(idGte)) return res.status(400).json({ error: 'Invalid idGte' });
+    
+            this.puntoContactoService.getPuntosContactoByCodZonaAndGteId(codZona, idGte)
+                .then(puntosContacto => res.status(200).json(puntosContacto))
+                .catch(error => this.handleError(res, error));
+        }
+
+
 }

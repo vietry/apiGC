@@ -68,6 +68,7 @@ export class CultivoService {
                             select: {
                                 nombre: true,
                                 centroPoblado: true,
+                                idDistrito: true,
                                 PuntoContacto: {
                                     select: {
                                         idDistrito: true,
@@ -107,7 +108,7 @@ export class CultivoService {
                         idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
                         idVegetacion:cultivo.Variedad.Vegetacion.id,
                         idPunto: cultivo.Fundo.PuntoContacto?.id,
-                        idDistrito: cultivo.Fundo.PuntoContacto?.idDistrito
+                        idDistrito: cultivo.Fundo.idDistrito
                     };
                 })
             };
@@ -150,6 +151,7 @@ export class CultivoService {
                         select: {
                             nombre: true,
                             centroPoblado: true,
+                            idDistrito: true,
                             PuntoContacto: {
                                 select: {
                                     id: true,
@@ -191,7 +193,7 @@ export class CultivoService {
                     idVegetacion: cultivo.Variedad.Vegetacion.id,
                     idPunto: cultivo.Fundo.PuntoContacto?.id,
                     idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
-                    idDistrito: cultivo.Fundo.PuntoContacto?.idDistrito
+                    idDistrito: cultivo.Fundo.idDistrito
 
                 };
             })};

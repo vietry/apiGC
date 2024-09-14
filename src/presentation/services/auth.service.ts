@@ -106,6 +106,7 @@ export class AuthService{
               ...userEntity,
               idTipo: tipoUser.idTipo,
               tipo: tipoUser.tipo,
+              zona: tipoUser.zona,
               token: token,
           },
           token: token,

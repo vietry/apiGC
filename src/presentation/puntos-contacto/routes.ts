@@ -15,6 +15,9 @@ export class PuntoContactoRoutes {
         router.post('/',controller.createPuntoContacto);
         router.put('/:id',controller.updatePuntoContacto);
 
+        // Nueva ruta para buscar por codZona e idGte
+        router.get('/zona/:codZona', controller.getPuntosContactoByCodZonaAndGteId);
+
         return router;
     }
 }

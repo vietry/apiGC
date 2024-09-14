@@ -12,13 +12,14 @@ export class ContactoPuntoEntity {
         public celularA: string | null,
         public celularB: string | null,
         public idPunto: number,
+        public idGte: number,
         //public createdAt: Date | null,
         //public updatedAt: Date | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): ContactoPuntoEntity {
         const {
-            id, nombre, apellido, cargo, tipo,email, celularA, celularB, idPunto, /* createdAt, updatedAt */
+            id, nombre, apellido, cargo, tipo,email, celularA, celularB, idPunto, idGte/* createdAt, updatedAt */
         } = object;
 
         if (!nombre) throw CustomError.badRequest('Nombre is required');
@@ -28,7 +29,7 @@ export class ContactoPuntoEntity {
         if (!idPunto) throw CustomError.badRequest('idPunto is required');
 
         return new ContactoPuntoEntity(
-            id, nombre, apellido, cargo, tipo, email, celularA, celularB, idPunto, 
+            id, nombre, apellido, cargo, tipo, email, celularA, celularB, idPunto, idGte,
             //createdAt, updatedAt
         );
     }

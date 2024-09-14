@@ -14,7 +14,7 @@ export class UpdateGteDto {
         const returnObj: {[key: string]: any} = {};
 
         if (this.idUsuario) returnObj.idUsuario = this.idUsuario;
-        if (this.activo) returnObj.activo = this.activo;
+        if (this.activo  !== undefined ) returnObj.activo = this.activo;
         if (this.tipo) returnObj.tipo = this.tipo;
         if (this.idSubZona) returnObj.idSubZona = this.idSubZona;
         if (this.idColaborador) returnObj.idColaborador = this.idColaborador;

@@ -1,4 +1,5 @@
 import { prisma } from "../../data/sqlserver";
+import { Prisma } from "@prisma/client";
 import { CreatePuntoContactoDto, CustomError, PaginationDto, UpdatePuntoContactoDto } from "../../domain";
 
 export class PuntoContactoService {
@@ -29,6 +30,8 @@ export class PuntoContactoService {
                     /*idGte: gte.id,*/
                     idGte: createPuntoContactoDto.idGte,
                     idDistrito: createPuntoContactoDto.idDistrito,
+                    idEmpresa: createPuntoContactoDto.idEmpresa,
+                    codZona: createPuntoContactoDto.codZona,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -45,6 +48,8 @@ export class PuntoContactoService {
                 activo: puntoContacto.activo,
                 idGte: puntoContacto.idGte,
                 idDistrito: puntoContacto.idDistrito,
+                idEmpresa: puntoContacto.idEmpresa,
+                codZona: puntoContacto.codZona,
                 hectareas: puntoContacto.hectareas,
 
             };
@@ -91,6 +96,11 @@ export class PuntoContactoService {
                                         id: true,
                                         
                                     }
+                                },
+                                Colaborador:{
+                                    select:{
+                                        ZonaAnterior: true
+                                    }
                                 }
                             }
                         },
@@ -132,12 +142,15 @@ export class PuntoContactoService {
                     activo: puntoContacto.activo,
                     idGte: puntoContacto.idGte,
                     hectareas: puntoContacto.hectareas,
-                    idUsuario: puntoContacto.Gte.Usuario?.id,
+                    idUsuario: puntoContacto.Gte?.Usuario?.id,
                     idDistrito: puntoContacto.Distrito?.id,
                     distrito: puntoContacto.Distrito?.nombre,
                     idProvincia: puntoContacto.Distrito?.idProvincia,
                     provincia: puntoContacto.Distrito?.Provincia.nombre,
-                    departamento: puntoContacto.Distrito?.Provincia.Departamento.nombre
+                    departamento: puntoContacto.Distrito?.Provincia.Departamento.nombre,
+                    idEmpresa: puntoContacto.idEmpresa,
+                    codZona: puntoContacto.codZona,
+                    nomZona: puntoContacto.Gte?.Colaborador?.ZonaAnterior?.nombre
                 }))
             };
 
@@ -239,6 +252,11 @@ export class PuntoContactoService {
                                         select: {
                                             id: true,
                                         }
+                                    },
+                                    Colaborador:{
+                                        select:{
+                                            ZonaAnterior: true
+                                        }
                                     }
                                 }
                             },
@@ -278,15 +296,104 @@ export class PuntoContactoService {
                         activo: puntoContacto.activo,
                         idGte: puntoContacto.idGte,
                         hectareas: puntoContacto.hectareas,
-                        idUsuario: puntoContacto.Gte.Usuario?.id,
+                        idUsuario: puntoContacto.Gte?.Usuario?.id,
                         idDistrito: puntoContacto.Distrito?.id,
                         distrito: puntoContacto.Distrito?.nombre,
                         idProvincia: puntoContacto.Distrito?.idProvincia,
                         provincia: puntoContacto.Distrito?.Provincia.nombre,
-                        departamento: puntoContacto.Distrito?.Provincia.Departamento.nombre
+                        departamento: puntoContacto.Distrito?.Provincia.Departamento.nombre,
+                        idEmpresa: puntoContacto.idEmpresa,
+                        codZona: puntoContacto.codZona,
+                        nomZona: puntoContacto.Gte?.Colaborador?.ZonaAnterior?.nombre
                         
                     }))
                 };
+            } catch (error) {
+                throw CustomError.internalServer(`${error}`);
+            }
+        }
+
+        async getPuntosContactoByCodZonaAndGteId(codZona: string, idGte?: number) {
+            try {
+                // Construir la cláusula where dinámicamente
+                let whereClause: Prisma.PuntoContactoWhereInput = { codZona };
+    
+                if (idGte) {
+                    whereClause = {
+                        AND: [
+                            {
+                                OR: [
+                                    { idGte },
+                                    { idGte: null } // Para incluir aquellos sin idGte
+                                ]
+                            },
+                            { codZona }
+                        ]
+                    };
+                }
+    
+                const puntosContacto = await prisma.puntoContacto.findMany({
+                    where: whereClause,
+                    orderBy: {
+                        nombre: 'asc'
+                    },
+                    include: {
+                        Gte: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        id: true,
+                                    }
+                                },
+                                Colaborador:{
+                                    select:{
+                                        ZonaAnterior: true
+                                    }
+                                }
+                            }
+                        },
+                        Distrito: {
+                            select: {
+                                nombre: true,
+                                id: true,
+                                idProvincia: true,
+                                Provincia: {
+                                    select: {
+                                        nombre: true,
+                                        Departamento: {
+                                            select: {
+                                                nombre: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+    
+                return puntosContacto.map(puntoContacto => ({
+                    id: puntoContacto.id,
+                    nombre: puntoContacto.nombre,
+                    tipoDoc: puntoContacto.tipoDoc,
+                    numDoc: puntoContacto.numDoc,
+                    tipo: puntoContacto.tipo,
+                    dirReferencia: puntoContacto.dirReferencia,
+                    lider: puntoContacto.lider,
+                    activo: puntoContacto.activo,
+                    idGte: puntoContacto.idGte,
+                    hectareas: puntoContacto.hectareas,
+                    idUsuario: puntoContacto.Gte?.Usuario?.id,
+                    idDistrito: puntoContacto.Distrito?.id,
+                    distrito: puntoContacto.Distrito?.nombre,
+                    idProvincia: puntoContacto.Distrito?.idProvincia,
+                    provincia: puntoContacto.Distrito?.Provincia.nombre,
+                    departamento: puntoContacto.Distrito?.Provincia.Departamento.nombre,
+                    idEmpresa: puntoContacto.idEmpresa,
+                    codZona: puntoContacto.codZona,
+                    nomZona: puntoContacto.Gte?.Colaborador?.ZonaAnterior?.nombre
+                }));
+    
             } catch (error) {
                 throw CustomError.internalServer(`${error}`);
             }
