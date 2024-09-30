@@ -568,7 +568,7 @@ export class DemoplotService {
     
             // Calcular el rango de fechas para el mes específico
             const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
-            const endDate = new Date(anio, mes, 0); // Último día del mes
+            const endDate = new Date(anio, mes, 1); // Último día del mes
     
             const demoplotCounts = await prisma.demoPlot.groupBy({
                 by: ['estado'],
@@ -631,6 +631,248 @@ export class DemoplotService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async countDemoplotsByMonthAnioRtc(idUsuario: number, mes: number, anio: number) {
+        try {
+            // Obtener el Colaborador que corresponde al idUsuario
+            const colaborador = await prisma.colaborador.findFirst({
+                where: { idUsuario },
+                select: { id: true }
+            });
     
+            if (!colaborador) throw CustomError.badRequest(`Colaborador with idUsuario ${idUsuario} does not exist`);
+    
+            // Obtener todos los GTEs asociados al idColaborador
+            const gtes = await prisma.gte.findMany({
+                where: { idColaborador: colaborador.id },
+                select: {
+                    id: true,
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true
+                        }
+                    }
+                }
+            });
+    
+            if (gtes.length === 0) throw CustomError.badRequest(`No GTEs found for Colaborador with id ${colaborador.id}`);
+    
+            // Calcular el rango de fechas para el mes específico
+            const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
+            const endDate = new Date(anio, mes, 1); // Último día del mes
+    
+            const result = [];
+    
+            for (const gte of gtes) {
+                const demoplotCounts = await prisma.demoPlot.groupBy({
+                    by: ['estado'],
+                    where: {
+                        idGte: gte.id,
+                        programacion: {
+                            gte: startDate, // Mayor o igual al primer día del mes
+                            lte: endDate    // Menor o igual al último día del mes
+                        }
+                    },
+                    _count: {
+                        estado: true
+                    }
+                });
+    
+                // Inicializar los contadores en cero para este GTE
+                const counts = {
+                    nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario?.apellidos}`,
+                    todos: 0,
+                    programados: 0,
+                    seguimiento: 0,
+                    completados: 0,
+                    cancelados: 0,
+                    reprogramados: 0,
+                    diaCampo: 0,
+                    iniciados: 0,
+                };
+    
+                // Asignar los valores de los contadores según los resultados de la consulta
+                demoplotCounts.forEach(demoplot => {
+                    counts.todos += demoplot._count.estado;
+                    switch (demoplot.estado) {
+                        case 'Programado':
+                            counts.programados = demoplot._count.estado;
+                            break;
+                        case 'Seguimiento':
+                            counts.seguimiento = demoplot._count.estado;
+                            break;
+                        case 'Completado':
+                            counts.completados = demoplot._count.estado;
+                            break;
+                        case 'Cancelado':
+                            counts.cancelados = demoplot._count.estado;
+                            break;
+                        case 'Reprogramado':
+                            counts.reprogramados = demoplot._count.estado;
+                            break;
+                        case 'Día campo':
+                            counts.diaCampo = demoplot._count.estado;
+                            break;
+                        case 'Iniciado':
+                            counts.iniciados = demoplot._count.estado;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+    
+                result.push(counts);
+            }
+    
+            return result;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getGteRankings() {
+        try {
+            // Step 1: Fetch all GTEs along with their user names
+            const gtes = await prisma.gte.findMany({
+                select: {
+                    id: true,
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true
+                        }
+                    }
+                }
+            });
+
+            // Step 2: Fetch counts of completed demoplots grouped by idGte
+            const demoplotCounts = await prisma.demoPlot.groupBy({
+                by: ['idGte'],
+                where: {
+                    estado: 'Completado'
+                },
+                _count: {
+                    id: true
+                }
+            });
+
+            // Step 3: Map the counts to a dictionary for easy lookup
+            const countsByGteId: { [key: number]: number } = {};
+            demoplotCounts.forEach(item => {
+                countsByGteId[item.idGte] = item._count.id;
+            });
+
+            // Step 4: Combine the GTEs and counts
+            const gteStats = gtes.map(gte => {
+                const completedCount = countsByGteId[gte.id] || 0;
+                return {
+                    nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario!.apellidos}`,
+                    completados: completedCount,
+                    cumplimiento:  completedCount/60,
+                    idGte: gte.id,
+                    rank: 0
+                    
+                };
+            });
+
+            // Step 5: Sort the array by 'completados' in descending order
+            gteStats.sort((a, b) => b.completados - a.completados);
+
+            // Step 6: Assign rank based on position
+            let rank = 1;
+            let previousCount = null;
+            for (let i = 0; i < gteStats.length; i++) {
+                if (previousCount !== null && gteStats[i].completados < previousCount) {
+                    rank = i + 1;
+                }
+                gteStats[i].rank = rank;
+                previousCount = gteStats[i].completados;
+            }
+
+            // Step 7: Return the rankings
+            return gteStats;
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getGteRankingsAnioMes(mes: number, anio: number) {
+        try {
+            // Step 1: Fetch all GTEs along with their user names
+            const gtes = await prisma.gte.findMany({
+                select: {
+                    id: true,
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true
+                        }
+                    }
+                }
+            });
+
+
+            const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
+            const endDate = new Date(anio, mes, 1); // Último día del mes
+    
+            const result = [];
+    
+            // Step 2: Fetch counts of completed demoplots grouped by idGte
+            const demoplotCounts = await prisma.demoPlot.groupBy({
+                by: ['idGte'],
+                where: {
+                    estado: 'Completado',
+                    programacion: {
+                        gte: startDate, // Mayor o igual al primer día del mes
+                        lte: endDate    // Menor o igual al último día del mes
+                    }
+                },
+                _count: {
+                    id: true
+                }
+            });
+
+            // Step 3: Map the counts to a dictionary for easy lookup
+            const countsByGteId: { [key: number]: number } = {};
+            demoplotCounts.forEach(item => {
+                countsByGteId[item.idGte] = item._count.id;
+            });
+
+            // Step 4: Combine the GTEs and counts
+            const gteStats = gtes.map(gte => {
+                const completedCount = countsByGteId[gte.id] || 0;
+                return {
+                    nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario!.apellidos}`,
+                    completados: completedCount,
+                    cumplimiento:  completedCount/60,
+                    idGte: gte.id,
+                    rank: 0
+                    
+                };
+            });
+
+            // Step 5: Sort the array by 'completados' in descending order
+            gteStats.sort((a, b) => b.completados - a.completados);
+
+            // Step 6: Assign rank based on position
+            let rank = 1;
+            let previousCount = null;
+            for (let i = 0; i < gteStats.length; i++) {
+                if (previousCount !== null && gteStats[i].completados < previousCount) {
+                    rank = i + 1;
+                }
+                gteStats[i].rank = rank;
+                previousCount = gteStats[i].completados;
+            }
+
+            // Step 7: Return the rankings
+            return gteStats;
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 
 }

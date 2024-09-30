@@ -414,7 +414,7 @@ model DemoPlot {
   objetivo         String?         @db.VarChar(255)
   instalacion      DateTime?       @db.DateTime
   finalizacion     DateTime?       @db.DateTime
-  estado           String?         @db.VarChar(11)
+  estado           String?         @db.VarChar(12)
   validacion       Boolean?
   idCultivo        Int
   idContactoP      Int
@@ -543,6 +543,7 @@ model ContactoPunto {
   email         String?       @db.VarChar(30)
   tipo          String        @db.VarChar(10)
   idGte         Int?
+  activo        Boolean?
   PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onUpdate: NoAction, map: "fk_Contacto_PuntoContacto")
   Gte           Gte?          @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ContactoPunto_Gte1")
   DemoPlot      DemoPlot[]
@@ -572,12 +573,13 @@ model ClienteZona {
 }
 
 model SuperZona {
-  id        Int       @id(map: "PK__SuperZon__3213E83F2126F16C")
-  codi      String    @db.VarChar(3)
-  nombre    String    @db.VarChar(70)
-  createdAt DateTime? @db.DateTime
-  updatedAt DateTime? @db.DateTime
-  SubZona   SubZona[]
+  id              Int               @id(map: "PK__SuperZon__3213E83F2126F16C")
+  codi            String            @db.VarChar(3)
+  nombre          String            @db.VarChar(70)
+  createdAt       DateTime?         @db.DateTime
+  updatedAt       DateTime?         @db.DateTime
+  ColaboradorJefe ColaboradorJefe[]
+  SubZona         SubZona[]
 }
 
 model Zona {
@@ -593,6 +595,8 @@ model ColaboradorJefe {
   id                                                     Int         @id(map: "PK__Colabora__3213E83F75414E03") @default(autoincrement())
   idJefe                                                 Int
   idColaborador                                          Int
+  idMacroZona                                            Int?
   Colaborador_ColaboradorJefe_idColaboradorToColaborador Colaborador @relation("ColaboradorJefe_idColaboradorToColaborador", fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_ColabJefe_Colab1")
   Colaborador_ColaboradorJefe_idJefeToColaborador        Colaborador @relation("ColaboradorJefe_idJefeToColaborador", fields: [idJefe], references: [id], onUpdate: NoAction, map: "fk_ColabJefe_Jefe1")
+  SuperZona                                              SuperZona?  @relation(fields: [idMacroZona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ColabJefe_MacroZona")
 }

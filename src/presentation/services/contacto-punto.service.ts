@@ -17,12 +17,13 @@ export class ContactoPuntoService{
             where: {
                 AND: [
                     { nombre: createContactoPuntoDto.nombre },
-                    { apellido: createContactoPuntoDto.apellido }
+                    { apellido: createContactoPuntoDto.apellido },
+                    { idGte: createContactoPuntoDto.idGte}
                   ]
                 }
               });
             
-        if ( contactoExists ) throw CustomError.badRequest( `Contacto ${nombreApellido} already exists` );
+        if ( contactoExists ) throw CustomError.badRequest( `El contacto: ${nombreApellido}, ya existe para su tienda` );
 
         try {
             const currentDate = new Date();
@@ -36,6 +37,7 @@ export class ContactoPuntoService{
                     email: createContactoPuntoDto.email,
                     celularA: createContactoPuntoDto.celularA,
                     celularB: createContactoPuntoDto.celularB,
+                    activo: createContactoPuntoDto.activo,
                     idPunto: createContactoPuntoDto.idPunto,
                     idGte: createContactoPuntoDto.idGte,
                     createdAt: currentDate,
@@ -132,6 +134,7 @@ export class ContactoPuntoService{
                         email: contacto.email,
                         celularA: contacto.celularA,
                         celularB: contacto.celularB,
+                        activo: contacto.activo,
                         idPunto: contacto.idPunto,
                         punto: contacto.PuntoContacto.nombre,
                         tipoDocPunto: contacto.PuntoContacto.tipoDoc,
@@ -242,6 +245,7 @@ export class ContactoPuntoService{
                     tipo: contacto.tipo,
                     celularA: contacto.celularA,
                     celularB: contacto.celularB,
+                    activo: contacto.activo,
                     email: contacto.email,
                     idPuntoContacto: contacto.idPunto,
                     tipoDoc: contacto.PuntoContacto.tipoDoc,

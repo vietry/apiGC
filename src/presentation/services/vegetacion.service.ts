@@ -51,7 +51,31 @@ export class VegetacionService {
         }
     }
 
-        async getVegetacion() {
+    async getVegetacion() {
+        try {
+            const vegetaciones = await prisma.vegetacion.findMany({
+                where: {
+                    nombre: {
+                        not: 'VARIOS CULTIVOS',
+                    },
+                },
+                orderBy: {
+                    nombre: 'asc',
+                },
+            });
+    
+            return vegetaciones.map((vegetacion) => ({
+                id: vegetacion.id,
+                nombre: vegetacion.nombre,
+                createdAt: vegetacion.createdAt,
+                updatedAt: vegetacion.updatedAt,
+            }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+        async getVegetacionGC() {
             try {
                 const vegetaciones = await prisma.vegetacion.findMany();
     

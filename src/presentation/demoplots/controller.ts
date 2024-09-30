@@ -99,5 +99,39 @@ export class DemoplotController{
             .catch(error => this.handleError(res, error));
     }
 
+    countDemoplotsByMesAnioRtc = async (req: Request, res: Response) => {
+        const idUsuario = +req.params.idUsuario;
+        const mes = +req.params.mes; // Parámetro del mes
+        const anio = +req.params.anio; // Parámetro del año
+
+        if (isNaN(idUsuario) || isNaN(mes) || isNaN(anio)) {
+            return res.status(400).json({ error: 'Invalid parameters' });
+        }
+
+        this.demoplotService.countDemoplotsByMonthAnioRtc(idUsuario, mes, anio)
+            .then(counts => res.status(200).json(counts))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getGteRankings  = async (req: Request, res: Response) => {
+        
+        this.demoplotService.getGteRankings()
+        .then(rankings => res.status(200).json(rankings))
+        .catch( error => this.handleError(res, error));
+    }
+
+    getGteRankingsAnioMes  = async (req: Request, res: Response) => {
+        
+        const mes = +req.params.mes; 
+        const anio = +req.params.anio;
+        if (isNaN(mes) || isNaN(anio)) {
+            return res.status(400).json({ error: 'Invalid parameters' });
+        }
+
+        this.demoplotService.getGteRankingsAnioMes(mes, anio)
+        .then(rankings => res.status(200).json(rankings))
+        .catch( error => this.handleError(res, error));
+    }
+
  
 }
