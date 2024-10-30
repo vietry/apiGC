@@ -384,6 +384,7 @@ model ZonaAnterior {
   nombre         String           @db.VarChar(80)
   createdAt      DateTime?        @db.DateTime
   updatedAt      DateTime?        @db.DateTime
+  demoplot       Boolean?
   ClienteZonaAnt ClienteZonaAnt[]
   Colaborador    Colaborador[]
   Empresa        Empresa          @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Zona_Empresa1")

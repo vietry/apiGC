@@ -63,6 +63,9 @@ export class AuthMiddleware{
                     tipo: tipoUser.tipo,
                     zona: tipoUser.zona,
                     token: newToken,
+                },
+                token: {
+                    token: newToken
                 }
             
             });

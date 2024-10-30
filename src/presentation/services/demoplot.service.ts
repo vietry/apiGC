@@ -750,7 +750,9 @@ export class DemoplotService {
             const demoplotCounts = await prisma.demoPlot.groupBy({
                 by: ['idGte'],
                 where: {
-                    estado: 'Completado'
+                    estado: {
+                        in: ['Completado', 'Día campo']
+                    },
                 },
                 _count: {
                     id: true
@@ -823,7 +825,9 @@ export class DemoplotService {
             const demoplotCounts = await prisma.demoPlot.groupBy({
                 by: ['idGte'],
                 where: {
-                    estado: 'Completado',
+                    estado: {
+                        in: ['Completado', 'Día campo']
+                    },
                     programacion: {
                         gte: startDate, // Mayor o igual al primer día del mes
                         lte: endDate    // Menor o igual al último día del mes

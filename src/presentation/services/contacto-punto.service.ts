@@ -18,7 +18,7 @@ export class ContactoPuntoService{
                 AND: [
                     { nombre: createContactoPuntoDto.nombre },
                     { apellido: createContactoPuntoDto.apellido },
-                    { idGte: createContactoPuntoDto.idGte}
+                    { idPunto: createContactoPuntoDto.idPunto}
                   ]
                 }
               });
