@@ -18,3 +18,4 @@ export * from './articulo.service';
 export * from './familia.service';
 export * from './fundos.service';
 export * from './puntos-ubigeos.service';
+export * from './charla/charla.service';

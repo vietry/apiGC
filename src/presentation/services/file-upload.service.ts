@@ -2,7 +2,7 @@ import path from 'path';
 import  fs from 'fs';
 import { UploadedFile } from 'express-fileupload';
 import { Uuid } from '../../config';
-import { CreateFotoDemoplotDto, CustomError, UpdateFotoDemoplotDto } from '../../domain';
+import { CreateFotoCharlaDto, CreateFotoDemoplotDto, CustomError, UpdateFotoCharlaDto, UpdateFotoDemoplotDto } from '../../domain';
 import { prisma } from '../../data/sqlserver';
 
 
@@ -150,5 +150,77 @@ export class FileUploadService{
             throw CustomError.internalServer(`Error deleting file: ${error}`);
         }
     }
+    //! FOTO CHARLA
+    async uploadAndCreateFotoCharla(
+        file: UploadedFile,
+        createFotoCharlaDto: CreateFotoCharlaDto,
+        folder: string = `uploads/charlas/${createFotoCharlaDto.idCharla}`,
+        validExtensions: string[] = ['png', 'jpg', 'jpeg']
+    ) {
+        const charlaExists = await prisma.charla.findFirst({ where: { id: createFotoCharlaDto.idCharla } });
+        if (!charlaExists) throw CustomError.badRequest(`Charla with id ${createFotoCharlaDto.idCharla} does not exist`);
+
+        const uploadResult = await this.uploadSingle(file, folder, validExtensions);
+
+        const currentDate = new Date();
+        const nombreFoto = uploadResult.fileName;
+        const rutaFoto = `${folder}/${uploadResult.fileName}`;
+        const tipo = file.mimetype.split('/').at(1) ?? '';
+
+        const fotoCharla = await prisma.fotoCharla.create({
+            data: {
+                idCharla: createFotoCharlaDto.idCharla,
+                nombre: nombreFoto,
+                comentario: createFotoCharlaDto.comentario,
+                estado: createFotoCharlaDto.estado,
+                rutaFoto: rutaFoto,
+                tipo: tipo,
+                latitud: createFotoCharlaDto.latitud,
+                longitud: createFotoCharlaDto.longitud,
+                createdBy: createFotoCharlaDto.createdBy,
+                updatedBy: createFotoCharlaDto.updatedBy,
+                createdAt: currentDate,
+                updatedAt: currentDate,
+            }
+        });
+
+        return { fileName: nombreFoto, rutaFoto };
+    }
+
+    async uploadAndUpdateFotoCharla(
+        file: UploadedFile,
+        updateFotoCharlaDto: UpdateFotoCharlaDto,
+        folder: string = 'uploads/charlas',
+        validExtensions: string[] = ['png', 'jpg', 'jpeg']
+    ) {
+        const fotoExists = await prisma.fotoCharla.findFirst({ where: { id: updateFotoCharlaDto.id } });
+        if (!fotoExists) throw CustomError.badRequest(`FotoCharla with id ${updateFotoCharlaDto.id} does not exist`);
+
+        const uploadResult = await this.uploadSingle(file, folder, validExtensions);
+
+        const currentDate = new Date();
+        const nombreFoto = uploadResult.fileName;
+        const rutaFoto = `${folder}/${uploadResult.fileName}`;
+        const tipo = file.mimetype.split('/').at(1) ?? '';
+
+        const updatedFotoCharla = await prisma.fotoCharla.update({
+            where: { id: updateFotoCharlaDto.id },
+            data: {
+                ...updateFotoCharlaDto.values,
+                nombre: nombreFoto,
+                rutaFoto: rutaFoto,
+                tipo: tipo,
+                updatedBy: updateFotoCharlaDto.updatedBy,
+                updatedAt: currentDate,
+            }
+        });
+
+        return {
+            fileName: nombreFoto,
+            rutaFoto,
+            updatedFotoCharla
+        };
+    }
+
 
 }

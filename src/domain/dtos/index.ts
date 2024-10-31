@@ -29,3 +29,11 @@ export * from './punto-ubigeo/update-punto-ubigeo.dto';
 
 export * from './cultivo/create-cultivo.dto';
 export * from './cultivo/update-cultivo.dto';
+
+//DTOS CHARLA
+export * from './charla/charla/create-charla.dto';
+export * from './charla/charla/update-charla.dto';
+export * from './charla/asistencia/create-asistencia.dto';
+export * from './charla/asistencia/update-asistencia.dto';
+export * from './charla/foto/create-foto.dto';
+export * from './charla/foto/update-foto.dto';

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateFotoDemoplotDto, CustomError, UpdateFotoDemoplotDto } from '../../domain';
+import { CreateFotoDemoplotDto, CustomError, UpdateFotoDemoplotDto, CreateFotoCharlaDto } from '../../domain';
 import { FileUploadService } from '../services/file-upload.service';
 import { UploadedFile } from 'express-fileupload';
 import { FotoDemoplotService } from '../services/foto-demoplot.service';
@@ -32,6 +32,8 @@ export class FileUploadController{
             .catch( error => this.handleError(res, error))
     }
 
+
+
     uploadMultipleFiles = (req: Request, res: Response) => {
 
         const type = req.params.type;
@@ -46,13 +48,13 @@ export class FileUploadController{
     uploadAndCreateFotoDemoPlot = async (req: Request, res: Response) => {
         
         const file = req.body.files.at(0) as UploadedFile;
-        const [error, createFotoDenoplotDto] = await CreateFotoDemoplotDto.create(req.body);
+        const [error, createFotoDemoplotDto] = await CreateFotoDemoplotDto.create(req.body);
         
         if(error) return res.status(400).json({error});
 
         //const fotoDemoplot = await this.fileUploadService.uploadAndCreateFotoDemoPlot(file, createFotoDenoplotDto!);
 
-        this.fileUploadService.uploadAndCreateFotoDemoPlot(file, createFotoDenoplotDto!)
+        this.fileUploadService.uploadAndCreateFotoDemoPlot(file, createFotoDemoplotDto!)
             .then(foto => res.status(201).json(foto))
             .catch( error => this.handleError(res, error));
 
@@ -76,5 +78,34 @@ export class FileUploadController{
             .then(response => res.status(200).json(response))
             .catch(error => this.handleError(res, error));
     }
+    //! FOTO CHARLAS
+
+    uploadFotoCharla  = (req: Request, res: Response) => {
+
+        const type = req.params.type;
+        const idCharla = req.params.idCharla;
+        const file = req.body.files.at(0) as UploadedFile;
+
+        this.fileUploadService.uploadSingle(file, `uploads/${type}/${idCharla}`)
+            .then( uploaded => res.json(uploaded) )
+            .catch( error => this.handleError(res, error))
+    }
+
+    uploadAndCreateFotoCharla = async (req: Request, res: Response) => {
+        
+        const file = req.body.files.at(0) as UploadedFile;
+        const [error, createFotoCharlaDto] = await CreateFotoCharlaDto.create(req.body);
+        
+        if(error) return res.status(400).json({error});
+
+        //const fotoDemoplot = await this.fileUploadService.uploadAndCreateFotoDemoPlot(file, createFotoDenoplotDto!);
+
+        this.fileUploadService.uploadAndCreateFotoCharla(file, createFotoCharlaDto!)
+            .then(foto => res.status(201).json(foto))
+            .catch( error => this.handleError(res, error));
+
+    }
+
+
  
 }

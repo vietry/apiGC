@@ -7,3 +7,8 @@ export * from './demoplot.entity';
 export * from './articulo.entity';
 export * from './blanco.entity';
 export * from './cultivo.entity';
+
+//ENTITY CHARLA
+export * from './charla/charla.entity';
+export * from './charla/asistencia.entity';
+export * from './charla/foto.entity';

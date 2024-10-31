@@ -13,7 +13,7 @@ export class FileUploadRoutes {
         const controller = new FileUploadController(
             new FileUploadService()
         );
-        router.use(TypeMiddleware.validTypes(['usuarios', 'demoplots', 'variedad']));
+        router.use(TypeMiddleware.validTypes(['usuarios', 'demoplots', 'variedad', 'charlas']));
 
         router.delete('/delete/:type/:img', controller.deleteFile);
 
@@ -26,6 +26,7 @@ export class FileUploadRoutes {
         router.post('/multiple/:type',controller.uploadMultipleFiles);
         router.post('/foto/:type', controller.uploadAndCreateFotoDemoPlot);
         router.put('/foto/:type/:id', controller.uploadAndCreateFotoDemoPlot);
+        router.post('/foto/charlas/:idCharla', controller.uploadAndCreateFotoCharla);
 
         
         return router;
