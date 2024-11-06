@@ -24,9 +24,12 @@ export class FileUploadRoutes {
         // api/upload/multiple/<user|category|product>/
         router.post('/single/:type',controller.uploadFile);
         router.post('/multiple/:type',controller.uploadMultipleFiles);
+        router.post('/foto/charlas', controller.uploadAndCreateFotoCharla);
         router.post('/foto/:type', controller.uploadAndCreateFotoDemoPlot);
         router.put('/foto/:type/:id', controller.uploadAndCreateFotoDemoPlot);
-        router.post('/foto/charlas/:idCharla', controller.uploadAndCreateFotoCharla);
+        router.put('/foto/charlas/:id', controller.uploadAndUpdateFotoDemoPlot);
+        
+        
 
         
         return router;

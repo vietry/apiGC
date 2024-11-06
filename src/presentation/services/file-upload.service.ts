@@ -157,7 +157,9 @@ export class FileUploadService{
         folder: string = `uploads/charlas/${createFotoCharlaDto.idCharla}`,
         validExtensions: string[] = ['png', 'jpg', 'jpeg']
     ) {
-        const charlaExists = await prisma.charla.findFirst({ where: { id: createFotoCharlaDto.idCharla } });
+
+        try {
+            const charlaExists = await prisma.charla.findFirst({ where: { id: createFotoCharlaDto.idCharla } });
         if (!charlaExists) throw CustomError.badRequest(`Charla with id ${createFotoCharlaDto.idCharla} does not exist`);
 
         const uploadResult = await this.uploadSingle(file, folder, validExtensions);
@@ -185,6 +187,10 @@ export class FileUploadService{
         });
 
         return { fileName: nombreFoto, rutaFoto };
+        } catch (error) {
+            throw CustomError.internalServer(`Error deleting file: ${error}`);
+        }
+        
     }
 
     async uploadAndUpdateFotoCharla(

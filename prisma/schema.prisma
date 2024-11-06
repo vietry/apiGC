@@ -638,7 +638,7 @@ model Charla {
   efectivo                          Boolean?
   comentarios                       String?         @db.VarChar(255)
   demoplots                         Int?
-  estado                            String?         @db.VarChar(11)
+  estado                            String?         @db.VarChar(12)
   programacion                      DateTime?       @db.DateTime
   ejecucion                         DateTime?       @db.DateTime
   cancelacion                       DateTime?       @db.DateTime

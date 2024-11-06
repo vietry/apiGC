@@ -18,6 +18,9 @@ export class CreateFotoCharlaDto {
         let idCharlaNumber = idCharla;
         let latitudNumber = latitud;
         let longitudNumber = longitud;
+        let createdByNumber = createdBy;
+        let updatedByNumber = updatedBy;
+
 
         if (!idCharla) return ['idCharla faltante'];
         if (!createdBy) return ['createdBy faltante'];
@@ -37,6 +40,16 @@ export class CreateFotoCharlaDto {
             if (isNaN(longitudNumber)) return ['longitud debe ser un número válido'];
         }
 
+        if (createdBy !== undefined && typeof createdBy !== 'number') {
+            createdByNumber = parseInt(createdBy);
+            if (isNaN(createdByNumber)) return ['createdBy debe ser un número válido'];
+        }
+
+        if (updatedBy !== undefined && typeof updatedBy !== 'number') {
+            updatedByNumber = parseInt(updatedBy);
+            if (isNaN(updatedByNumber)) return ['updatedBy debe ser un número válido'];
+        }
+
         return [
             undefined,
             new CreateFotoCharlaDto(
@@ -48,8 +61,8 @@ export class CreateFotoCharlaDto {
                 tipo,
                 latitudNumber,
                 longitudNumber,
-                createdBy,
-                updatedBy
+                createdByNumber,
+                updatedByNumber
             )
         ];
     }

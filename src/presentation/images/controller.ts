@@ -25,6 +25,21 @@ export class ImageController{
 
     }
 
+    getImageCharla = (req: Request, res: Response) => {
+
+        const {type = '', img = '', idCharla=''} = req.params;
+
+        const imagePath = path.resolve( __dirname, `../../../uploads/${type}/${idCharla}/${img}`);
+        
+
+        if (!fs.existsSync(imagePath)){
+            return res.status(404).send('Image not found');
+        }
+
+        res.sendFile(imagePath);
+
+    }
+
     async deleteFile(type: string, img: string) {
         const imagePath = path.resolve(__dirname, `../../../uploads/${type}/${img}`);
         

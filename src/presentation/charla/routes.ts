@@ -11,6 +11,8 @@ export class CharlaRoutes {
 
         router.get('/', controller.getCharlas);
         router.get('/:id', controller.getCharlaById);
+        router.get('/count/:anio/:mes/:idUsuario', controller.countCharlasByMesAnio);
+        router.get('/usuario/:idUsuario', controller.getCharlasByUsuarioId); 
         router.post('/', controller.createCharla);
         router.put('/:id', controller.updateCharla);
 

@@ -19,3 +19,5 @@ export * from './familia.service';
 export * from './fundos.service';
 export * from './puntos-ubigeos.service';
 export * from './charla/charla.service';
+export * from './charla/asistencia.service';
+export * from './charla/foto-charla.service';
