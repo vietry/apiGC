@@ -13,6 +13,7 @@ export class FotoDemoplotRoutes {
         router.get('/', controller.getFotosDemoplots);
         router.get('/:id', controller.getFotoDemoplotById);
         router.get('/demoplot/:idDemoPlot', controller.getFotosByIdDemoplot);
+        router.delete('/:id', controller.deleteFotoDemoplotById);
 
         return router;
     }

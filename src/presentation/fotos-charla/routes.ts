@@ -13,6 +13,7 @@ export class FotoCharlaRoutes {
         router.get('/', controller.getFotosCharlas);
         router.get('/:id', controller.getFotoCharlaById);
         router.get('/charla/:idCharla', controller.getFotosByIdCharla);
+        router.delete('/:id', controller.deleteFotoCharlaById);
 
         return router;
     }

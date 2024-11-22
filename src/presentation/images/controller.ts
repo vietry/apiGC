@@ -56,4 +56,20 @@ export class ImageController{
         }
     }
 
+    async deleteFileCharla(idCharla: string,type: string, img: string) {
+        const imagePath = path.resolve(__dirname, `../../../uploads/${type}/${idCharla}/${img}`);
+        
+
+        if (!fs.existsSync(imagePath)) {
+            throw CustomError.badRequest('Image not found');
+        }
+
+        try {
+            fs.unlinkSync(imagePath);
+            return { message: 'File deleted successfully' };
+        } catch (error) {
+            throw CustomError.internalServer(`Error deleting file: ${error}`);
+        }
+    }
+
 }

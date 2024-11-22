@@ -6,12 +6,14 @@ export class AsistenciaEntity {
         public id: number,
         public idContactoTienda: number | null,
         public idCharla: number | null,
+        //public createdBy: number | null,
+        //public updatedBy: number | null
 
     ) {}
 
     public static fromObject(object: { [key: string]: any }): AsistenciaEntity {
         const {
-            id, idContactoTienda, idCharla,
+            id, idContactoTienda, idCharla,//createdBy,updatedBy
         } = object;
 
 
@@ -19,7 +21,7 @@ export class AsistenciaEntity {
         if (!idCharla) throw CustomError.badRequest('idCharla is required');
 
         return new AsistenciaEntity(
-            id, idContactoTienda, idCharla,
+            id, idContactoTienda, idCharla,//createdBy,updatedBy
         );
     }
 }

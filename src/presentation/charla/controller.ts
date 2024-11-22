@@ -5,7 +5,7 @@ import { CharlaService } from "../services/charla/charla.service";
 export class CharlaController {
     constructor(private readonly charlaService: CharlaService) {}
 
-    private handleError = (res: Response, error: unknown) => {
+    readonly handleError = (res: Response, error: unknown) => {
         if (error instanceof CustomError) {
             return res.status(error.statusCode).json({ error: error.message });
         }

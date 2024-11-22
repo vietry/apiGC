@@ -4,17 +4,18 @@ import { CreateCharlaDto, CustomError, PaginationDto, UpdateCharlaDto } from "..
 
 
 export class CharlaService {
+
     constructor() {}
 
     async createCharla(createCharlaDto: CreateCharlaDto) {
 
-        const colabIdUsuarioExists = await prisma.puntoContacto.findUnique({where: {id: createCharlaDto.idTienda}});
-        if ( !colabIdUsuarioExists ) throw CustomError.badRequest( `La tienda no existe` );
+        const tiendaExists = await prisma.puntoContacto.findUnique({where: {id: createCharlaDto.idTienda}});
+        if ( !tiendaExists ) throw CustomError.badRequest( `La tienda no existe` );
 
-
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         try {
-            const currentDate = new Date();
-
+            
             const charla = await prisma.charla.create({
                 data: {
                     tema: createCharlaDto.tema,
@@ -48,7 +49,8 @@ export class CharlaService {
         }
     }
 
-    async updateCharla(updateCharlaDto: UpdateCharlaDto) {
+    async updateCharla(updateCharlaDto: UpdateCharlaDto) {        const date = new Date();
+      const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         const charlaExists = await prisma.charla.findFirst({ where: { id: updateCharlaDto.id } });
         if (!charlaExists) throw CustomError.badRequest(`Charla with id ${updateCharlaDto.id} does not exist`);
 
@@ -57,7 +59,7 @@ export class CharlaService {
                 where: { id: updateCharlaDto.id },
                 data: {
                     ...updateCharlaDto.values,
-                    updatedAt: new Date(),
+                    updatedAt: currentDate,
                 },
             });
 
@@ -106,31 +108,13 @@ export class CharlaService {
                     idFamilia: charla.idFamilia,
                     idGte: charla.idGte,
                     idTienda: charla.idTienda,
+                    codZona: charla.PuntoContacto.codZona,
                     createdAt: charla.createdAt,
                     createdBy: charla.createdBy,
                     updatedAt: charla.updatedAt,
                     updatedBy: charla.updatedBy
                 }));
             
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
-    }
-
-    async getAsistenciasByIdCharla(idCharla: number, offset: number, limit: number) {
-        try {
-            const asistencias = await prisma.asistencia.findMany({
-                skip: (offset - 1) * limit,
-                take: limit,
-                where: { idCharla },
-                orderBy: { createdAt: 'desc' },
-                include: {
-                    Charla: true,
-                    ContactoPunto: true,
-                },
-            });
-    
-            return { asistencias };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -197,7 +181,10 @@ export class CharlaService {
                   idGte: charla.idGte,
                   idTienda: charla.idTienda,
                   createdAt: charla.createdAt,
+                  createdBy: charla.createdBy,
                   updatedAt: charla.updatedAt,
+                  updatedBy: charla.updatedBy,
+                  codZona: charla.PuntoContacto.codZona,
                   familia: charla.Familia?.nombre,
                   vegetacion: charla.Vegetacion?.nombre,
                   blancoCientifico: charla.BlancoBiologico?.cientifico,
@@ -346,7 +333,10 @@ export class CharlaService {
               idGte: charla.idGte,
               idTienda: charla.idTienda,
               createdAt: charla.createdAt,
+              createdBy: charla.createdBy,
               updatedAt: charla.updatedAt,
+              updatedBy: charla.updatedBy,
+              codZona: charla.PuntoContacto.codZona,
               familia: charla.Familia?.nombre,
               vegetacion: charla.Vegetacion?.nombre,
               blancoCientifico: charla.BlancoBiologico?.cientifico,
@@ -435,7 +425,10 @@ export class CharlaService {
               idGte: charla.idGte,
               idTienda: charla.idTienda,
               createdAt: charla.createdAt,
+              createdBy: charla.createdBy,
               updatedAt: charla.updatedAt,
+              updatedBy: charla.updatedBy,
+              codZona: charla.PuntoContacto.codZona,
               familia: charla.Familia?.nombre,
               vegetacion: charla.Vegetacion?.nombre,
               blancoCientifico: charla.BlancoBiologico?.cientifico,

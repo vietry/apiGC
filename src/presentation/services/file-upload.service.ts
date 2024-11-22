@@ -8,6 +8,9 @@ import { prisma } from '../../data/sqlserver';
 
 
 export class FileUploadService{
+    //date = new Date();
+    //currentDate = new Date(this.date.getTime() - 5 * 60 * 60 * 1000);
+    //currentDate = new Date();
     constructor(
         private readonly uuid = Uuid.v4,
     ){}
@@ -72,12 +75,14 @@ export class FileUploadService{
         validExtensions: string[] = ['png', 'jpg', 'jpeg']
     ) {
 
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         const demoplotExists = await prisma.demoPlot.findFirst({where: {id: createFotoDemoplotDto.idDemoPlot}});
         if ( !demoplotExists ) throw CustomError.badRequest( `IdDemoplot no exists` );
 
         const uploadResult = await this.uploadSingle(file, folder, validExtensions);
 
-        const currentDate = new Date();
+        //const currentDate = new Date();
         const nombreFoto = uploadResult.fileName;
         const rutaFoto = `${folder}/${uploadResult.fileName}`;
         const tipo = file.mimetype.split('/').at(1) ?? '';
@@ -108,12 +113,14 @@ export class FileUploadService{
         folder: string = 'uploads/demoplots',
         validExtensions: string[] = ['png', 'jpg', 'jpeg']
     ) {
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         const fotoExists = await prisma.fotoDemoPlot.findFirst({ where: { id: updateFotoDemoplotDto.id } });
         if (!fotoExists) throw CustomError.badRequest(`FotoDemoPlot with id ${updateFotoDemoplotDto.id} does not exist`);
 
         const uploadResult = await this.uploadSingle(file, folder, validExtensions);
 
-        const currentDate = new Date();
+
         const nombreFoto = uploadResult.fileName;
         const rutaFoto = `${folder}/${uploadResult.fileName}`;
         const tipo = file.mimetype.split('/').at(1) ?? '';
@@ -150,6 +157,40 @@ export class FileUploadService{
             throw CustomError.internalServer(`Error deleting file: ${error}`);
         }
     }
+
+    /*async deleteFileDemoplot(type: string, img: string) {
+        const imagePath = path.resolve(__dirname, `../../../uploads/${type}/${img}`);
+        console.log(imagePath);
+
+        if (!fs.existsSync(imagePath)) {
+            throw CustomError.badRequest('Image not found');
+        }
+
+        try {
+            fs.unlinkSync(imagePath);
+            return { message: 'File deleted successfully' };
+        } catch (error) {
+            throw CustomError.internalServer(`Error deleting file: ${error}`);
+        }
+    }*/
+
+    async deleteFileCharla(idCharla: string, type: string, img: string) {
+        const imagePath = path.resolve(__dirname, `../../../uploads/${type}/${idCharla}/${img}`);
+        console.log(imagePath);
+
+        if (!fs.existsSync(imagePath)) {
+            throw CustomError.badRequest('Image not found');
+        }
+
+        try {
+            fs.unlinkSync(imagePath);
+            return { message: 'File deleted successfully' };
+        } catch (error) {
+            throw CustomError.internalServer(`Error deleting file: ${error}`);
+        }
+    }
+
+
     //! FOTO CHARLA
     async uploadAndCreateFotoCharla(
         file: UploadedFile,
@@ -161,15 +202,18 @@ export class FileUploadService{
         try {
             const charlaExists = await prisma.charla.findFirst({ where: { id: createFotoCharlaDto.idCharla } });
         if (!charlaExists) throw CustomError.badRequest(`Charla with id ${createFotoCharlaDto.idCharla} does not exist`);
-
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         const uploadResult = await this.uploadSingle(file, folder, validExtensions);
 
-        const currentDate = new Date();
+        //const date = new Date();
+        //const currentDate = new Date(date.toISOString());
         const nombreFoto = uploadResult.fileName;
         const rutaFoto = `${folder}/${uploadResult.fileName}`;
         const tipo = file.mimetype.split('/').at(1) ?? '';
-
-        const fotoCharla = await prisma.fotoCharla.create({
+        console.log(currentDate)
+        //const fotoCharla = 
+        await prisma.fotoCharla.create({
             data: {
                 idCharla: createFotoCharlaDto.idCharla,
                 nombre: nombreFoto,
@@ -188,7 +232,7 @@ export class FileUploadService{
 
         return { fileName: nombreFoto, rutaFoto };
         } catch (error) {
-            throw CustomError.internalServer(`Error deleting file: ${error}`);
+            throw CustomError.internalServer(`Error creating file: ${error}`);
         }
         
     }
@@ -203,8 +247,9 @@ export class FileUploadService{
         if (!fotoExists) throw CustomError.badRequest(`FotoCharla with id ${updateFotoCharlaDto.id} does not exist`);
 
         const uploadResult = await this.uploadSingle(file, folder, validExtensions);
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
 
-        const currentDate = new Date();
         const nombreFoto = uploadResult.fileName;
         const rutaFoto = `${folder}/${uploadResult.fileName}`;
         const tipo = file.mimetype.split('/').at(1) ?? '';

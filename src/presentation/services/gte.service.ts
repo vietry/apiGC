@@ -144,6 +144,7 @@ export class GteService{
                         //Usuario: true,
                         Colaborador: {
                             select: {
+                                ZonaAnterior: true,
                                 Usuario: {
                                     select: {
                                         id: true,
@@ -190,7 +191,9 @@ export class GteService{
                         nombres: gte.Usuario?.nombres,
                         apellidos: gte.Usuario?.apellidos,
                         email: gte.Usuario?.email,
-                        subZona: gte.SubZona?.nombre
+                        subZona: gte.SubZona?.nombre,
+                        idZonaAnt: gte.Colaborador?.ZonaAnterior?.id,
+                        codZona: gte.Colaborador?.ZonaAnterior?.codigo.trim(),
                         }
                         })
             }

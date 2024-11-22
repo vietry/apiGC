@@ -16,6 +16,7 @@ export class FileUploadRoutes {
         router.use(TypeMiddleware.validTypes(['usuarios', 'demoplots', 'variedad', 'charlas']));
 
         router.delete('/delete/:type/:img', controller.deleteFile);
+        //router.delete('/delete/:type/:idCharla/:img', controller.deleteFileCharla);
 
         router.use(FileUploadMiddleware.containFiles);
         
@@ -28,6 +29,10 @@ export class FileUploadRoutes {
         router.post('/foto/:type', controller.uploadAndCreateFotoDemoPlot);
         router.put('/foto/:type/:id', controller.uploadAndCreateFotoDemoPlot);
         router.put('/foto/charlas/:id', controller.uploadAndUpdateFotoDemoPlot);
+        router.delete('/delete/:type/:img', controller.deleteFileDemoplot);
+        router.delete('/delete/:type/:idCharla/:img', controller.deleteFileCharla);
+        
+        
         
         
 

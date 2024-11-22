@@ -56,7 +56,7 @@ export class UpdateCharlaDto {
 
     static async create(props: { [key: string]: any }): Promise<[string?, UpdateCharlaDto?]> {
         const {
-            id, tema, asistentes, hectareas, dosis, efectivo, comentarios, demoplots, estado,
+            id, tema, asistentes, hectareas = null, dosis = null, efectivo, comentarios, demoplots, estado,
             programacion, ejecucion, cancelacion, motivo, idVegetacion, idBlanco, idDistrito,
             idFamilia, idGte, idTienda, 
                         //createdAt, 
@@ -74,12 +74,12 @@ export class UpdateCharlaDto {
 
         if (hectareas !== undefined && typeof hectareas !== 'number') {
             hectareasNumber = parseFloat(hectareas);
-            if (isNaN(hectareasNumber)) return ['hectareas debe ser un número válido'];
+            //if (isNaN(hectareasNumber)) return ['hectareas debe ser un número válido'];
         }
 
         if (dosis !== undefined && typeof dosis !== 'number') {
             dosisNumber = parseFloat(dosis);
-            if (isNaN(dosisNumber)) return ['dosis debe ser un número válido'];
+            //if (isNaN(dosisNumber)) return ['dosis debe ser un número válido'];
         }
 
         return [

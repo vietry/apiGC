@@ -78,6 +78,20 @@ export class FileUploadController{
             .then(response => res.status(200).json(response))
             .catch(error => this.handleError(res, error));
     }
+
+    deleteFileDemoplot = async (req: Request, res: Response) => {
+        const {type, img } = req.params;
+        this.fileUploadService.deleteFile(type, img)
+            .then(response => res.status(200).json(response))
+            .catch(error => this.handleError(res, error));
+    }
+
+    deleteFileCharla = async (req: Request, res: Response) => {
+        const { idCharla, type, img } = req.params;
+        this.fileUploadService.deleteFileCharla(idCharla,type, img)
+            .then(response => res.status(200).json(response))
+            .catch(error => this.handleError(res, error));
+    }
     //! FOTO CHARLAS
 
     uploadFotoCharla  = (req: Request, res: Response) => {

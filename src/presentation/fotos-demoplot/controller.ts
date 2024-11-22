@@ -45,4 +45,11 @@ export class FotoDemoplotController {
             .catch(error => this.handleError(res, error));
 
     }
+
+    deleteFotoDemoplotById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        this.fotoDemoplotService.deleteFotoDemoplotById(id)
+            .then(response => res.status(200).json(response))
+            .catch(error => this.handleError(res, error));
+    }
 }

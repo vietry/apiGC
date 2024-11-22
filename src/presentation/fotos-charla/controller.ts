@@ -46,4 +46,11 @@ export class FotoCharlaController {
             .catch(error => this.handleError(res, error));
 
     }
+
+    deleteFotoCharlaById = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        this.fotoCharlaService.deleteFotoCharlaById(id)
+            .then(response => res.status(200).json(response))
+            .catch(error => this.handleError(res, error));
+    }
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateAsistenciaDto, UpdateAsistenciaDto, CustomError } from "../../domain";
+import { CreateAsistenciaDto, UpdateAsistenciaDto, CustomError, PaginationDto } from "../../domain";
 import { AsistenciaService } from "../services/charla/asistencia.service";
 
 
@@ -24,7 +24,7 @@ export class AsistenciaController {
     }
 
     getAsistencias = async (req: Request, res: Response) => {
-        const offset = parseInt(req.query.offset as string) || 0;
+        const offset = parseInt(req.query.offset as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
 
         this.asistenciaService.getAsistencias(offset, limit)
@@ -34,12 +34,23 @@ export class AsistenciaController {
 
     getAsistenciasByIdCharla = async (req: Request, res: Response) => {
         const idCharla = parseInt(req.params.idCharla);
-        const offset = parseInt(req.query.offset as string) || 0;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        if (isNaN(idCharla)) return res.status(400).json({ error: 'Invalid ID' });
     
-        if (isNaN(idCharla)) return res.status(400).json({ error: 'Invalid idCharla' });
+        this.asistenciaService.getAsistenciasByIdCharla(idCharla, paginationDto!)
+            .then(asistencias => res.status(200).json(asistencias))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getAsistenciasByUsuario = async (req: Request, res: Response) => {
+        const idUsuario = parseInt(req.params.idUsuario);
+
+        if (isNaN(idUsuario)) return res.status(400).json({ error: 'Invalid ID' });
     
-        this.asistenciaService.getAsistenciasByIdCharla(idCharla, offset, limit)
+        this.asistenciaService.getAsistenciasByUsuario(idUsuario)
             .then(asistencias => res.status(200).json(asistencias))
             .catch(error => this.handleError(res, error));
     }
@@ -60,6 +71,15 @@ export class AsistenciaController {
 
         this.asistenciaService.getAsistenciaById(id)
             .then(asistencia => res.status(200).json(asistencia))
+            .catch(error => this.handleError(res, error));
+    }
+
+        deleteAsistencia = async (req: Request, res: Response) => {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.asistenciaService.deleteAsistencia(id)
+            .then(asistencia => res.status(200).json({ message: 'Asistencia eliminada exitosamente', asistencia }))
             .catch(error => this.handleError(res, error));
     }
 }

@@ -124,4 +124,24 @@ export class FotoDemoplotService {
                 throw CustomError.internalServer(`${error}`);
             }
         }
+
+        async deleteFotoDemoplotById(id: number) {
+            try {
+                const fotoDemoplot = await prisma.fotoDemoPlot.findUnique({
+                    where: { id },
+                });
+        
+                if (!fotoDemoplot) {
+                    throw CustomError.badRequest(`FotoDemoplot with id ${id} does not exist`);
+                }
+        
+                await prisma.fotoDemoPlot.delete({
+                    where: { id },
+                });
+        
+                return { message: `FotoDemoplot with id ${id} has been successfully deleted` };
+            } catch (error) {
+                    throw CustomError.internalServer(`${error}`);
+            }
+        }
 }

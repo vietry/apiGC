@@ -29,6 +29,26 @@ export class FotoCharlaService {
         }
     }*/
 
+    async deleteFotoCharlaById(id: number) {
+        try {
+            const fotoCharla = await prisma.fotoCharla.findUnique({
+                where: { id },
+            });
+    
+            if (!fotoCharla) {
+                throw CustomError.badRequest(`FotoCharla with id ${id} does not exist`);
+            }
+    
+            await prisma.fotoCharla.delete({
+                where: { id },
+            });
+    
+            return { message: `FotoCharla with id ${id} has been successfully deleted` };
+        } catch (error) {
+                throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getFotosCharlas(paginationDto: PaginationDto) {
         const { page, limit } = paginationDto;
 
