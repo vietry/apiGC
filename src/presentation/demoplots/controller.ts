@@ -75,6 +75,21 @@ export class DemoplotController{
             .catch(error => this.handleError(res, error));
     }
 
+    getDemoplotsByAnioMesGte = async (req: Request, res: Response) => {
+        const idGte = +req.params.idGte;
+        const mes = +req.params.mes; // Parámetro del mes
+        const anio = +req.params.anio; // Parámetro del año
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        if (isNaN(idGte)) return res.status(400).json({ error: 'Invalid ID' });
+
+        this.demoplotService.getDemoplotsByAnioMesGte(idGte, mes, anio, paginationDto!)
+            .then(demoplots => res.status(200).json(demoplots))
+            .catch(error => this.handleError(res, error));
+    }
+
     countDemoplotsByGte = async (req: Request, res: Response) => {
         const idUsuario = +req.params.idUsuario;
 

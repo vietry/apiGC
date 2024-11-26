@@ -364,6 +364,165 @@ export class DemoplotService {
         }
     }
 
+    async getDemoplotsByAnioMesGte(idUsuario: number, mes: number, anio: number, paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
+
+        try {
+            const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
+            const endDate = new Date(anio, mes, 1); // Último día del mes
+            const gte = await prisma.gte.findFirst({
+                where: { idUsuario },
+                select: { id: true }
+            });
+
+            const [total, demoplots] = await Promise.all([
+                prisma.demoPlot.count({ where: { idGte: gte?.id } }),
+                prisma.demoPlot.findMany({
+                    where: { 
+                        idGte: gte?.id,
+                        programacion: {
+                        gte: startDate, // Mayor o igual al primer día del mes
+                        lte: endDate    // Menor o igual al último día del mes
+                    } },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    orderBy: {
+                        programacion: 'desc'
+                    },
+                    include: {
+                        Familia: {
+                            select: {
+                                nombre: true
+                            }
+                        },
+                        BlancoBiologico: {
+                            select: {
+                                cientifico: true,
+                                estandarizado: true
+                            }
+                        },
+                        ContactoDelPunto: {
+                            select: {
+                                nombre: true,
+                                cargo: true,
+                                apellido: true,
+                                email: true,
+                                celularA: true,
+                                tipo: true,
+                                PuntoContacto: true
+                                
+                            }
+                        },
+                        Cultivo: {
+                            select: {
+
+                                Variedad: {
+                                    select: {
+                                        nombre: true,
+                                        Vegetacion: true
+                                    }
+                                },
+                                Fundo: {
+                                    select: {
+                                        id: true,
+                                        nombre: true,
+                                        idDistrito: true,
+                                    }
+                                }
+                            }
+                        },
+                        Gte: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        nombres: true
+                                    }
+                                }
+                            }
+                        },
+                        Distrito: {
+                            
+                            select: {
+                                nombre: true,
+                                Provincia: {
+                                    select: {
+                                        nombre: true,
+                                        Departamento: {
+                                            select: {
+                                                nombre: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        
+                        FotoDemoPlot: true
+                    },
+                }),
+            ]);
+
+            //if (!demoplots) throw CustomError.badRequest(`No Demoplots found with Gte id ${gte!.id}`);
+
+            return {
+                page,
+                limit,
+                total,
+                next: `/api/demoplots/gte/${gte!.id}?page=${page + 1}&limit=${limit}`,
+                prev: page - 1 > 0 ? `/api/demoplots/gte/${gte!.id}?page=${page - 1}&limit=${limit}` : null,
+                demoplots: demoplots.map((demoplot) => {
+                    return {
+                        id: demoplot.id,
+                        titulo: demoplot.titulo,
+                        objetivo: demoplot.objetivo,
+                        hasCultivo: demoplot.hasCultivo,
+                        instalacion: demoplot.instalacion,
+                        seguimiento: demoplot.seguimiento,
+                        finalizacion: demoplot.finalizacion,
+                        estado: demoplot.estado,
+                        gradoInfestacion: demoplot.gradoInfestacion,
+                        dosis: demoplot.dosis,
+                        validacion: demoplot.validacion,
+                        resultado: demoplot.resultado,
+                        programacion: demoplot.programacion,
+                        diaCampo: demoplot.diaCampo,
+                        idCultivo: demoplot.idCultivo,
+                        idContactoP: demoplot.idContactoP,
+                        idBlanco: demoplot.idBlanco,
+                        idDistrito: demoplot.idDistrito,
+                        idFamilia: demoplot.idFamilia,
+                        idGte: demoplot.idGte,
+                        familia: demoplot.Familia?.nombre,
+                        blancoCientifico: demoplot.BlancoBiologico.cientifico,
+                        blancoComun: demoplot.BlancoBiologico.estandarizado,
+                        contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
+                        cargo: demoplot.ContactoDelPunto.cargo,
+                        tipoContacto: demoplot.ContactoDelPunto.tipo,
+                        emailContacto:demoplot.ContactoDelPunto.email,
+                        celularContacto:demoplot.ContactoDelPunto.celularA,
+                        idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
+                        punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                        idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
+                        cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                        variedad: demoplot.Cultivo.Variedad.nombre,
+                        FotoDemoPlot: demoplot.FotoDemoPlot,
+                        nombreGte: demoplot.Gte.Usuario?.nombres,
+                        departamento: demoplot.Distrito.Provincia.Departamento.nombre,
+                        provincia: demoplot.Distrito.Provincia.nombre,
+                        distrito: demoplot.Distrito.nombre,
+                        idFundo: demoplot.Cultivo.Fundo.id,
+                        fundo: demoplot.Cultivo.Fundo.nombre,
+                        createdAt: demoplot.createdAt,
+                        updatedAt: demoplot.updatedAt
+                    }
+                })
+            };
+
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getDemoplotById(id: number) {
         try {
             const demoplot = await prisma.demoPlot.findUnique({
@@ -831,9 +990,11 @@ export class DemoplotService {
                 by: ['idGte'],
                 where: {
                     estado: {
-                        in: ['Completado', 'Día campo']
+                        in: ['Completado', 
+                            'Día campo',
+                        ]
                     },
-                    programacion: {
+                    finalizacion: {
                         gte: startDate, // Mayor o igual al primer día del mes
                         lte: endDate    // Menor o igual al último día del mes
                     }
@@ -855,6 +1016,7 @@ export class DemoplotService {
                 return {
                     nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario!.apellidos}`,
                     completados: completedCount,
+                    diasCampo: 0, 
                     cumplimiento:  completedCount/60,
                     idGte: gte.id,
                     rank: 0
