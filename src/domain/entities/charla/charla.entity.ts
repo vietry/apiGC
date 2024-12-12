@@ -16,7 +16,7 @@ export class CharlaEntity {
         public cancelacion: Date | null,
         public motivo: string | null,
         public idVegetacion: number,
-        public idBlanco: number,
+        public idBlanco: number | null,
         public idDistrito: string | null,
         public idFamilia: number | null,
         public idGte: number,
@@ -39,7 +39,7 @@ export class CharlaEntity {
         } = object;
 
         if (!idVegetacion) throw CustomError.badRequest('idVegetacion is required');
-        if (!idBlanco) throw CustomError.badRequest('idBlanco is required');
+        //if (!idBlanco) throw CustomError.badRequest('idBlanco is required');
         if (!idGte) throw CustomError.badRequest('idGte is required');
         if (!idTienda) throw CustomError.badRequest('idTienda is required');
 

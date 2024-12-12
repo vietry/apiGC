@@ -14,7 +14,7 @@ export class UpdateCharlaDto {
         public readonly cancelacion?: Date | null,
         public readonly motivo?: string | null,
         public readonly idVegetacion?: number,
-        public readonly idBlanco?: number,
+        public readonly idBlanco?: number | null,
         public readonly idDistrito?: string | null,
         public readonly idFamilia?: number | null,
         public readonly idGte?: number,
@@ -46,9 +46,6 @@ export class UpdateCharlaDto {
         if (this.idFamilia !== undefined) returnObj.idFamilia = this.idFamilia;
         if (this.idGte !== undefined) returnObj.idGte = this.idGte;
         if (this.idTienda !== undefined) returnObj.idTienda = this.idTienda;
-        //if (this.createdAt !== undefined) returnObj.createdAt = this.createdAt;
-        //if (this.createdBy !== undefined) returnObj.createdBy = this.createdBy;
-        //if (this.updatedAt !== undefined) returnObj.updatedAt = this.updatedAt;
         if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
 
         return returnObj;
@@ -74,12 +71,12 @@ export class UpdateCharlaDto {
 
         if (hectareas !== undefined && typeof hectareas !== 'number') {
             hectareasNumber = parseFloat(hectareas);
-            //if (isNaN(hectareasNumber)) return ['hectareas debe ser un número válido'];
+            
         }
 
         if (dosis !== undefined && typeof dosis !== 'number') {
             dosisNumber = parseFloat(dosis);
-            //if (isNaN(dosisNumber)) return ['dosis debe ser un número válido'];
+            
         }
 
         return [

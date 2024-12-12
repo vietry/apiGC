@@ -3,10 +3,8 @@ import { CreateDemoplotDto, CustomError, PaginationDto, UpdateDemoplotDto } from
 
 export class DemoplotService {
     
-    
-
     // DI
-    constructor() {}
+    //constructor() {}
 
     async createDemoplot(createDemoplotDto: CreateDemoplotDto) {
         try {
@@ -21,6 +19,7 @@ export class DemoplotService {
                     instalacion: createDemoplotDto.instalacion,
                     seguimiento: createDemoplotDto.seguimiento,
                     finalizacion: createDemoplotDto.finalizacion,
+                    presentacion: createDemoplotDto.presentacion,
                     estado: createDemoplotDto.estado,
                     gradoInfestacion: createDemoplotDto.gradoInfestacion,
                     dosis: createDemoplotDto.dosis,
@@ -34,8 +33,14 @@ export class DemoplotService {
                     idDistrito: createDemoplotDto.idDistrito,
                     idFamilia: createDemoplotDto.idFamilia,
                     idGte: createDemoplotDto.idGte,
+                    venta: createDemoplotDto.venta,
+                    fecVenta: createDemoplotDto.fecVenta,
+                    cantidad: createDemoplotDto.cantidad,
+                    importe: createDemoplotDto.importe,
                     createdAt: currentDate,
+                    createdBy: createDemoplotDto.createdBy,
                     updatedAt: currentDate,
+                    updatedBy: createDemoplotDto.updatedBy,
                 },
             });
 
@@ -56,7 +61,8 @@ export class DemoplotService {
                 where: { id: updateDemoplotDto.id },
                 data: {
                     ...updateDemoplotDto.values,
-                    updatedAt: currentDate,
+                    updatedAt: updateDemoplotDto.updatedAt  ?? currentDate
+                    //updatedAt:  currentDate
                 },
             });
 
@@ -167,6 +173,7 @@ export class DemoplotService {
                         instalacion: demoplot.instalacion,
                         seguimiento: demoplot.seguimiento,
                         finalizacion: demoplot.finalizacion,
+                        presentacion: demoplot.presentacion,
                         estado: demoplot.estado,
                         gradoInfestacion: demoplot.gradoInfestacion,
                         dosis: demoplot.dosis,
@@ -200,8 +207,14 @@ export class DemoplotService {
                         distrito: demoplot.Distrito.nombre,
                         idFundo: demoplot.Cultivo.Fundo.id,
                         fundo: demoplot.Cultivo.Fundo.nombre,
+                        venta: demoplot.venta,
+                        fecVenta: demoplot.fecVenta,
+                        cantidad: demoplot.cantidad,
+                        importe: demoplot.importe,
                         createdAt: demoplot.createdAt,
-                        updatedAt: demoplot.updatedAt
+                        createdBy: demoplot.createdBy,
+                        updatedAt: demoplot.updatedAt,
+                        updatedBy: demoplot.updatedBy
                     }
                 })
             };
@@ -320,6 +333,7 @@ export class DemoplotService {
                         instalacion: demoplot.instalacion,
                         seguimiento: demoplot.seguimiento,
                         finalizacion: demoplot.finalizacion,
+                        presentacion: demoplot.presentacion,
                         estado: demoplot.estado,
                         gradoInfestacion: demoplot.gradoInfestacion,
                         dosis: demoplot.dosis,
@@ -353,8 +367,14 @@ export class DemoplotService {
                         distrito: demoplot.Distrito.nombre,
                         idFundo: demoplot.Cultivo.Fundo.id,
                         fundo: demoplot.Cultivo.Fundo.nombre,
+                        venta: demoplot.venta,
+                        fecVenta: demoplot.fecVenta,
+                        cantidad: demoplot.cantidad,
+                        importe: demoplot.importe,
                         createdAt: demoplot.createdAt,
-                        updatedAt: demoplot.updatedAt
+                        createdBy: demoplot.createdBy,
+                        updatedAt: demoplot.updatedAt,
+                        updatedBy: demoplot.updatedBy
                     }
                 })
             };
@@ -479,6 +499,7 @@ export class DemoplotService {
                         instalacion: demoplot.instalacion,
                         seguimiento: demoplot.seguimiento,
                         finalizacion: demoplot.finalizacion,
+                        presentacion: demoplot.presentacion,
                         estado: demoplot.estado,
                         gradoInfestacion: demoplot.gradoInfestacion,
                         dosis: demoplot.dosis,
@@ -512,8 +533,13 @@ export class DemoplotService {
                         distrito: demoplot.Distrito.nombre,
                         idFundo: demoplot.Cultivo.Fundo.id,
                         fundo: demoplot.Cultivo.Fundo.nombre,
+                        fecVenta: demoplot.fecVenta,
+                        cantidad: demoplot.cantidad,
+                        importe: demoplot.importe,
                         createdAt: demoplot.createdAt,
-                        updatedAt: demoplot.updatedAt
+                        createdBy: demoplot.createdBy,
+                        updatedAt: demoplot.updatedAt,
+                        updatedBy: demoplot.updatedBy
                     }
                 })
             };
@@ -609,6 +635,7 @@ export class DemoplotService {
                 instalacion: demoplot.instalacion,
                 seguimiento: demoplot.seguimiento,
                 finalizacion: demoplot.finalizacion,
+                presentacion: demoplot.presentacion,
                 estado: demoplot.estado,
                 gradoInfestacion: demoplot.gradoInfestacion,
                 dosis: demoplot.dosis,
@@ -642,8 +669,14 @@ export class DemoplotService {
                 idFundo: demoplot.Cultivo.Fundo.id,
                 fundo: demoplot.Cultivo.Fundo.nombre,
                 fotosDemoplot: demoplot.FotoDemoPlot,
+                venta: demoplot.venta,
+                fecVenta: demoplot.fecVenta,
+                cantidad: demoplot.cantidad,
+                importe: demoplot.importe,
                 createdAt: demoplot.createdAt,
-                        updatedAt: demoplot.updatedAt
+                createdBy: demoplot.createdBy,
+                updatedAt: demoplot.updatedAt,
+                updatedBy: demoplot.updatedBy
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -738,7 +771,7 @@ export class DemoplotService {
                 by: ['estado'],
                 where: {
                     idGte: gte.id,
-                    programacion: {
+                    updatedAt: {
                         gte: startDate, // Mayor o igual al primer día del mes
                         lte: endDate    // Menor o igual al último día del mes
                     }
@@ -795,6 +828,132 @@ export class DemoplotService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async getDemoplotStatsByGteWithRank(idGte: number, mes: number, anio: number) {
+        try {
+            // Obtener todos los GTEs junto con los nombres de los usuarios
+            const gtes = await prisma.gte.findMany({
+                select: {
+                    id: true,
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                },
+            });
+    
+            if (!gtes.some((gte) => gte.id === idGte)) {
+                throw CustomError.badRequest(`GTE with id ${idGte} does not exist`);
+            }
+    
+            // Calcular el rango de fechas para el mes específico
+            const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
+            const endDate = new Date(anio, mes, 1); // Primer día del mes siguiente
+    
+            // Contar demoplots agrupados por idGte y estado
+            const demoplotCounts = await prisma.demoPlot.groupBy({
+                by: ['idGte', 'estado'],
+                where: {
+                    updatedAt: {
+                        gte: startDate,
+                        lte: endDate,
+                    },
+                },
+                _count: {
+                    estado: true,
+                },
+            });
+    
+            // Inicializar una estructura para acumular datos por GTE
+            const gteStats = gtes.map((gte) => ({
+                idGte: gte.id,
+                nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario!.apellidos}`,
+                todos: 0,
+                programados: 0,
+                seguimiento: 0,
+                completados: 0,
+                cancelados: 0,
+                reprogramados: 0,
+                diaCampo: 0,
+                iniciados: 0,
+                cumplimiento: 0, // Se calculará más adelante
+                cumpDiaCampo: 0,
+                rank: 0, // Se asignará más adelante
+            }));
+    
+            // Crear un mapa para facilitar la actualización de estadísticas por idGte
+            const gteStatsMap = Object.fromEntries(gteStats.map((gte) => [gte.idGte, gte]));
+    
+            // Asignar los valores de los contadores según los resultados de la consulta
+            demoplotCounts.forEach((demoplot) => {
+                const gteStat = gteStatsMap[demoplot.idGte];
+                if (gteStat) {
+                    gteStat.todos += demoplot._count.estado;
+                    switch (demoplot.estado) {
+                        case 'Programado':
+                            gteStat.programados += demoplot._count.estado;
+                            break;
+                        case 'Seguimiento':
+                            gteStat.seguimiento += demoplot._count.estado;
+                            break;
+                        case 'Completado':
+                            gteStat.completados += demoplot._count.estado;
+                            break;
+                        case 'Cancelado':
+                            gteStat.cancelados += demoplot._count.estado;
+                            break;
+                        case 'Reprogramado':
+                            gteStat.reprogramados += demoplot._count.estado;
+                            break;
+                        case 'Día campo':
+                            gteStat.diaCampo += demoplot._count.estado;
+                            break;
+                        case 'Iniciado':
+                            gteStat.iniciados += demoplot._count.estado;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+    
+            // Calcular el cumplimiento para cada GTE
+            const objetivo = 60; // Ajusta este valor según tu lógica de negocio
+            const objDiaCampo = 4;
+
+            gteStats.forEach((gte) => {
+                gte.cumpDiaCampo = gte.diaCampo / objDiaCampo;
+            });
+
+            gteStats.forEach((gte) => {
+                gte.cumplimiento = (gte.completados + gte.diaCampo) / objetivo;
+            });
+    
+            // Ordenar por número de completados en orden descendente
+            gteStats.sort((a, b) => b.completados - a.completados);
+    
+            // Asignar rangos
+            let rank = 1;
+            let previousCount = null;
+            for (let i = 0; i < gteStats.length; i++) {
+                if (previousCount !== null && gteStats[i].completados < previousCount) {
+                    rank = i + 1;
+                }
+                gteStats[i].rank = rank;
+                previousCount = gteStats[i].completados;
+            }
+    
+            // Extraer los datos del GTE específico
+            const gteData = gteStatsMap[idGte];
+    
+            return gteData;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+    
 
     async countDemoplotsByMonthAnioRtc(idUsuario: number, mes: number, anio: number) {
         try {

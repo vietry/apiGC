@@ -8,6 +8,7 @@ export class CreateDemoplotDto {
         public readonly instalacion: Date | null,
         public readonly seguimiento: Date | null,
         public readonly finalizacion: Date | null,
+        public readonly presentacion: Date | null,
         public readonly estado: string | null,
         public readonly gradoInfestacion: string | null,
         public readonly dosis: number | null,
@@ -21,13 +22,22 @@ export class CreateDemoplotDto {
         public readonly idGte: number,
         public readonly programacion: Date | null,
         public readonly diaCampo: boolean | null,
+        public readonly venta: boolean | null,
+        public readonly fecVenta: Date | null,
+        public readonly cantidad: number | null,
+        public readonly importe: number | null,
+        public readonly createdBy: number | null,
+        public readonly updatedBy: number | null
     ) {}
 
     static async create(object: { [key: string]: any }): Promise<[string?, CreateDemoplotDto?]> {
         const {
-            titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
+            titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,presentacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idFamilia, idGte, programacion, diaCampo
+            idDistrito, idFamilia, idGte, programacion, diaCampo, venta, fecVenta, cantidad, importe,
+                       createdBy, 
+
+                       updatedBy
         } = object;
 
         if (!idCultivo) return ['idCultivo faltante'];
@@ -78,6 +88,7 @@ export class CreateDemoplotDto {
                 instalacion,
                 seguimiento,
                 finalizacion,
+                presentacion,
                 estado,
                 gradoInfestacion,
                 dosisNumber,
@@ -90,7 +101,14 @@ export class CreateDemoplotDto {
                 idFamiliaNumber,
                 idGteNumber,
                 programacion, 
-                diaCampo
+                diaCampo,
+                venta,
+                fecVenta,
+                cantidad,
+                importe,
+                                createdBy, 
+                                updatedBy
+
             )
         ];
     }

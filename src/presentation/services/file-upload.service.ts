@@ -82,7 +82,6 @@ export class FileUploadService{
 
         const uploadResult = await this.uploadSingle(file, folder, validExtensions);
 
-        //const currentDate = new Date();
         const nombreFoto = uploadResult.fileName;
         const rutaFoto = `${folder}/${uploadResult.fileName}`;
         const tipo = file.mimetype.split('/').at(1) ?? '';
@@ -97,6 +96,8 @@ export class FileUploadService{
                 tipo: tipo,
                 latitud: createFotoDemoplotDto.latitud,
                 longitud: createFotoDemoplotDto.longitud,
+                createdBy: createFotoDemoplotDto.createdBy,
+                updatedBy: createFotoDemoplotDto.updatedBy,
                 createdAt: currentDate,
                 updatedAt: currentDate,
             }

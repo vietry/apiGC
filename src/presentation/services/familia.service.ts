@@ -79,4 +79,31 @@ export class FamiliaService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async getFamiliasEscuela() {
+        try {
+            const familias = await prisma.familia.findMany({
+                where: {
+                    escuela: true
+                },
+                include: {
+                    Empresa: true,
+                }
+            });
+
+            return familias.map((familia) => ({
+                id: familia.id,
+                codigo:  familia.codigo.trim(),
+                nombre: familia.nombre.trim(),
+                idEmpresa: familia.idEmpresa,
+                escuela: familia.escuela,
+                createdAt: familia.createdAt,
+                updatedAt: familia.updatedAt,
+                empresaNombre: familia.Empresa.nomEmpresa,
+                codiEmpresa: `0${familia.Empresa.id}`
+            }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 }

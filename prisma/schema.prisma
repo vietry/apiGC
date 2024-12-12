@@ -19,26 +19,31 @@ model Foto {
 }
 
 model Usuario {
-  id                                       Int           @id(map: "PK__Usuario__3213E83FD8E5D762") @default(autoincrement())
-  nombres                                  String        @db.VarChar(45)
-  apellidos                                String?       @db.VarChar(45)
-  email                                    String        @db.VarChar(40)
-  emailValidado                            Boolean?
-  password                                 String        @db.VarChar(255)
-  rol                                      String?       @db.VarChar(10)
-  celular                                  String?       @db.VarChar(15)
-  idFoto                                   Int?
-  createdAt                                DateTime?     @db.DateTime
-  updatedAt                                DateTime?     @db.DateTime
-  Asistencia_Asistencia_createdByToUsuario Asistencia[]  @relation("Asistencia_createdByToUsuario")
-  Asistencia_Asistencia_updatedByToUsuario Asistencia[]  @relation("Asistencia_updatedByToUsuario")
-  Charla_Charla_createdByToUsuario         Charla[]      @relation("Charla_createdByToUsuario")
-  Charla_Charla_updatedByToUsuario         Charla[]      @relation("Charla_updatedByToUsuario")
-  Colaborador                              Colaborador[]
-  FotoCharla_FotoCharla_createdByToUsuario FotoCharla[]  @relation("FotoCharla_createdByToUsuario")
-  FotoCharla_FotoCharla_updatedByToUsuario FotoCharla[]  @relation("FotoCharla_updatedByToUsuario")
-  Gte                                      Gte[]
-  Foto                                     Foto?         @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
+  id                                           Int               @id(map: "PK__Usuario__3213E83FD8E5D762") @default(autoincrement())
+  nombres                                      String            @db.VarChar(45)
+  apellidos                                    String?           @db.VarChar(45)
+  email                                        String            @db.VarChar(40)
+  emailValidado                                Boolean?
+  password                                     String            @db.VarChar(255)
+  rol                                          String?           @db.VarChar(10)
+  celular                                      String?           @db.VarChar(15)
+  idFoto                                       Int?
+  createdAt                                    DateTime?         @db.DateTime
+  updatedAt                                    DateTime?         @db.DateTime
+  Asistencia_Asistencia_createdByToUsuario     Asistencia[]      @relation("Asistencia_createdByToUsuario")
+  Asistencia_Asistencia_updatedByToUsuario     Asistencia[]      @relation("Asistencia_updatedByToUsuario")
+  Charla_Charla_createdByToUsuario             Charla[]          @relation("Charla_createdByToUsuario")
+  Charla_Charla_updatedByToUsuario             Charla[]          @relation("Charla_updatedByToUsuario")
+  Colaborador                                  Colaborador[]
+  DemoPlot_DemoPlot_createdByToUsuario         DemoPlot[]        @relation("DemoPlot_createdByToUsuario")
+  DemoPlot_DemoPlot_updatedByToUsuario         DemoPlot[]        @relation("DemoPlot_updatedByToUsuario")
+  FotoCharla_FotoCharla_createdByToUsuario     FotoCharla[]      @relation("FotoCharla_createdByToUsuario")
+  FotoCharla_FotoCharla_updatedByToUsuario     FotoCharla[]      @relation("FotoCharla_updatedByToUsuario")
+  FotoDemoPlot_FotoDemoPlot_createdByToUsuario FotoDemoPlot[]    @relation("FotoDemoPlot_createdByToUsuario")
+  FotoDemoPlot_FotoDemoPlot_updatedByToUsuario FotoDemoPlot[]    @relation("FotoDemoPlot_updatedByToUsuario")
+  FotoDemoPlotLog                              FotoDemoPlotLog[]
+  Gte                                          Gte[]
+  Foto                                         Foto?             @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
 }
 
 model Area {
@@ -227,17 +232,19 @@ model Empresa {
 }
 
 model Familia {
-  id        Int        @id(map: "PK__Familia__3213E83F108F037C") @default(autoincrement())
-  codigo    String     @db.VarChar(7)
-  nombre    String     @db.VarChar(60)
-  idEmpresa Int
-  enfoque   Boolean?
-  createdAt DateTime?  @db.DateTime
-  updatedAt DateTime?  @db.DateTime
-  Articulo  Articulo[]
-  Charla    Charla[]
-  DemoPlot  DemoPlot[]
-  Empresa   Empresa    @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Empresa_Familia1")
+  id             Int              @id(map: "PK__Familia__3213E83F108F037C") @default(autoincrement())
+  codigo         String           @db.VarChar(7)
+  nombre         String           @db.VarChar(60)
+  idEmpresa      Int
+  enfoque        Boolean?
+  createdAt      DateTime?        @db.DateTime
+  updatedAt      DateTime?        @db.DateTime
+  escuela        Boolean?
+  Articulo       Articulo[]
+  Charla         Charla[]
+  CharlaProducto CharlaProducto[]
+  DemoPlot       DemoPlot[]
+  Empresa        Empresa          @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Empresa_Familia1")
 }
 
 model Fundo {
@@ -407,62 +414,77 @@ model Todo {
 }
 
 model BlancoBiologico {
-  id            Int        @id(map: "PK__BlancoBi__3213E83FFBD81CEA") @default(autoincrement())
-  cientifico    String?    @db.VarChar(45)
-  estandarizado String?    @db.VarChar(45)
-  idVegetacion  Int
-  createdAt     DateTime?  @db.DateTime
-  updatedAt     DateTime?  @db.DateTime
-  Vegetacion    Vegetacion @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Blanco_Vegetacion1")
-  Charla        Charla[]
-  DemoPlot      DemoPlot[]
+  id             Int              @id(map: "PK__BlancoBi__3213E83FFBD81CEA") @default(autoincrement())
+  cientifico     String?          @db.VarChar(45)
+  estandarizado  String?          @db.VarChar(45)
+  idVegetacion   Int
+  createdAt      DateTime?        @db.DateTime
+  updatedAt      DateTime?        @db.DateTime
+  Vegetacion     Vegetacion       @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Blanco_Vegetacion1")
+  Charla         Charla[]
+  CharlaProducto CharlaProducto[]
+  DemoPlot       DemoPlot[]
 }
 
 model DemoPlot {
-  id               Int             @id(map: "PK__DemoPlot__3213E83F320BC81B") @default(autoincrement())
-  titulo           String?         @db.VarChar(255)
-  objetivo         String?         @db.VarChar(255)
-  instalacion      DateTime?       @db.DateTime
-  finalizacion     DateTime?       @db.DateTime
-  estado           String?         @db.VarChar(12)
-  validacion       Boolean?
-  idCultivo        Int
-  idContactoP      Int
-  idBlanco         Int
-  idDistrito       String          @db.VarChar(6)
-  idGte            Int
-  createdAt        DateTime?       @db.DateTime
-  updatedAt        DateTime?       @db.DateTime
-  resultado        String?         @db.VarChar(255)
-  seguimiento      DateTime?       @db.DateTime
-  dosis            Decimal?        @db.Decimal(6, 2)
-  gradoInfestacion String?         @db.VarChar(5)
-  hasCultivo       Decimal?        @db.Decimal(6, 2)
-  idFamilia        Int?
-  diaCampo         Boolean?
-  programacion     DateTime?       @db.DateTime
-  BlancoBiologico  BlancoBiologico @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
-  ContactoDelPunto ContactoPunto   @relation(fields: [idContactoP], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_ContactoP1")
-  Cultivo          Cultivo         @relation(fields: [idCultivo], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Cultivo1")
-  Familia          Familia?        @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_Familia1")
-  Gte              Gte             @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Gte1")
-  Distrito         Distrito        @relation(fields: [idDistrito], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Provincia1")
-  FotoDemoPlot     FotoDemoPlot[]
+  id                                  Int               @id(map: "PK__DemoPlot__3213E83F320BC81B") @default(autoincrement())
+  titulo                              String?           @db.VarChar(255)
+  objetivo                            String?           @db.VarChar(255)
+  instalacion                         DateTime?         @db.DateTime
+  finalizacion                        DateTime?         @db.DateTime
+  estado                              String?           @db.VarChar(12)
+  validacion                          Boolean?
+  idCultivo                           Int
+  idContactoP                         Int
+  idBlanco                            Int
+  idDistrito                          String            @db.VarChar(6)
+  idGte                               Int
+  createdAt                           DateTime?         @db.DateTime
+  updatedAt                           DateTime?         @db.DateTime
+  resultado                           String?           @db.VarChar(255)
+  seguimiento                         DateTime?         @db.DateTime
+  dosis                               Decimal?          @db.Decimal(6, 2)
+  gradoInfestacion                    String?           @db.VarChar(5)
+  hasCultivo                          Decimal?          @db.Decimal(6, 2)
+  idFamilia                           Int?
+  diaCampo                            Boolean?
+  programacion                        DateTime?         @db.DateTime
+  presentacion                        DateTime?         @db.DateTime
+  venta                               Boolean?
+  cantidad                            Decimal?          @db.Decimal(6, 2)
+  importe                             Decimal?          @db.Decimal(6, 2)
+  createdBy                           Int?
+  updatedBy                           Int?
+  fecVenta                            DateTime?         @db.DateTime
+  BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
+  ContactoDelPunto                    ContactoPunto     @relation(fields: [idContactoP], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_ContactoP1")
+  Usuario_DemoPlot_createdByToUsuario Usuario?          @relation("DemoPlot_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_createdBy1")
+  Cultivo                             Cultivo           @relation(fields: [idCultivo], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Cultivo1")
+  Familia                             Familia?          @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_Familia1")
+  Gte                                 Gte               @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Gte1")
+  Distrito                            Distrito          @relation(fields: [idDistrito], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Provincia1")
+  Usuario_DemoPlot_updatedByToUsuario Usuario?          @relation("DemoPlot_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_updatedBy1")
+  FotoDemoPlot                        FotoDemoPlot[]
+  FotoDemoPlotLog                     FotoDemoPlotLog[]
 }
 
 model FotoDemoPlot {
-  id         Int       @id(map: "PK__FotoDemo__3213E83F1BF52518") @default(autoincrement())
-  idDemoPlot Int
-  tipo       String?   @db.VarChar(10)
-  latitud    Decimal?  @db.Decimal(10, 6)
-  longitud   Decimal?  @db.Decimal(10, 6)
-  createdAt  DateTime? @db.DateTime
-  updatedAt  DateTime? @db.DateTime
-  rutaFoto   String?   @db.VarChar(255)
-  comentario String?   @db.VarChar(255)
-  nombre     String?   @db.VarChar(50)
-  estado     String?   @db.VarChar(15)
-  DemoPlot   DemoPlot  @relation(fields: [idDemoPlot], references: [id], onUpdate: NoAction, map: "fk_Foto_DemoPlot1")
+  id                                      Int       @id(map: "PK__FotoDemo__3213E83F1BF52518") @default(autoincrement())
+  idDemoPlot                              Int
+  tipo                                    String?   @db.VarChar(10)
+  latitud                                 Decimal?  @db.Decimal(10, 6)
+  longitud                                Decimal?  @db.Decimal(10, 6)
+  createdAt                               DateTime? @db.DateTime
+  updatedAt                               DateTime? @db.DateTime
+  rutaFoto                                String?   @db.VarChar(255)
+  comentario                              String?   @db.VarChar(255)
+  nombre                                  String?   @db.VarChar(50)
+  estado                                  String?   @db.VarChar(15)
+  createdBy                               Int?
+  updatedBy                               Int?
+  DemoPlot                                DemoPlot  @relation(fields: [idDemoPlot], references: [id], onUpdate: NoAction, map: "fk_Foto_DemoPlot1")
+  Usuario_FotoDemoPlot_createdByToUsuario Usuario?  @relation("FotoDemoPlot_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_FotoD_createdBy1")
+  Usuario_FotoDemoPlot_updatedByToUsuario Usuario?  @relation("FotoDemoPlot_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_FotoD_updatedBy1")
 }
 
 model Gte {
@@ -630,38 +652,39 @@ model Asistencia {
 }
 
 model Charla {
-  id                                Int             @id(map: "PK__Charla__3213E83F5A8BC2A3") @default(autoincrement())
-  tema                              String?         @db.VarChar(255)
+  id                                Int              @id(map: "PK__Charla__3213E83F5A8BC2A3") @default(autoincrement())
+  tema                              String?          @db.VarChar(255)
   asistentes                        Int?
-  hectareas                         Decimal?        @db.Decimal(6, 2)
-  dosis                             Decimal?        @db.Decimal(6, 2)
+  hectareas                         Decimal?         @db.Decimal(6, 2)
+  dosis                             Decimal?         @db.Decimal(6, 2)
   efectivo                          Boolean?
-  comentarios                       String?         @db.VarChar(255)
+  comentarios                       String?          @db.VarChar(255)
   demoplots                         Int?
-  estado                            String?         @db.VarChar(12)
-  programacion                      DateTime?       @db.DateTime
-  ejecucion                         DateTime?       @db.DateTime
-  cancelacion                       DateTime?       @db.DateTime
-  motivo                            String?         @db.VarChar(255)
+  estado                            String?          @db.VarChar(12)
+  programacion                      DateTime?        @db.DateTime
+  ejecucion                         DateTime?        @db.DateTime
+  cancelacion                       DateTime?        @db.DateTime
+  motivo                            String?          @db.VarChar(255)
   idVegetacion                      Int
-  idBlanco                          Int
-  idDistrito                        String?         @db.VarChar(6)
+  idBlanco                          Int?
+  idDistrito                        String?          @db.VarChar(6)
   idFamilia                         Int?
   idGte                             Int
   idTienda                          Int
-  createdAt                         DateTime?       @db.DateTime
+  createdAt                         DateTime?        @db.DateTime
   createdBy                         Int?
-  updatedAt                         DateTime?       @db.DateTime
+  updatedAt                         DateTime?        @db.DateTime
   updatedBy                         Int?
   Asistencia                        Asistencia[]
-  BlancoBiologico                   BlancoBiologico @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_Charla_Blanco1")
-  Familia                           Familia?        @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Familia1")
-  Gte                               Gte             @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_Charla_Gte1")
-  Distrito                          Distrito?       @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Provincia1")
-  PuntoContacto                     PuntoContacto   @relation(fields: [idTienda], references: [id], onUpdate: NoAction, map: "fk_Charla_Tienda1")
-  Usuario_Charla_createdByToUsuario Usuario?        @relation("Charla_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Usuario1")
-  Usuario_Charla_updatedByToUsuario Usuario?        @relation("Charla_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Usuario2")
-  Vegetacion                        Vegetacion      @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Charla_Vegetacion1")
+  BlancoBiologico                   BlancoBiologico? @relation(fields: [idBlanco], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Blanco1")
+  Familia                           Familia?         @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Familia1")
+  Gte                               Gte              @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_Charla_Gte1")
+  Distrito                          Distrito?        @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Provincia1")
+  PuntoContacto                     PuntoContacto    @relation(fields: [idTienda], references: [id], onUpdate: NoAction, map: "fk_Charla_Tienda1")
+  Usuario_Charla_createdByToUsuario Usuario?         @relation("Charla_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Usuario1")
+  Usuario_Charla_updatedByToUsuario Usuario?         @relation("Charla_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Usuario2")
+  Vegetacion                        Vegetacion       @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Charla_Vegetacion1")
+  CharlaProducto                    CharlaProducto[]
   FotoCharla                        FotoCharla[]
 }
 
@@ -682,4 +705,40 @@ model FotoCharla {
   Charla                                Charla    @relation(fields: [idCharla], references: [id], onUpdate: NoAction, map: "fk_Foto_Charla1")
   Usuario_FotoCharla_createdByToUsuario Usuario?  @relation("FotoCharla_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_FotoCharla_Usuario1")
   Usuario_FotoCharla_updatedByToUsuario Usuario?  @relation("FotoCharla_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_FotoCharla_Usuario2")
+}
+
+model CharlaProducto {
+  id              Int              @id(map: "PK__CharlaPr__3213E83FC1BC5952") @default(autoincrement())
+  idCharla        Int
+  idFamilia       Int
+  idBlanco        Int?
+  createdAt       DateTime?        @db.DateTime
+  createdBy       Int?
+  updatedAt       DateTime?        @db.DateTime
+  updatedBy       Int?
+  BlancoBiologico BlancoBiologico? @relation(fields: [idBlanco], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_CharlaProducto_Blanco1")
+  Charla          Charla           @relation(fields: [idCharla], references: [id], onUpdate: NoAction, map: "fk_CharlaProducto_Charla1")
+  Familia         Familia          @relation(fields: [idFamilia], references: [id], onUpdate: NoAction, map: "fk_CharlaProducto_Familia1")
+}
+
+model FotoDemoPlotLog {
+  id             Int       @id(map: "PK__FotoDemo__3213E83F0948CE0D") @default(autoincrement())
+  idFotoDemoPlot Int?
+  idDemoPlot     Int
+  nombre         String?   @db.VarChar(50)
+  comentario     String?   @db.VarChar(255)
+  rutaFoto       String?   @db.VarChar(255)
+  tipo           String?   @db.VarChar(10)
+  latitud        Decimal?  @db.Decimal(10, 6)
+  longitud       Decimal?  @db.Decimal(10, 6)
+  estado         String?   @db.VarChar(15)
+  createdAt      DateTime? @db.DateTime
+  createdBy      Int?
+  updatedAt      DateTime? @db.DateTime
+  updatedBy      Int?
+  deletedAt      DateTime  @db.DateTime
+  deletedBy      Int
+  motivo         String    @db.VarChar(255)
+  DemoPlot       DemoPlot  @relation(fields: [idDemoPlot], references: [id], onUpdate: NoAction, map: "fk_FotoDLog_DemoPlot1")
+  Usuario        Usuario   @relation(fields: [deletedBy], references: [id], onUpdate: NoAction, map: "fk_FotoDLog_Usuario1")
 }

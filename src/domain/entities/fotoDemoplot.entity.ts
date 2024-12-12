@@ -12,17 +12,21 @@ export class FotoDemoplotEntity {
         public tipo: string | null,
         public latitud: number | null,
         public longitud: number | null,
-        // public createdAt: Date | null,
-        // public updatedAt: Date | null
+        //public createdAt: Date | null,
+        public createdBy: number | null,
+        //public updatedAt: Date | null,
+        public updatedBy: number | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): FotoDemoplotEntity {
         const {
-            id, idDemoPlot, nombre, comentario, estado, rutaFoto, tipo, latitud, longitud, /* createdAt, updatedAt */
+            id, idDemoPlot, nombre, comentario, estado, rutaFoto, tipo, latitud, longitud,             //createdAt, 
+            createdBy, 
+            //updatedAt, 
+            updatedBy
         } = object;
 
         if (!idDemoPlot) throw CustomError.badRequest('idDemoPlot is required');
-        //if (!rutaFoto) throw CustomError.badRequest('rutaFoto is required');
 
         let latitudNumber = latitud;
         let longitudNumber = longitud;
@@ -30,7 +34,10 @@ export class FotoDemoplotEntity {
         
         return new FotoDemoplotEntity(
             id, idDemoPlot, nombre, comentario, estado, rutaFoto, tipo, latitudNumber, longitudNumber,
-            // createdAt, updatedAt
+                        //createdAt, 
+                        createdBy, 
+                        //updatedAt, 
+                        updatedBy
         );
     }
 }

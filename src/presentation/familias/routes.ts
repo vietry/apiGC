@@ -11,6 +11,7 @@ export class FamiliaRoutes {
         // Rutas de familia
         router.get('/', controller.getFamilias);
         router.get('/enfoque', controller.getFamiliasConEnfoque);
+        router.get('/escuela', controller.getFamiliasEscuela);
         router.get('/:id', controller.getFamiliaById);
 
         return router;

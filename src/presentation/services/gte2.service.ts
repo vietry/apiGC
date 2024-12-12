@@ -1,5 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { ColaboradorEntity, CreateGteDto, CustomError, PaginationDto, UsuarioEntity } from "../../domain";
+import { CreateGteDto, CustomError, PaginationDto, } from "../../domain";
 import { CreateGteDto2 } from "../../domain/dtos/gte/create-gte2.dto";
 
 export class GteService2{

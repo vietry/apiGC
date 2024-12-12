@@ -64,7 +64,7 @@ export class DemoplotController{
 
     getDemoplotsByGteId = async (req: Request, res: Response) => {
         const idGte = +req.params.idGte;
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 200 } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
 
@@ -79,7 +79,7 @@ export class DemoplotController{
         const idGte = +req.params.idGte;
         const mes = +req.params.mes; // Parámetro del mes
         const anio = +req.params.anio; // Parámetro del año
-        const { page = 1, limit = 10 } = req.query;
+        const { page = 1, limit = 200 } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
 
@@ -110,6 +110,20 @@ export class DemoplotController{
         }
 
         this.demoplotService.countDemoplotsByMonthAnioGte(idUsuario, mes, anio)
+            .then(counts => res.status(200).json(counts))
+            .catch(error => this.handleError(res, error));
+    }
+
+    getDemoplotStatsByGteWithRank = async (req: Request, res: Response) => {
+        const idGte = +req.params.idGte;
+        const mes = +req.params.mes; // Parámetro del mes
+        const anio = +req.params.anio; // Parámetro del año
+
+        if (isNaN(idGte) || isNaN(mes) || isNaN(anio)) {
+            return res.status(400).json({ error: 'Invalid parameters' });
+        }
+
+        this.demoplotService.getDemoplotStatsByGteWithRank(idGte, mes, anio)
             .then(counts => res.status(200).json(counts))
             .catch(error => this.handleError(res, error));
     }

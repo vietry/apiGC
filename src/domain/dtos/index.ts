@@ -20,6 +20,8 @@ export * from './demoplot/create-demoplot.dto';
 export * from './demoplot/update-demoplot.dto';
 export * from './fotos-demoplot/create-foto-demoplot.dto';
 export * from './fotos-demoplot/update-foto-demoplot.dto';
+export * from './fotos-demoplot/create-foto-demoplot-log.dto';
+export * from './fotos-demoplot/update-foto-demoplot-log.dto';
 
 export * from './fundo/create-fundo.dto';
 export * from './fundo/update-fundo.dto';
@@ -37,3 +39,5 @@ export * from './charla/asistencia/create-asistencia.dto';
 export * from './charla/asistencia/update-asistencia.dto';
 export * from './charla/foto/create-foto.dto';
 export * from './charla/foto/update-foto.dto';
+export * from './charla/charla-producto/create-charla-producto.dto';
+export * from './charla/charla-producto/update-charla-producto.dto';

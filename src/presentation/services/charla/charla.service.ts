@@ -121,7 +121,21 @@ export class CharlaService {
     }
 
     async getCharlaById(id: number) {
-        try {
+      
+      
+      try {
+
+        // Obtener charlaProductos asociados a la charla
+        const charlaProductos = await prisma.charlaProducto.findMany({
+          where: { idCharla: id },
+          include: {
+              Familia: { select: { id:true, nombre: true } },
+              BlancoBiologico: {select: {estandarizado: true, id: true} },
+          }
+      });
+
+
+
             const charla = await prisma.charla.findUnique({
                 where: { id },
                 include: {
@@ -140,7 +154,7 @@ export class CharlaService {
                         },
                       },
                     },
-                    Familia: { select: { nombre: true } },
+                    Familia: true,
                     Gte: {
                       select: {
                         id: true,
@@ -158,6 +172,17 @@ export class CharlaService {
             });
 
             if (!charla) throw CustomError.badRequest(`Charla with id ${id} does not exist`);
+
+        const cProductos = charlaProductos.map(cp => cp.id).filter(Boolean);
+        const [idCP1, idCP2] = cProductos;
+        const familias = charlaProductos.map(cp => cp.Familia?.nombre).filter(Boolean);
+        const [familia1, familia2] = familias;
+        const idFamilias = charlaProductos.map(cp => cp.Familia?.id).filter(Boolean);
+        const [idFamilia1, idFamilia2] = idFamilias;
+        const blancos = charlaProductos.map(cp => cp.BlancoBiologico?.estandarizado).filter(Boolean);
+        const [blanco1, blanco2] = blancos;
+        const idblancos = charlaProductos.map(cp => cp.BlancoBiologico?.id).filter(Boolean);
+        const [idBlanco1, idBlanco2] = idblancos;
 
             return {
                 
@@ -185,16 +210,26 @@ export class CharlaService {
                   updatedAt: charla.updatedAt,
                   updatedBy: charla.updatedBy,
                   codZona: charla.PuntoContacto.codZona,
-                  familia: charla.Familia?.nombre,
+                  familia: familia2 == null ? familia1.trimEnd() : `${familia1.trimEnd()} - ${familia2.trimEnd()}`,
                   vegetacion: charla.Vegetacion?.nombre,
                   blancoCientifico: charla.BlancoBiologico?.cientifico,
-                  estandarizado: charla.BlancoBiologico?.estandarizado,
+                  estandarizado: blanco2 == null ? blanco1!.trimEnd() : `${blanco1!.trimEnd()} - ${blanco2.trimEnd()}`,
                   distrito: charla.Distrito?.nombre,
                   provincia: charla.Distrito?.Provincia?.nombre,
                   departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
                   nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
                   rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
                   puntoContacto: charla.PuntoContacto?.nombre,
+                  idCharlaProd1: idCP1,
+                  idCharlaProd2: idCP2,
+                  idFamilia1: idFamilia1,
+                  idFamilia2: idFamilia2,
+                  familia1: familia1,
+                  familia2: familia2,
+                  blanco1: blanco1,
+                  blanco2: blanco2,
+                  idBlanco1: idBlanco1,
+                  idBlanco2: idBlanco2,
                 
               };
         } catch (error) {
@@ -345,6 +380,7 @@ export class CharlaService {
               departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
               nombreGte: charla.Gte?.Usuario?.nombres,
               puntoContacto: charla.PuntoContacto?.nombre,
+
             })),
           };
         } catch (error) {
@@ -401,48 +437,74 @@ export class CharlaService {
                 PuntoContacto: true,
               },
             });
+            
     
-          // Mapear las charlas con los campos requeridos
-          return {
-            charlas: charlas.map((charla) => ({
-              id: charla.id,
-              tema: charla.tema,
-              asistentes: charla.asistentes,
-              hectareas: charla.hectareas,
-              dosis: charla.dosis,
-              efectivo: charla.efectivo,
-              comentarios: charla.comentarios,
-              demoplots: charla.demoplots,
-              estado: charla.estado,
-              programacion: charla.programacion,
-              ejecucion: charla.ejecucion,
-              cancelacion: charla.cancelacion,
-              motivo: charla.motivo,
-              idVegetacion: charla.idVegetacion,
-              idBlanco: charla.idBlanco,
-              idDistrito: charla.idDistrito,
-              idFamilia: charla.idFamilia,
-              idGte: charla.idGte,
-              idTienda: charla.idTienda,
-              createdAt: charla.createdAt,
-              createdBy: charla.createdBy,
-              updatedAt: charla.updatedAt,
-              updatedBy: charla.updatedBy,
-              codZona: charla.PuntoContacto.codZona,
-              familia: charla.Familia?.nombre,
-              vegetacion: charla.Vegetacion?.nombre,
-              blancoCientifico: charla.BlancoBiologico?.cientifico,
-              estandarizado: charla.BlancoBiologico?.estandarizado,
-              distrito: charla.Distrito?.nombre,
-              provincia: charla.Distrito?.Provincia?.nombre,
-              departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
-              nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
-              rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
-              puntoContacto: charla.PuntoContacto?.nombre,
-            })),
-          };
-        } catch (error) {
-          throw CustomError.internalServer(`${error}`);
-        }
-      }
+              // Obtener los charlaProductos asociados a las charlas
+    const charlaIds = charlas.map((charla) => charla.id);
+    const charlaProductos = await prisma.charlaProducto.findMany({
+      where: { idCharla: { in: charlaIds } },
+      include: {
+        Familia: { select: { nombre: true } },
+        BlancoBiologico: { select: { estandarizado: true } },
+      },
+    });
+
+    // Mapear las charlas con los campos requeridos y añadir familia1, familia2
+    return {
+      charlas: charlas.map((charla) => {
+        const productos = charlaProductos.filter(
+          (producto) => producto.idCharla === charla.id
+        );
+
+        const familia1 = productos[0]?.Familia?.nombre.trimEnd() || null;
+        const familia2 = productos[1]?.Familia?.nombre.trimEnd() || null;
+        const blanco1 = productos[0]?.BlancoBiologico?.estandarizado ? productos[0]?.BlancoBiologico?.estandarizado.trimEnd() : null;
+        const blanco2 = productos[1]?.BlancoBiologico?.estandarizado ? productos[1]?.BlancoBiologico?.estandarizado.trimEnd() : null;
+
+        return {
+          id: charla.id,
+          tema: charla.tema,
+          asistentes: charla.asistentes,
+          hectareas: charla.hectareas,
+          dosis: charla.dosis,
+          efectivo: charla.efectivo,
+          comentarios: charla.comentarios,
+          demoplots: charla.demoplots,
+          estado: charla.estado,
+          programacion: charla.programacion,
+          ejecucion: charla.ejecucion,
+          cancelacion: charla.cancelacion,
+          motivo: charla.motivo,
+          idVegetacion: charla.idVegetacion,
+          idBlanco: charla.idBlanco,
+          idDistrito: charla.idDistrito,
+          idFamilia: charla.idFamilia,
+          idGte: charla.idGte,
+          idTienda: charla.idTienda,
+          createdAt: charla.createdAt,
+          createdBy: charla.createdBy,
+          updatedAt: charla.updatedAt,
+          updatedBy: charla.updatedBy,
+          codZona: charla.PuntoContacto?.codZona,
+          familia: familia2 == null ? familia1 : `${familia1} - ${familia2}`,
+          vegetacion: charla.Vegetacion?.nombre,
+          blancoCientifico: charla.BlancoBiologico?.cientifico,
+          estandarizado: blanco2 == null ? blanco1 : `${blanco1} - ${blanco2}`,
+          distrito: charla.Distrito?.nombre,
+          provincia: charla.Distrito?.Provincia?.nombre,
+          departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
+          nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
+          rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
+          puntoContacto: charla.PuntoContacto?.nombre,
+          familia1: familia1,
+          familia2: familia2,
+          blanco1: blanco1,
+          blanco2: blanco2,
+        };
+      }),
+    };
+  } catch (error) {
+    throw CustomError.internalServer(`${error}`);
+  }
+}
 }

@@ -37,4 +37,10 @@ export class FamiliaController {
             .then(familias => res.status(200).json(familias))
             .catch(error => this.handleError(res, error));
     }
+
+    getFamiliasEscuela = async (req: Request, res: Response) => {
+        this.familiaService.getFamiliasEscuela()
+            .then(familias => res.status(200).json(familias))
+            .catch(error => this.handleError(res, error));
+    }
 }

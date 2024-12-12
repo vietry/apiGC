@@ -21,3 +21,5 @@ export * from './puntos-ubigeos.service';
 export * from './charla/charla.service';
 export * from './charla/asistencia.service';
 export * from './charla/foto-charla.service';
+export * from './charla/charla-producto.service';
+export * from './foto-demoplot-log.service';

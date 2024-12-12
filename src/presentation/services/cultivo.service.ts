@@ -1,5 +1,5 @@
 import { prisma } from "../../data/sqlserver";
-import { CreateCultivoDto, CultivoEntity, CustomError, PaginationDto, UpdateCultivoDto, UsuarioEntity } from "../../domain";
+import { CreateCultivoDto,  CustomError,  UpdateCultivoDto, } from "../../domain";
 
 export class CultivoService {
 

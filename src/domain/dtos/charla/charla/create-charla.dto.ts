@@ -13,7 +13,7 @@ export class CreateCharlaDto {
         public readonly cancelacion: Date | null,
         public readonly motivo: string | null,
         public readonly idVegetacion: number,
-        public readonly idBlanco: number,
+        public readonly idBlanco: number | null,
         public readonly idDistrito: string | null,
         public readonly idFamilia: number | null,
         public readonly idGte: number,
@@ -36,7 +36,7 @@ export class CreateCharlaDto {
         } = object;
 
         if (!idVegetacion) return ['idVegetacion faltante'];
-        if (!idBlanco) return ['idBlanco faltante'];
+        //if (!idBlanco) return ['idBlanco faltante'];
         if (!idGte) return ['idGte faltante'];
         if (!idTienda) return ['idTienda faltante'];
 

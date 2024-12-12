@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>For unit test only</title>
+    <item>
+        <title>Version 1.2.0</title>
+        <description>Ahora es posible calificar el demoplot e ingresar una venta. Además, ahora se debe agregar un motivo para la eliminación de una foto</description>
+        <pubDate>Wed, 06 Dec 2024 10:00:00 +0000</pubDate>
+        <enclosure url="http://localhost/v1/apps/demoplots/demoplots/AppDemoplot_v1.2.0.apk" sparkle:version="1.2.0"/>
+    </item>
+  </channel>
+</rss>

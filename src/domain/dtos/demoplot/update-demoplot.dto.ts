@@ -10,6 +10,7 @@ export class UpdateDemoplotDto {
         public readonly instalacion?: Date | null,
         public readonly seguimiento?: Date | null,
         public readonly finalizacion?: Date | null,
+        public readonly presentacion?: Date | null,
         public readonly estado?: string | null,
         public readonly gradoInfestacion?: string | null,
         public readonly dosis?: number | null,
@@ -23,7 +24,14 @@ export class UpdateDemoplotDto {
         public readonly idGte?: number,
         public readonly programacion?: Date | null,
         public readonly diaCampo?: boolean | null,
-        // public readonly updatedAt?: Date | null
+
+        public readonly venta?: boolean | null,
+        public readonly fecVenta?: Date | null,
+        public readonly cantidad?: number | null,
+        public readonly importe?: number | null,
+        public readonly updatedAt?: Date | null,
+        public readonly updatedBy?: number | null,
+        
     ) {}
 
     get values() {
@@ -35,6 +43,7 @@ export class UpdateDemoplotDto {
         if (this.instalacion ) returnObj.instalacion = this.instalacion;
         if (this.seguimiento ) returnObj.seguimiento = this.seguimiento;
         if (this.finalizacion ) returnObj.finalizacion = this.finalizacion;
+        if (this.presentacion ) returnObj.presentacion = this.presentacion;
         if (this.estado ) returnObj.estado = this.estado;
         if (this.gradoInfestacion ) returnObj.gradoInfestacion = this.gradoInfestacion;
         if (this.dosis ) returnObj.dosis = this.dosis;
@@ -48,15 +57,25 @@ export class UpdateDemoplotDto {
         if (this.idGte ) returnObj.idGte = this.idGte;
         if (this.programacion ) returnObj.programacion = this.programacion;
         if (this.diaCampo ) returnObj.diaCampo = this.diaCampo;
-        // if (this.updatedAt ) returnObj.updatedAt = this.updatedAt;
+        if (this.venta) returnObj.venta = this.venta;
+        if (this.fecVenta !== undefined) returnObj.fecVenta = this.fecVenta;
+        if (this.cantidad !== undefined) returnObj.cantidad = this.cantidad;
+        if (this.importe !== undefined) returnObj.importe = this.importe;
+        if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
+        if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
+
 
         return returnObj;
     }
 
     static async create(props: {[key: string]: any}): Promise<[string?, UpdateDemoplotDto?]> {
-        const { id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion, estado,
+        const { id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,presentacion, estado,
             gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idFamilia, idGte, programacion, diaCampo } = props;
+            idDistrito, idFamilia, idGte, programacion, diaCampo,venta,fecVenta,cantidad,importe,
+            updatedAt, updatedBy,
+            
+        
+        } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -67,6 +86,8 @@ export class UpdateDemoplotDto {
 
         let hasCultivoNumber = hasCultivo;
         let dosisNumber = dosis;
+        let cantidadNum = cantidad;
+        let importeNum = importe;
         let idCultivoNumber = idCultivo;
         let idContactoPNumber = idContactoP;
         let idBlancoNumber = idBlanco;
@@ -116,6 +137,7 @@ export class UpdateDemoplotDto {
             instalacion,
             seguimiento,
             finalizacion,
+            presentacion,
             estado,
             gradoInfestacion,
             dosisNumber,
@@ -128,7 +150,10 @@ export class UpdateDemoplotDto {
             idFamiliaNumber,
             idGteNumber,
             programacion,
-            diaCampo
+            diaCampo,
+            venta, fecVenta, cantidadNum, importeNum,
+            updatedAt,updatedBy,
+            
         )];
     }
 }
