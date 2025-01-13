@@ -1,24 +1,24 @@
 import { Router } from "express";
 import { UsuariosController } from "./controller";
-import { UsuarioDatasourceImpl } from "../../infrastucture/datasource/usuario.datasource.impl";
-import { UsuarioRepositoryImpl } from "../../infrastucture/repositories/usuario.repository.impl";
-
+import { UsuariosService } from "../services";
 
 export class UsuarioRoutes {
-    static get routes(): Router{
-        const router = Router();
+  static get routes(): Router {
+    const router = Router();
 
-        const datasource = new UsuarioDatasourceImpl();
-        const usuarioRepository = new UsuarioRepositoryImpl(datasource);
-        const usuarioController = new UsuariosController(usuarioRepository);
+    // Instanciar el servicio y el controlador
+    const usuariosService = new UsuariosService();
+    const controller = new UsuariosController(usuariosService);
 
-        router.get('/', usuarioController.getUsuarios);
-        router.get('/:id', usuarioController.getUsuarioById);
-        router.post('/', usuarioController.createUsuario);
-        router.put('/:id', usuarioController.updateUsuario);
-        router.delete('/:id', usuarioController.deleteUsuario);
+    // Rutas principales de Usuarios
 
+    router.get("/", controller.getAllUsuarios);
+    router.get("/all", controller.getUsuariosByPage);
+    router.get("/:id", controller.getUsuarioById);
+    router.post("/", controller.createUsuario);
+    router.put("/:id", controller.updateUsuario);
+    //router.delete("/:id", [AuthMiddleware] ,controller.deleteUsuario);
 
-        return router;
-    }
+    return router;
+  }
 }

@@ -1,140 +1,180 @@
 import { prisma } from "../../data/sqlserver";
-import { BlancoBiologicoEntity, CustomError, PaginationDto, UsuarioEntity } from "../../domain";
+import {
+  CreateBlancoBiologicoDto,
+  CustomError,
+  PaginationDto,
+  UpdateBlancoBiologicoDto,
+} from "../../domain";
 
 export class BlancoBiologicoService {
+  // DI
+  constructor() {}
 
-    // DI
-    constructor() {}
+  async createBlancoBiologico(
+    createBlancoBiologicoDto: CreateBlancoBiologicoDto
+  ) {
+    try {
+      const currentDate = new Date();
 
-    /*async createBlancoBiologico(createBlancoBiologicoDto: CreateBlancoBiologicoDTO, user: UsuarioEntity) {
-        try {
-            const currentDate = new Date();
+      const blancoBiologico = await prisma.blancoBiologico.create({
+        data: {
+          cientifico: createBlancoBiologicoDto.cientifico,
+          estandarizado: createBlancoBiologicoDto.estandarizado,
+          idVegetacion: createBlancoBiologicoDto.idVegetacion,
+          createdAt: currentDate,
+          updatedAt: currentDate,
+        },
+      });
 
-            const blancoBiologico = await prisma.blancoBiologico.create({
-                data: {
-                    cientifico: createBlancoBiologicoDto.cientifico,
-                    estandarizado: createBlancoBiologicoDto.estandarizado,
-                    idVegetacion: createBlancoBiologicoDto.idVegetacion,
-                    createdAt: currentDate,
-                    updatedAt: currentDate,
-                },
-            });
-
-            return {
-                id: blancoBiologico.id,
-                cientifico: blancoBiologico.cientifico,
-                estandarizado: blancoBiologico.estandarizado,
-                idVegetacion: blancoBiologico.idVegetacion,
-            };
-
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
+      return {
+        id: blancoBiologico.id,
+        cientifico: blancoBiologico.cientifico,
+        estandarizado: blancoBiologico.estandarizado,
+        idVegetacion: blancoBiologico.idVegetacion,
+      };
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`);
     }
+  }
 
-    async updateBlancoBiologico(updateBlancoBiologicoDto: UpdateBlancoBiologicoDTO) {
-        const blancoBiologicoExists = await prisma.blancoBiologico.findFirst({ where: { id: updateBlancoBiologicoDto.id } });
-        if (!blancoBiologicoExists) throw CustomError.badRequest(`BlancoBiologico with id ${updateBlancoBiologicoDto.id} does not exist`);
+  async updateBlancoBiologico(
+    updateBlancoBiologicoDto: UpdateBlancoBiologicoDto
+  ) {
+    const blancoBiologicoExists = await prisma.blancoBiologico.findFirst({
+      where: { id: updateBlancoBiologicoDto.id },
+    });
+    if (!blancoBiologicoExists)
+      throw CustomError.badRequest(
+        `BlancoBiologico with id ${updateBlancoBiologicoDto.id} does not exist`
+      );
 
-        try {
-            const updatedBlancoBiologico = await prisma.blancoBiologico.update({
-                where: { id: updateBlancoBiologicoDto.id },
-                data: {
-                    ...updateBlancoBiologicoDto.values,
-                    updatedAt: new Date(),
-                },
-            });
+    try {
+      const updatedBlancoBiologico = await prisma.blancoBiologico.update({
+        where: { id: updateBlancoBiologicoDto.id },
+        data: {
+          ...updateBlancoBiologicoDto.values,
+          updatedAt: new Date(),
+        },
+      });
 
-            return updatedBlancoBiologico;
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
-    }*/
-
-    async getBlancosBiologicosByPage(paginationDto: PaginationDto) {
-        const { page, limit } = paginationDto;
-
-        try {
-            const [total, blancosBiologicos] = await Promise.all([
-                await prisma.blancoBiologico.count(),
-                await prisma.blancoBiologico.findMany({
-                    skip: ((page - 1) * limit),
-                    take: limit,
-                    include: {
-                        Vegetacion: true,
-                    },
-                })
-            ]);
-
-            return {
-                page: page,
-                limit: limit,
-                total: total,
-                next: `/v1/blancos?page${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0) ? `/v1/blancos?page${(page - 1)}&limit=${limit}` : null,
-                blancosBiologicos: blancosBiologicos.map((blancoBiologico) => {
-                    return {
-                        id: blancoBiologico.id,
-                        cientifico: blancoBiologico.cientifico,
-                        estandarizado: blancoBiologico.estandarizado,
-                        idVegetacion: blancoBiologico.idVegetacion,
-                        vegetacion: blancoBiologico.Vegetacion.nombre
-                    };
-                })
-            };
-
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
+      return updatedBlancoBiologico;
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`);
     }
+  }
 
+  async getBlancosBiologicosByPage(
+    paginationDto: PaginationDto,
+    cientifico?: string,
+    estandarizado?: string,
+    idVegetacion?: number,
+    vegetacion?: string
+  ) {
+    const { page, limit } = paginationDto;
 
-    async getBlancosBiologicos() {
-        try {
-            const blancosBiologicos = await prisma.blancoBiologico.findMany({
-                include: {
-                    Vegetacion: {
-                        select: {
-                            nombre: true
-                        }
-                    }
-                }, orderBy: {
-                    estandarizado: 'asc'
-                }
-            });
-    
-            // Filtrar los resultados para obtener valores únicos en 'cientifico'
-            const uniqueBlancosBiologicos = Array.from(new Map(
-                blancosBiologicos.map(item => [item.cientifico, item])
-            ).values());
-    
-            return uniqueBlancosBiologicos.map((blancoBiologico) => ({
-                id: blancoBiologico.id,
-                cientifico: blancoBiologico.cientifico,
-                estandarizado: blancoBiologico.estandarizado,
-                idVegetacion: blancoBiologico.idVegetacion,
-                vegetacion: blancoBiologico.Vegetacion?.nombre
-            }));
-    
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
+    try {
+      const where: any = {};
+      if (cientifico) {
+        where.cientifico = { contains: cientifico };
+      }
+      if (idVegetacion) {
+        where.idVegetacion = idVegetacion;
+      }
+      if (estandarizado) {
+        where.estandarizado = { contains: estandarizado };
+      }
+      if (vegetacion) {
+        where.Vegetacion = { nombre: { contains: vegetacion } };
+      }
+
+      const [total, blancosBiologicos] = await Promise.all([
+        await prisma.blancoBiologico.count({ where }),
+        await prisma.blancoBiologico.findMany({
+          skip: (page - 1) * limit,
+          take: limit,
+          where: where,
+          include: {
+            Vegetacion: true,
+          },
+        }),
+      ]);
+
+      return {
+        page: page,
+        pages: Math.ceil(total / limit),
+        limit: limit,
+        total: total,
+        next: `/v1/blancos?page${page + 1}&limit=${limit}`,
+        prev:
+          page - 1 > 0 ? `/v1/blancos?page${page - 1}&limit=${limit}` : null,
+        blancosBiologicos: blancosBiologicos.map((blancoBiologico) => {
+          return {
+            id: blancoBiologico.id,
+            cientifico: blancoBiologico.cientifico,
+            estandarizado: blancoBiologico.estandarizado,
+            idVegetacion: blancoBiologico.idVegetacion,
+            vegetacion: blancoBiologico.Vegetacion.nombre,
+            createdAt: blancoBiologico.createdAt,
+            updatedAt: blancoBiologico.updatedAt,
+          };
+        }),
+      };
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`);
     }
+  }
 
-    async getBlancoBiologicoById(id: number) {
-        try {
-            const blancoBiologico = await prisma.blancoBiologico.findUnique({
-                where: { id },
-                include: {
-                    Vegetacion: true,
-                },
-            });
+  async getBlancosBiologicos() {
+    try {
+      const blancosBiologicos = await prisma.blancoBiologico.findMany({
+        include: {
+          Vegetacion: {
+            select: {
+              nombre: true,
+            },
+          },
+        },
+        orderBy: {
+          estandarizado: "asc",
+        },
+      });
 
-            if (!blancoBiologico) throw CustomError.badRequest(`BlancoBiologico with id ${id} does not exist`);
+      // Filtrar los resultados para obtener valores únicos en 'cientifico'
+      const uniqueBlancosBiologicos = Array.from(
+        new Map(
+          blancosBiologicos.map((item) => [item.cientifico, item])
+        ).values()
+      );
 
-            return blancoBiologico;
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
+      return uniqueBlancosBiologicos.map((blancoBiologico) => ({
+        id: blancoBiologico.id,
+        cientifico: blancoBiologico.cientifico,
+        estandarizado: blancoBiologico.estandarizado,
+        idVegetacion: blancoBiologico.idVegetacion,
+        vegetacion: blancoBiologico.Vegetacion?.nombre,
+      }));
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`);
     }
+  }
+
+  async getBlancoBiologicoById(id: number) {
+    try {
+      const blancoBiologico = await prisma.blancoBiologico.findUnique({
+        where: { id },
+        include: {
+          Vegetacion: true,
+        },
+      });
+
+      if (!blancoBiologico)
+        throw CustomError.badRequest(
+          `BlancoBiologico with id ${id} does not exist`
+        );
+
+      return blancoBiologico;
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`);
+    }
+  }
 }

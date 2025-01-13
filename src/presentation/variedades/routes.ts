@@ -1,21 +1,20 @@
-import { Router } from 'express';
-import { VariedadService } from '../services';
-import { VariedadController } from './controller';
-
+import { Router } from "express";
+import { VariedadService } from "../services";
+import { VariedadController } from "./controller";
 
 export class VariedadRoutes {
-    static get routes(): Router {
-        const router = Router();
-        const variedadService = new VariedadService();
-        const controller = new VariedadController(variedadService);
+  static get routes(): Router {
+    const router = Router();
+    const variedadService = new VariedadService();
+    const controller = new VariedadController(variedadService);
 
-        // Rutas de variedad
-        router.get('/', controller.getVariedades);
-        router.get('/page/', controller.getVariedadesByPage);
-        router.get('/:id', controller.getVariedadById);
-        //router.post('/variedades', controller.createVariedad);
-        //router.put('/variedades/:id', controller.updateVariedad);
+    // Rutas de variedad
+    router.get("/", controller.getVariedades);
+    router.get("/page", controller.getVariedadesByPage);
+    router.get("/:id", controller.getVariedadById);
+    router.post("/", controller.createVariedad);
+    router.put("/:id", controller.updateVariedad);
 
-        return router;
-    }
+    return router;
+  }
 }
