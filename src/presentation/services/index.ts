@@ -6,6 +6,8 @@ export * from "./colaborador.service";
 export * from "./punto-contacto.service";
 export * from "./contacto-punto.service";
 export * from "./demoplot.service";
+export * from "./dashboard.service";
+export * from "./dashboard.service";
 export * from "./articulo.service";
 export * from "./blanco.service";
 export * from "./cultivo.service";

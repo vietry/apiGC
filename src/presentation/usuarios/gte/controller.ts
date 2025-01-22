@@ -13,7 +13,7 @@ export class GteController {
   // DI
   constructor(private readonly gteService: GteService) {}
 
-  private handleError = (res: Response, error: unknown) => {
+  private readonly handleError = (res: Response, error: unknown) => {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({ error: error.message });
       return;
@@ -55,11 +55,53 @@ export class GteController {
 
   getGtes = async (req: Request, res: Response) => {
     const { page = 1, limit = 10 } = req.query;
-    const [error, paginationDto] = PaginationDto.create(+page, +limit);
-    if (error) return res.status(400).json({ error });
+    // Se extraen los filtros de la query string (además de la paginación)
+    const { nombres, apellidos, subzona, colaborador, tipo, activo } =
+      req.query;
+
+    const filters = {
+      nombres: nombres ? String(nombres) : undefined,
+      apellidos: apellidos ? String(apellidos) : undefined,
+      subzona: subzona ? String(subzona) : undefined,
+      colaborador: colaborador ? String(colaborador) : undefined,
+      tipo: tipo ? String(tipo) : undefined,
+      activo:
+        activo !== undefined
+          ? !!(activo === "true" || activo === "1")
+          : undefined,
+    };
+
+    const [paginationError, paginationDto] = PaginationDto.create(
+      +page,
+      +limit
+    );
+    if (paginationError)
+      return res.status(400).json({ error: paginationError });
 
     this.gteService
-      .getGtes(paginationDto!)
+      .getGtes(paginationDto!, filters)
+      .then((gtes) => res.status(200).json(gtes))
+      .catch((error) => this.handleError(res, error));
+  };
+
+  getAllGtes = async (req: Request, res: Response) => {
+    const { nombres, apellidos, subzona, colaborador, tipo, activo } =
+      req.query;
+
+    const filters = {
+      nombres: nombres ? String(nombres) : undefined,
+      apellidos: apellidos ? String(apellidos) : undefined,
+      subzona: subzona ? String(subzona) : undefined,
+      colaborador: colaborador ? String(colaborador) : undefined,
+      tipo: tipo ? String(tipo) : undefined,
+      activo:
+        activo !== undefined
+          ? !!(activo === "true" || activo === "1")
+          : undefined,
+    };
+
+    this.gteService
+      .getAllGtes(filters)
       .then((gtes) => res.status(200).json(gtes))
       .catch((error) => this.handleError(res, error));
   };

@@ -4,17 +4,17 @@ import { AuthMiddleware } from "../../middlewares/auth.middleware";
 import { ColaboradorService } from "../../services/colaborador.service";
 
 export class ColaboradorRoutes {
-    static get routes(): Router{
-        const router = Router();
-        const colaboradorService = new ColaboradorService();
-        const controller = new ColaboradorController(colaboradorService);
+  static get routes(): Router {
+    const router = Router();
+    const colaboradorService = new ColaboradorService();
+    const controller = new ColaboradorController(colaboradorService);
 
+    router.get("/", controller.getColaboradores);
+    router.get("/all", controller.getAllColaboradores);
+    router.get("/:id", controller.getColaboradorById);
+    router.post("/", controller.createColaborador);
+    router.put("/:id", controller.updateColaborador);
 
-        router.get('/',controller.getColaboradores);
-        router.get('/:id', controller.getColaboradorById);
-        router.post('/',[ AuthMiddleware.validateJWT] ,controller.createColaborador);
-        router.put('/:id',[ AuthMiddleware.validateJWT], controller.updateColaborador);
-
-        return router;
-    }
+    return router;
+  }
 }

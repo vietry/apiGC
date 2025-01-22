@@ -20,6 +20,7 @@ interface UsuarioFilters {
   email?: string;
   celular?: string;
   rol?: string;
+  activo?: boolean;
 }
 
 export class UsuariosService {
@@ -59,8 +60,6 @@ export class UsuariosService {
   }
 
   async updateUsuario(updateUsuarioDto: UpdateUsuarioDto) {
-    //const date = new Date();
-
     const usuario = await prisma.usuario.findUnique({
       where: { id: updateUsuarioDto.id },
     });
@@ -90,56 +89,74 @@ export class UsuariosService {
     filters: UsuarioFilters = {}
   ) {
     const { page, limit } = paginationDto;
-    const { nombres, apellidos, email, celular, rol } = filters;
-
-    // Construimos el objeto 'where' para los filtros
+    const { nombres, apellidos, email, celular, rol, activo } = filters;
     const where: any = {};
 
-    // Ejemplo de filtro con búsqueda parcial (case-insensitive)
+    // Filtros básicos con mode insensitive
     if (nombres) {
-      where.nombres = {
-        contains: nombres,
-        //mode: "insensitive",
-      };
+      where.nombres = { contains: nombres };
     }
     if (apellidos) {
-      where.apellidos = {
-        contains: apellidos,
-      };
+      where.apellidos = { contains: apellidos };
     }
     if (email) {
-      where.email = {
-        contains: email,
-      };
+      where.email = { contains: email };
     }
     if (celular) {
-      where.celular = {
-        contains: celular,
-      };
+      where.celular = { contains: celular };
     }
     if (rol) {
-      where.rol = { contains: rol };
+      where.rol = rol;
     }
 
     try {
-      const [total, usuarios] = await Promise.all([
-        prisma.usuario.count({ where }),
-        prisma.usuario.findMany({
-          where,
-          skip: (page - 1) * limit,
-          take: limit,
-        }),
+      // 1. Obtener todos los usuarios según filtros básicos
+      const todosUsuarios = await prisma.usuario.findMany({ where });
+
+      // 2. Obtener usuarios activos (colaborador o gte)
+      const [colaboradores, gtes] = await Promise.all([
+        prisma.colaborador.findMany({ select: { idUsuario: true } }),
+        prisma.gte.findMany({ select: { idUsuario: true } }),
       ]);
+
+      const idsActivos = new Set([
+        ...colaboradores.map((c) => c.idUsuario),
+        ...gtes.map((g) => g.idUsuario),
+      ]);
+
+      // 3. Filtrar usuarios según activo
+      const usuariosFiltrados = todosUsuarios.filter(
+        (usuario) =>
+          activo === undefined || activo === idsActivos.has(usuario.id)
+      );
+
+      // 4. Calcular total y aplicar paginación
+      const total = usuariosFiltrados.length;
+      const start = (page - 1) * limit;
+      const usuariosPaginados = usuariosFiltrados.slice(start, start + limit);
+
+      // 5. Mapear resultados
+      const usuariosConActivo = usuariosPaginados.map((usuario) => ({
+        id: usuario.id,
+        nombres: usuario.nombres,
+        apellidos: usuario.apellidos,
+        email: usuario.email,
+        emailValidado: usuario.emailValidado ?? false,
+        password: usuario.password,
+        celular: usuario.celular,
+        rol: usuario.rol,
+        idFoto: usuario.idFoto,
+        activo: idsActivos.has(usuario.id),
+        createdAt: usuario.createdAt,
+        updatedAt: usuario.updatedAt,
+      }));
 
       return {
         page,
         pages: Math.ceil(total / limit),
         limit,
         total,
-        next: `/v1/usuarios?page=${page + 1}&limit=${limit}`,
-        prev:
-          page - 1 > 0 ? `/v1/usuarios?page=${page - 1}&limit=${limit}` : null,
-        usuarios,
+        usuarios: usuariosConActivo,
       };
     } catch (error) {
       throw CustomError.internalServer(`${error}`);
@@ -147,41 +164,62 @@ export class UsuariosService {
   }
 
   async getUsuarios(filters: UsuarioFilters = {}) {
-    const { nombres, apellidos, email, celular, rol } = filters;
-
+    const { nombres, apellidos, email, celular, rol, activo } = filters;
     const where: any = {};
 
+    // Filtros básicos
     if (nombres) {
-      where.nombres = {
-        contains: nombres,
-        mode: "insensitive",
-      };
+      where.nombres = { contains: nombres, mode: "insensitive" };
     }
     if (apellidos) {
-      where.apellidos = {
-        contains: apellidos,
-        mode: "insensitive",
-      };
+      where.apellidos = { contains: apellidos, mode: "insensitive" };
     }
     if (email) {
-      where.email = {
-        contains: email,
-        mode: "insensitive",
-      };
+      where.email = { contains: email, mode: "insensitive" };
     }
     if (celular) {
-      where.celular = {
-        contains: celular,
-        mode: "insensitive",
-      };
+      where.celular = { contains: celular, mode: "insensitive" };
     }
     if (rol) {
       where.rol = rol;
     }
 
     try {
+      // 1. Obtener usuarios según filtros básicos
       const usuarios = await prisma.usuario.findMany({ where });
-      return usuarios;
+
+      // 2. Obtener todos los usuarios activos (que existen en colaborador o gte)
+      const [colaboradores, gtes] = await Promise.all([
+        prisma.colaborador.findMany({ select: { idUsuario: true } }),
+        prisma.gte.findMany({ select: { idUsuario: true } }),
+      ]);
+
+      const idsActivos = new Set([
+        ...colaboradores.map((c) => c.idUsuario),
+        ...gtes.map((g) => g.idUsuario),
+      ]);
+
+      // 3. Filtrar usuarios según el parámetro activo
+      const usuariosFiltrados = usuarios.filter(
+        (usuario) =>
+          activo === undefined || activo === idsActivos.has(usuario.id)
+      );
+
+      // 4. Mapear resultados
+      return usuariosFiltrados.map((usuario) => ({
+        id: usuario.id,
+        nombres: usuario.nombres,
+        apellidos: usuario.apellidos,
+        email: usuario.email,
+        emailValidado: usuario.emailValidado ?? false,
+        password: usuario.password,
+        celular: usuario.celular,
+        rol: usuario.rol,
+        idFoto: usuario.idFoto,
+        activo: idsActivos.has(usuario.id),
+        createdAt: usuario.createdAt,
+        updatedAt: usuario.updatedAt,
+      }));
     } catch (error) {
       throw CustomError.internalServer(`${error}`);
     }

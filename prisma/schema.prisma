@@ -37,6 +37,7 @@ model Usuario {
   Colaborador                                  Colaborador[]
   DemoPlot_DemoPlot_createdByToUsuario         DemoPlot[]        @relation("DemoPlot_createdByToUsuario")
   DemoPlot_DemoPlot_updatedByToUsuario         DemoPlot[]        @relation("DemoPlot_updatedByToUsuario")
+  Externo                                      Externo[]
   FotoCharla_FotoCharla_createdByToUsuario     FotoCharla[]      @relation("FotoCharla_createdByToUsuario")
   FotoCharla_FotoCharla_updatedByToUsuario     FotoCharla[]      @relation("FotoCharla_updatedByToUsuario")
   FotoDemoPlot_FotoDemoPlot_createdByToUsuario FotoDemoPlot[]    @relation("FotoDemoPlot_createdByToUsuario")
@@ -240,6 +241,7 @@ model Familia {
   createdAt      DateTime?        @db.DateTime
   updatedAt      DateTime?        @db.DateTime
   escuela        Boolean?
+  clase          String?          @db.VarChar(25)
   Articulo       Articulo[]
   Charla         Charla[]
   CharlaProducto CharlaProducto[]
@@ -321,6 +323,7 @@ model Representada {
   nombre      String        @db.VarChar(45)
   createdAt   DateTime?     @db.DateTime
   updatedAt   DateTime?     @db.DateTime
+  Externo     Externo[]
   LaborVisita LaborVisita[]
   Visita      Visita[]
 }
@@ -741,4 +744,15 @@ model FotoDemoPlotLog {
   motivo         String    @db.VarChar(255)
   DemoPlot       DemoPlot  @relation(fields: [idDemoPlot], references: [id], onUpdate: NoAction, map: "fk_FotoDLog_DemoPlot1")
   Usuario        Usuario   @relation(fields: [deletedBy], references: [id], onUpdate: NoAction, map: "fk_FotoDLog_Usuario1")
+}
+
+model Externo {
+  id             Int          @id(map: "PK__Externo__3213E83FC7A0FB3D") @default(autoincrement())
+  cargo          String?      @db.VarChar(20)
+  idRepresentada Int
+  idUsuario      Int?
+  createdAt      DateTime?    @db.DateTime
+  updatedAt      DateTime?    @db.DateTime
+  Representada   Representada @relation(fields: [idRepresentada], references: [id], onUpdate: NoAction, map: "fk_ExternoRepresentada")
+  Usuario        Usuario?     @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ExternoUsuario")
 }

@@ -110,16 +110,19 @@ export class UsuariosController {
   };
 
   getAllUsuarios = async (req: Request, res: Response) => {
-    const { nombres, apellidos, email, celular, rol } = req.query;
+    const { nombres, apellidos, email, celular, rol, activo } = req.query;
+
+    const filters = {
+      nombres: nombres?.toString(),
+      apellidos: apellidos?.toString(),
+      email: email?.toString(),
+      celular: celular?.toString(),
+      rol: rol?.toString(),
+      activo: activo === undefined ? undefined : activo === "true",
+    };
 
     this.usuariosService
-      .getUsuarios({
-        nombres: nombres?.toString(),
-        apellidos: apellidos?.toString(),
-        email: email?.toString(),
-        celular: celular?.toString(),
-        rol: rol?.toString(),
-      })
+      .getUsuarios(filters)
       .then((usuarios) => res.status(200).json(usuarios))
       .catch((error) => this.handleError(res, error));
   };
@@ -133,18 +136,29 @@ export class UsuariosController {
       email,
       celular,
       rol,
+      activo,
     } = req.query;
+
+    // Validar paginación
     const [error, paginationDto] = PaginationDto.create(+page, +limit);
     if (error) return res.status(400).json({ error });
 
+    // Construir filtros
+    const filters = {
+      nombres: nombres?.toString(),
+      apellidos: apellidos?.toString(),
+      email: email?.toString(),
+      celular: celular?.toString(),
+      rol: rol?.toString(),
+      //activo: activo === undefined ? undefined : activo === "true",
+      activo:
+        activo !== undefined
+          ? !!(activo === "true" || activo === "1")
+          : undefined,
+    };
+
     this.usuariosService
-      .getUsuariosByPage(paginationDto!, {
-        nombres: nombres?.toString(),
-        apellidos: apellidos?.toString(),
-        email: email?.toString(),
-        celular: celular?.toString(),
-        rol: rol?.toString(),
-      })
+      .getUsuariosByPage(paginationDto!, filters)
       .then((result) => res.status(200).json(result))
       .catch((error) => this.handleError(res, error));
   };

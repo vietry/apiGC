@@ -4,7 +4,6 @@ import {
   CustomError,
   PaginationDto,
   UpdateColaboradorDTO,
-  UsuarioEntity,
 } from "../../domain";
 
 interface ColaboradorFilters {
@@ -14,31 +13,28 @@ interface ColaboradorFilters {
   codigoZona?: string;
   cargo?: string;
   zonaAnt?: string;
+  empresa?: string;
+  macrozona?: number;
 }
 
 export class ColaboradorService {
   //DI
-  constructor() {}
+  //constructor() {}
 
-  async createColaborador(
-    createColaboradorDto: CreateColaboradorDTO,
-    user: UsuarioEntity
-  ) {
-    //const colaboradorExists = await prisma.colaborador.findFirst({where: {email: createColaboradorDto.cargo}});
-
+  async createColaborador(createColaboradorDto: CreateColaboradorDTO) {
     const usuarioExists = await prisma.usuario.findFirst({
-      where: { id: user.id },
+      where: { id: createColaboradorDto.idUsuario },
     });
     if (!usuarioExists) throw CustomError.badRequest(`Usuario no exists`);
 
     const gteExists = await prisma.gte.findFirst({
-      where: { idUsuario: user.id },
+      where: { idUsuario: createColaboradorDto.idUsuario },
     });
     if (gteExists)
       throw CustomError.badRequest(`Gte with IdUsuario already  exists`);
 
     const colaboradorExists = await prisma.colaborador.findFirst({
-      where: { idUsuario: user.id },
+      where: { idUsuario: createColaboradorDto.idUsuario },
     });
     if (colaboradorExists)
       throw CustomError.badRequest(`Colaborador no exists`);
@@ -51,7 +47,7 @@ export class ColaboradorService {
           cargo: createColaboradorDto.cargo,
           idArea: createColaboradorDto.idArea,
           idZonaAnt: createColaboradorDto.idZonaAnt,
-          idUsuario: user.id,
+          idUsuario: createColaboradorDto.idUsuario,
           createdAt: currentDate,
           updatedAt: currentDate,
         },
@@ -185,6 +181,136 @@ export class ColaboradorService {
           };
         }),
       };
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`);
+    }
+  }
+
+  async getAllColaboradores(filters: ColaboradorFilters) {
+    const {
+      nombres,
+      apellidos,
+      area,
+      codigoZona,
+      cargo,
+      zonaAnt,
+      empresa,
+      macrozona,
+    } = filters;
+
+    try {
+      // Construimos el objeto 'where' usando los filtros recibidos.
+      const where: any = {};
+
+      if (nombres) {
+        where.Usuario = {
+          ...where.Usuario,
+          nombres: {
+            contains: nombres,
+          },
+        };
+      }
+      if (apellidos) {
+        where.Usuario = {
+          ...where.Usuario,
+          apellidos: {
+            contains: apellidos,
+          },
+        };
+      }
+      if (cargo) {
+        where.cargo = {
+          contains: cargo,
+        };
+      }
+      if (area) {
+        where.Area = {
+          nombre: {
+            contains: area,
+          },
+        };
+      }
+      if (codigoZona) {
+        where.ZonaAnterior = {
+          ...where.ZonaAnterior,
+          codigo: {
+            contains: codigoZona,
+          },
+        };
+      }
+      if (zonaAnt) {
+        where.ZonaAnterior = {
+          ...where.ZonaAnterior,
+          nombre: {
+            contains: zonaAnt,
+          },
+        };
+      }
+      if (empresa) {
+        where.ZonaAnterior = { Empresa: { nomEmpresa: { contains: empresa } } };
+      }
+
+      if (macrozona) {
+        where.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador = {
+          some: {
+            SuperZona: {
+              id: macrozona,
+            },
+          },
+        };
+      }
+
+      // Se realiza la consulta sin paginación.
+      const colaboradores = await prisma.colaborador.findMany({
+        where,
+        include: {
+          Usuario: true,
+          Area: true,
+          ZonaAnterior: {
+            select: {
+              codigo: true,
+              nombre: true,
+              demoplot: true,
+              Empresa: true,
+            },
+          },
+          ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador: {
+            select: {
+              SuperZona: {
+                select: {
+                  nombre: true,
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return colaboradores.map((colaborador) => {
+        const macrozona =
+          colaborador
+            ?.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
+            ?.SuperZona?.id ?? null;
+
+        return {
+          id: colaborador.id,
+          cargo: colaborador.cargo,
+          idUsuario: colaborador.idUsuario,
+          idArea: colaborador.idArea,
+          idZonaAnt: colaborador.idZonaAnt,
+          nombres: colaborador.Usuario?.nombres,
+          apellidos: colaborador.Usuario?.apellidos,
+          area: colaborador.Area?.nombre,
+          codigoZona: colaborador.ZonaAnterior?.codigo,
+          zonaAnt: colaborador.ZonaAnterior?.nombre,
+          zonaDemoplot: colaborador.ZonaAnterior?.demoplot,
+          empresa: colaborador.ZonaAnterior?.Empresa?.nomEmpresa,
+          macrozona: macrozona,
+          createdAt: colaborador.createdAt,
+          updatedAt: colaborador.updatedAt,
+        };
+      });
     } catch (error) {
       throw CustomError.internalServer(`${error}`);
     }

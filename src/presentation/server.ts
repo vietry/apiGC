@@ -1,9 +1,8 @@
 import express, { Router } from "express";
 import fileUpload from "express-fileupload";
 import compression from "compression";
-var cors = require("cors");
-//import path from 'path';
-//import { envs } from '../config';
+import os from "os";
+let cors = require("cors");
 
 interface Options {
   port: number;
@@ -17,6 +16,19 @@ export class Server {
   private readonly port: number;
   private readonly publicPath: string;
   private readonly routes: Router;
+
+  private showMemoryUsage() {
+    const used = process.memoryUsage();
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+
+    console.log("Uso de Memoria:");
+    console.log(`Total: ${(totalMemory / 1024 / 1024 / 1024).toFixed(2)} GB`);
+    console.log(`Libre: ${(freeMemory / 1024 / 1024 / 1024).toFixed(2)} GB`);
+    console.log(`RSS: ${(used.rss / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`Heap Total: ${(used.heapTotal / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`Heap Usado: ${(used.heapUsed / 1024 / 1024).toFixed(2)} MB`);
+  }
 
   constructor(options: Options) {
     const { port, routes, public_path = "public" } = options;
@@ -55,6 +67,11 @@ export class Server {
 
     this.serverListener = this.app.listen(this.port, () => {
       console.log(`Server running on port ${this.port}`);
+      this.showMemoryUsage();
+
+      setInterval(() => {
+        this.showMemoryUsage();
+      }, 5 * 60 * 1000);
     });
 
     // Inicia ngrok y expone el servidor local a la web

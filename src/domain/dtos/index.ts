@@ -36,6 +36,12 @@ export * from "./vegetacion/update-vegetacion.dto";
 export * from "./cultivo/create-cultivo.dto";
 export * from "./cultivo/update-cultivo.dto";
 
+export * from "./zona-anterior/create-zona-anterior.dto";
+export * from "./zona-anterior/update-zona-anterior.dto";
+
+export * from "./subzona/create-subzona.dto";
+export * from "./subzona/update-subzona.dto";
+
 //DTOS CHARLA
 export * from "./charla/charla/create-charla.dto";
 export * from "./charla/charla/update-charla.dto";

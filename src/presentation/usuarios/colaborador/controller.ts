@@ -11,7 +11,7 @@ export class ColaboradorController {
   // DI
   constructor(private readonly colaboradorService: ColaboradorService) {}
 
-  private handleError = (res: Response, error: unknown) => {
+  private readonly handleError = (res: Response, error: unknown) => {
     if (error instanceof CustomError) {
       return res.status(error.statusCode).json({ error: error.message });
     }
@@ -27,7 +27,7 @@ export class ColaboradorController {
     if (error) return res.status(400).json({ error });
 
     this.colaboradorService
-      .createColaborador(createColaboradorDto!, req.body.user)
+      .createColaborador(createColaboradorDto!)
       .then((colaborador) => res.status(201).json(colaborador))
       .catch((error) => this.handleError(res, error));
   };
@@ -69,6 +69,35 @@ export class ColaboradorController {
         codigoZona: codigoZona?.toString(),
         zonaAnt: zonaAnt?.toString(),
       })
+      .then((colaboradores) => res.status(200).json(colaboradores))
+      .catch((error) => this.handleError(res, error));
+  };
+
+  getAllColaboradores = async (req: Request, res: Response) => {
+    const {
+      nombres,
+      apellidos,
+      cargo,
+      area,
+      codigoZona,
+      zonaAnt,
+      empresa,
+      macrozona,
+    } = req.query;
+
+    const filters = {
+      nombres: nombres ? String(nombres) : undefined,
+      apellidos: apellidos ? String(apellidos) : undefined,
+      cargo: cargo ? String(cargo) : undefined,
+      area: area ? String(area) : undefined,
+      codigoZona: codigoZona ? String(codigoZona) : undefined,
+      zonaAnt: zonaAnt ? String(zonaAnt) : undefined,
+      macrozona: macrozona ? +macrozona : undefined,
+      empresa: empresa?.toString(),
+    };
+
+    this.colaboradorService
+      .getAllColaboradores(filters)
       .then((colaboradores) => res.status(200).json(colaboradores))
       .catch((error) => this.handleError(res, error));
   };

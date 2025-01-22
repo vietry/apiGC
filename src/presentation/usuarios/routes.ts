@@ -12,8 +12,8 @@ export class UsuarioRoutes {
 
     // Rutas principales de Usuarios
 
-    router.get("/", controller.getAllUsuarios);
-    router.get("/all", controller.getUsuariosByPage);
+    router.get("/", controller.getUsuariosByPage);
+    router.get("/all", controller.getAllUsuarios);
     router.get("/:id", controller.getUsuarioById);
     router.post("/", controller.createUsuario);
     router.put("/:id", controller.updateUsuario);

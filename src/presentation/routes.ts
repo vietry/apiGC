@@ -25,12 +25,15 @@ import { CharlaRoutes } from "./charla/routes";
 import { AsistenciaRoutes } from "./asistencias/routes";
 import { FotoCharlaRoutes } from "./fotos-charla/routes";
 import { CharlaProductoRoutes } from "./charla-producto/routes";
+import { DashboardRoutes } from "./dashboards/routes";
+import { SubZonaRoutes } from "./subzonas/routes";
+import { ZonaAnteriorRoutes } from "./zona-anterior/routes";
 
 export class AppRoutes {
   static get routes(): Router {
     const router = Router();
 
-    router.use("/api/todos", TodoRoutes.routes);
+    //router.use("/api/todos", TodoRoutes.routes);
     router.use("/api/auth", AuthRoutes.routes);
     router.use("/api/usuarios", UsuarioRoutes.routes);
     router.use("/api/colaboradores", ColaboradorRoutes.routes);
@@ -38,6 +41,7 @@ export class AppRoutes {
     router.use("/api/puntoscontacto", PuntoContactoRoutes.routes);
     router.use("/api/contactospuntos", ContactoPuntoRoutes.routes);
     router.use("/api/demoplots", DemoplotRoutes.routes);
+    router.use("/api/dashboards", DashboardRoutes.routes);
     router.use("/api/upload", FileUploadRoutes.routes);
     router.use("/api/images", ImageRoutes.routes);
     router.use("/api/fotosdemoplots", FotoDemoplotRoutes.routes);
@@ -51,6 +55,8 @@ export class AppRoutes {
     router.use("/api/familias", FamiliaRoutes.routes);
     router.use("/api/fundos", FundoRoutes.routes);
     router.use("/api/puntosubigeos", PuntoUbigeoRoutes.routes);
+    router.use("/api/subzonas", SubZonaRoutes.routes);
+    router.use("/api/zonasanteriores", ZonaAnteriorRoutes.routes);
     router.use("/api/charlas", CharlaRoutes.routes);
     router.use("/api/asistencias", AsistenciaRoutes.routes);
     router.use("/api/fotoscharlas", FotoCharlaRoutes.routes);
