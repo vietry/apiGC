@@ -71,16 +71,23 @@ export class Validators {
         });
 
         let idEmpresa: number;
-        if (isJefe?.idMacroZona) {
+        if (isJefe?.idMacroZona && isJefe?.idEmpresa === null) {
+            // Si idMacroZona está entre 1-4, es empresa 1 (TQC)
             if (isJefe.idMacroZona >= 1 && isJefe.idMacroZona <= 4) {
                 idEmpresa = 1;
-            } else if (isJefe.idMacroZona === 777) {
+            }
+            // Si es 777, es empresa 4
+            else if (isJefe.idMacroZona === 777) {
                 idEmpresa = 4;
-            } else {
-                idEmpresa = colaborador!.ZonaAnterior?.idEmpresa!;
+            }
+            // Si no cumple ninguna condición anterior
+            else {
+                idEmpresa = colaborador?.ZonaAnterior?.idEmpresa!;
             }
         } else {
-            idEmpresa = colaborador!.ZonaAnterior?.idEmpresa!;
+            // Si no hay idMacroZona, usamos idEmpresa del jefe o del colaborador
+            idEmpresa =
+                isJefe?.idEmpresa ?? colaborador?.ZonaAnterior?.idEmpresa!;
         }
 
         if (colaborador) {
@@ -96,7 +103,9 @@ export class Validators {
                 cargo: colaborador.cargo ?? '',
                 zona: colaborador.ZonaAnterior?.codigo!,
                 idMacrozona: isJefe ? isJefe.idMacroZona! : idMacrozona ?? 0,
-                idEmpresa: idEmpresa,
+                idEmpresa: isJefe
+                    ? isJefe.idEmpresa ?? idEmpresa
+                    : idEmpresa ?? 0,
                 empresa: colaborador.ZonaAnterior?.Empresa?.nomEmpresa!,
             };
         }

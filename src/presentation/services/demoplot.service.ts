@@ -25,6 +25,7 @@ export interface DemoplotFilters {
     empresa?: string;
     macrozona?: number;
     idColaborador?: number;
+    gdactivo?: boolean;
 }
 
 export class DemoplotService {
@@ -343,21 +344,10 @@ export class DemoplotService {
                 }),
             ]);
 
-            //if (!demoplots) throw CustomError.badRequest(`No Demoplots found with Gte id ${gte!.id}`);
-
             return {
                 page,
                 limit,
                 total,
-                next: `/api/demoplots/gte/${gte!.id}?page=${
-                    page + 1
-                }&limit=${limit}`,
-                prev:
-                    page - 1 > 0
-                        ? `/api/demoplots/gte/${gte!.id}?page=${
-                              page - 1
-                          }&limit=${limit}`
-                        : null,
                 demoplots: demoplots.map((demoplot) => {
                     return {
                         id: demoplot.id,
@@ -519,21 +509,10 @@ export class DemoplotService {
                 }),
             ]);
 
-            //if (!demoplots) throw CustomError.badRequest(`No Demoplots found with Gte id ${gte!.id}`);
-
             return {
                 page,
                 limit,
                 total,
-                next: `/api/demoplots/gte/${gte!.id}?page=${
-                    page + 1
-                }&limit=${limit}`,
-                prev:
-                    page - 1 > 0
-                        ? `/api/demoplots/gte/${gte!.id}?page=${
-                              page - 1
-                          }&limit=${limit}`
-                        : null,
                 demoplots: demoplots.map((demoplot) => {
                     return {
                         id: demoplot.id,
@@ -1642,6 +1621,152 @@ export class DemoplotService {
                     };
                 }),
             };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getDemoplotStatsByGteWithRankVariable(
+        idGte: number,
+        mes: number,
+        anio: number
+    ) {
+        try {
+            const gtes = await prisma.gte.findMany({
+                select: {
+                    id: true,
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                },
+            });
+
+            if (!gtes.some((gte) => gte.id === idGte)) {
+                throw CustomError.badRequest(
+                    `GTE with id ${idGte} does not exist`
+                );
+            }
+
+            // Calcular mes anterior
+            const previousMonth = mes === 1 ? 12 : mes - 1;
+            const previousYear = mes === 1 ? anio - 1 : anio;
+
+            // Fechas para el mes actual (1-19)
+            const currentMonthStart = new Date(anio, mes - 1, 1);
+            const currentMonthEnd = new Date(anio, mes - 1, 20);
+
+            // Fechas para el mes anterior (20-fin)
+            const previousMonthStart = new Date(
+                previousYear,
+                previousMonth - 1,
+                20
+            );
+            const previousMonthEnd = new Date(anio, mes - 1, 1);
+
+            const demoplotCounts = await prisma.demoPlot.groupBy({
+                by: ['idGte', 'estado'],
+                where: {
+                    OR: [
+                        {
+                            updatedAt: {
+                                gte: currentMonthStart,
+                                lt: currentMonthEnd,
+                            },
+                        },
+                        {
+                            updatedAt: {
+                                gte: previousMonthStart,
+                                lt: previousMonthEnd,
+                            },
+                        },
+                    ],
+                },
+                _count: {
+                    estado: true,
+                },
+            });
+
+            const gteStats = gtes.map((gte) => ({
+                idGte: gte.id,
+                nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario!.apellidos}`,
+                todos: 0,
+                programados: 0,
+                seguimiento: 0,
+                completados: 0,
+                cancelados: 0,
+                reprogramados: 0,
+                diaCampo: 0,
+                iniciados: 0,
+                cumplimiento: 0,
+                cumpDiaCampo: 0,
+                rank: 0,
+            }));
+
+            const gteStatsMap = Object.fromEntries(
+                gteStats.map((gte) => [gte.idGte, gte])
+            );
+
+            demoplotCounts.forEach((demoplot) => {
+                const gteStat = gteStatsMap[demoplot.idGte];
+                if (gteStat) {
+                    gteStat.todos += demoplot._count.estado;
+                    switch (demoplot.estado) {
+                        case 'Programado':
+                            gteStat.programados += demoplot._count.estado;
+                            break;
+                        case 'Seguimiento':
+                            gteStat.seguimiento += demoplot._count.estado;
+                            break;
+                        case 'Completado':
+                            gteStat.completados += demoplot._count.estado;
+                            break;
+                        case 'Cancelado':
+                            gteStat.cancelados += demoplot._count.estado;
+                            break;
+                        case 'Reprogramado':
+                            gteStat.reprogramados += demoplot._count.estado;
+                            break;
+                        case 'Día campo':
+                            gteStat.diaCampo += demoplot._count.estado;
+                            break;
+                        case 'Iniciado':
+                            gteStat.iniciados += demoplot._count.estado;
+                            break;
+                    }
+                }
+            });
+
+            const objetivo = 60;
+            const objDiaCampo = 4;
+
+            gteStats.forEach((gte) => {
+                gte.cumpDiaCampo = gte.diaCampo / objDiaCampo;
+            });
+
+            gteStats.forEach((gte) => {
+                gte.cumplimiento = (gte.completados + gte.diaCampo) / objetivo;
+            });
+
+            gteStats.sort((a, b) => b.completados - a.completados);
+
+            let rank = 1;
+            let previousCount = null;
+            for (let i = 0; i < gteStats.length; i++) {
+                if (
+                    previousCount !== null &&
+                    gteStats[i].completados < previousCount
+                ) {
+                    rank = i + 1;
+                }
+                gteStats[i].rank = rank;
+                previousCount = gteStats[i].completados;
+            }
+
+            const gteData = gteStatsMap[idGte];
+            return gteData;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

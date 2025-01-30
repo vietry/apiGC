@@ -19,32 +19,38 @@ model Foto {
 }
 
 model Usuario {
-  id                                           Int               @id(map: "PK__Usuario__3213E83FD8E5D762") @default(autoincrement())
-  nombres                                      String            @db.VarChar(45)
-  apellidos                                    String?           @db.VarChar(45)
-  email                                        String            @db.VarChar(40)
-  emailValidado                                Boolean?
-  password                                     String            @db.VarChar(255)
-  rol                                          String?           @db.VarChar(10)
-  celular                                      String?           @db.VarChar(15)
-  idFoto                                       Int?
-  createdAt                                    DateTime?         @db.DateTime
-  updatedAt                                    DateTime?         @db.DateTime
-  Asistencia_Asistencia_createdByToUsuario     Asistencia[]      @relation("Asistencia_createdByToUsuario")
-  Asistencia_Asistencia_updatedByToUsuario     Asistencia[]      @relation("Asistencia_updatedByToUsuario")
-  Charla_Charla_createdByToUsuario             Charla[]          @relation("Charla_createdByToUsuario")
-  Charla_Charla_updatedByToUsuario             Charla[]          @relation("Charla_updatedByToUsuario")
-  Colaborador                                  Colaborador[]
-  DemoPlot_DemoPlot_createdByToUsuario         DemoPlot[]        @relation("DemoPlot_createdByToUsuario")
-  DemoPlot_DemoPlot_updatedByToUsuario         DemoPlot[]        @relation("DemoPlot_updatedByToUsuario")
-  Externo                                      Externo[]
-  FotoCharla_FotoCharla_createdByToUsuario     FotoCharla[]      @relation("FotoCharla_createdByToUsuario")
-  FotoCharla_FotoCharla_updatedByToUsuario     FotoCharla[]      @relation("FotoCharla_updatedByToUsuario")
-  FotoDemoPlot_FotoDemoPlot_createdByToUsuario FotoDemoPlot[]    @relation("FotoDemoPlot_createdByToUsuario")
-  FotoDemoPlot_FotoDemoPlot_updatedByToUsuario FotoDemoPlot[]    @relation("FotoDemoPlot_updatedByToUsuario")
-  FotoDemoPlotLog                              FotoDemoPlotLog[]
-  Gte                                          Gte[]
-  Foto                                         Foto?             @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
+  id                                                     Int                 @id(map: "PK__Usuario__3213E83FD8E5D762") @default(autoincrement())
+  nombres                                                String              @db.VarChar(45)
+  apellidos                                              String?             @db.VarChar(45)
+  email                                                  String              @db.VarChar(40)
+  emailValidado                                          Boolean?
+  password                                               String              @db.VarChar(255)
+  rol                                                    String?             @db.VarChar(10)
+  celular                                                String?             @db.VarChar(15)
+  idFoto                                                 Int?
+  createdAt                                              DateTime?           @db.DateTime
+  updatedAt                                              DateTime?           @db.DateTime
+  Asistencia_Asistencia_createdByToUsuario               Asistencia[]        @relation("Asistencia_createdByToUsuario")
+  Asistencia_Asistencia_updatedByToUsuario               Asistencia[]        @relation("Asistencia_updatedByToUsuario")
+  Charla_Charla_createdByToUsuario                       Charla[]            @relation("Charla_createdByToUsuario")
+  Charla_Charla_updatedByToUsuario                       Charla[]            @relation("Charla_updatedByToUsuario")
+  Colaborador                                            Colaborador[]
+  CostoLaboral_CostoLaboral_createdByToUsuario           CostoLaboral[]      @relation("CostoLaboral_createdByToUsuario")
+  CostoLaboral_CostoLaboral_updatedByToUsuario           CostoLaboral[]      @relation("CostoLaboral_updatedByToUsuario")
+  DemoPlot_DemoPlot_createdByToUsuario                   DemoPlot[]          @relation("DemoPlot_createdByToUsuario")
+  DemoPlot_DemoPlot_updatedByToUsuario                   DemoPlot[]          @relation("DemoPlot_updatedByToUsuario")
+  Externo                                                Externo[]
+  FotoCharla_FotoCharla_createdByToUsuario               FotoCharla[]        @relation("FotoCharla_createdByToUsuario")
+  FotoCharla_FotoCharla_updatedByToUsuario               FotoCharla[]        @relation("FotoCharla_updatedByToUsuario")
+  FotoDemoPlot_FotoDemoPlot_createdByToUsuario           FotoDemoPlot[]      @relation("FotoDemoPlot_createdByToUsuario")
+  FotoDemoPlot_FotoDemoPlot_updatedByToUsuario           FotoDemoPlot[]      @relation("FotoDemoPlot_updatedByToUsuario")
+  FotoDemoPlotLog                                        FotoDemoPlotLog[]
+  Gte                                                    Gte[]
+  RegistroLaboralGD_RegistroLaboralGD_createdByToUsuario RegistroLaboralGD[] @relation("RegistroLaboralGD_createdByToUsuario")
+  RegistroLaboralGD_RegistroLaboralGD_updatedByToUsuario RegistroLaboralGD[] @relation("RegistroLaboralGD_updatedByToUsuario")
+  Foto                                                   Foto?               @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
+  VariablePersonal_VariablePersonal_createdByToUsuario   VariablePersonal[]  @relation("VariablePersonal_createdByToUsuario")
+  VariablePersonal_VariablePersonal_updatedByToUsuario   VariablePersonal[]  @relation("VariablePersonal_updatedByToUsuario")
 }
 
 model Area {
@@ -216,20 +222,21 @@ model Division {
 }
 
 model Empresa {
-  id             Int              @id(map: "PK__Empresa__3213E83F9EE8C362")
-  nomEmpresa     String           @db.VarChar(15)
-  createdAt      DateTime?        @db.DateTime
-  updatedAt      DateTime?        @db.DateTime
-  Articulo       Articulo[]
-  Clase          Clase[]
-  Cliente        Cliente[]
-  ClienteZona    ClienteZona[]
-  ClienteZonaAnt ClienteZonaAnt[]
-  Division       Division[]
-  Familia        Familia[]
-  Linea          Linea[]
-  PuntoContacto  PuntoContacto[]
-  ZonaAnterior   ZonaAnterior[]
+  id              Int               @id(map: "PK__Empresa__3213E83F9EE8C362")
+  nomEmpresa      String            @db.VarChar(15)
+  createdAt       DateTime?         @db.DateTime
+  updatedAt       DateTime?         @db.DateTime
+  Articulo        Articulo[]
+  Clase           Clase[]
+  Cliente         Cliente[]
+  ClienteZona     ClienteZona[]
+  ClienteZonaAnt  ClienteZonaAnt[]
+  ColaboradorJefe ColaboradorJefe[]
+  Division        Division[]
+  Familia         Familia[]
+  Linea           Linea[]
+  PuntoContacto   PuntoContacto[]
+  ZonaAnterior    ZonaAnterior[]
 }
 
 model Familia {
@@ -491,21 +498,23 @@ model FotoDemoPlot {
 }
 
 model Gte {
-  id            Int             @id(map: "PK__Gte__3213E83FFF0D0701") @default(autoincrement())
-  activo        Boolean?
-  idSubZona     Int?
-  idColaborador Int?
-  idUsuario     Int?
-  createdAt     DateTime?       @db.DateTime
-  updatedAt     DateTime?       @db.DateTime
-  tipo          String?         @db.VarChar(20)
-  Charla        Charla[]
-  ContactoPunto ContactoPunto[]
-  DemoPlot      DemoPlot[]
-  Colaborador   Colaborador?    @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_Colaborador1")
-  SubZona       SubZona?        @relation(fields: [idSubZona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_SubZona1")
-  Usuario       Usuario?        @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_Usuario1")
-  PuntoContacto PuntoContacto[]
+  id                Int                 @id(map: "PK__Gte__3213E83FFF0D0701") @default(autoincrement())
+  activo            Boolean?
+  idSubZona         Int?
+  idColaborador     Int?
+  idUsuario         Int?
+  createdAt         DateTime?           @db.DateTime
+  updatedAt         DateTime?           @db.DateTime
+  tipo              String?             @db.VarChar(20)
+  Charla            Charla[]
+  ContactoPunto     ContactoPunto[]
+  DemoPlot          DemoPlot[]
+  Colaborador       Colaborador?        @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_Colaborador1")
+  SubZona           SubZona?            @relation(fields: [idSubZona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_SubZona1")
+  Usuario           Usuario?            @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_Usuario1")
+  PuntoContacto     PuntoContacto[]
+  RegistroLaboralGD RegistroLaboralGD[]
+  VariablePersonal  VariablePersonal[]
 }
 
 model PuntoContacto {
@@ -635,9 +644,11 @@ model ColaboradorJefe {
   idJefe                                                 Int
   idColaborador                                          Int
   idMacroZona                                            Int?
+  idEmpresa                                              Int?
   Colaborador_ColaboradorJefe_idColaboradorToColaborador Colaborador @relation("ColaboradorJefe_idColaboradorToColaborador", fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_ColabJefe_Colab1")
   Colaborador_ColaboradorJefe_idJefeToColaborador        Colaborador @relation("ColaboradorJefe_idJefeToColaborador", fields: [idJefe], references: [id], onUpdate: NoAction, map: "fk_ColabJefe_Jefe1")
   SuperZona                                              SuperZona?  @relation(fields: [idMacroZona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ColabJefe_MacroZona")
+  Empresa                                                Empresa?    @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Jefe_Empresa")
 }
 
 model Asistencia {
@@ -755,4 +766,56 @@ model Externo {
   updatedAt      DateTime?    @db.DateTime
   Representada   Representada @relation(fields: [idRepresentada], references: [id], onUpdate: NoAction, map: "fk_ExternoRepresentada")
   Usuario        Usuario?     @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ExternoUsuario")
+}
+
+model CostoLaboral {
+  id                                      Int       @id(map: "PK__CostoLab__3213E83F6527997F") @default(autoincrement())
+  conteo1                                 Decimal?  @db.Decimal(18, 0)
+  conteo2                                 Decimal?  @db.Decimal(18, 0)
+  diacampo                                Decimal?  @db.Decimal(18, 0)
+  sueldo                                  Decimal?  @db.Decimal(18, 0)
+  viaticos                                Decimal?  @db.Decimal(18, 0)
+  moto                                    Decimal?  @db.Decimal(18, 0)
+  year                                    Int
+  month                                   Int
+  createdAt                               DateTime? @db.DateTime
+  createdBy                               Int?
+  updatedAt                               DateTime? @db.DateTime
+  updatedBy                               Int?
+  Usuario_CostoLaboral_createdByToUsuario Usuario?  @relation("CostoLaboral_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_CostoLaboralCreated")
+  Usuario_CostoLaboral_updatedByToUsuario Usuario?  @relation("CostoLaboral_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_CostoLaboralUpdated")
+}
+
+model VariablePersonal {
+  id                                          Int       @id(map: "PK__Variable__3213E83FED128FFE") @default(autoincrement())
+  variable                                    Decimal?  @db.Decimal(7, 2)
+  bono10                                      Decimal?  @db.Decimal(6, 2)
+  vidaLey                                     Decimal?  @db.Decimal(6, 2)
+  beneficio                                   Decimal?  @db.Decimal(7, 2)
+  total                                       Decimal?  @db.Decimal(7, 2)
+  year                                        Int
+  month                                       Int
+  idGte                                       Int
+  createdAt                                   DateTime? @db.DateTime
+  createdBy                                   Int?
+  updatedAt                                   DateTime? @db.DateTime
+  updatedBy                                   Int?
+  Usuario_VariablePersonal_createdByToUsuario Usuario?  @relation("VariablePersonal_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalCreated")
+  Gte                                         Gte       @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VariablePersonalGenerador")
+  Usuario_VariablePersonal_updatedByToUsuario Usuario?  @relation("VariablePersonal_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalUpdated")
+  @@unique([idGte, year, month], name: "idGte_year_month")
+}
+
+model RegistroLaboralGD {
+  id                                           Int       @id(map: "PK__Registro__3213E83F041C2A04") @default(autoincrement())
+  ingreso                                      DateTime? @db.DateTime
+  cese                                         DateTime? @db.DateTime
+  idGte                                        Int
+  createdAt                                    DateTime? @db.DateTime
+  createdBy                                    Int?
+  updatedAt                                    DateTime? @db.DateTime
+  updatedBy                                    Int?
+  Usuario_RegistroLaboralGD_createdByToUsuario Usuario?  @relation("RegistroLaboralGD_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_RegistroLaboralCreated")
+  Gte                                          Gte       @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_RegistroLaboralGenerador")
+  Usuario_RegistroLaboralGD_updatedByToUsuario Usuario?  @relation("RegistroLaboralGD_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_RegistroLaboralUpdated")
 }

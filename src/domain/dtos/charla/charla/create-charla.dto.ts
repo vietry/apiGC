@@ -24,19 +24,36 @@ export class CreateCharlaDto {
         public readonly updatedBy: number | null
     ) {}
 
-    static async create(object: { [key: string]: any }): Promise<[string?, CreateCharlaDto?]> {
+    static async create(object: {
+        [key: string]: any;
+    }): Promise<[string?, CreateCharlaDto?]> {
         const {
-            tema, asistentes, hectareas, dosis, efectivo, comentarios, demoplots, estado,
-            programacion, ejecucion, cancelacion, motivo, idVegetacion, idBlanco, idDistrito,
-            idFamilia, idGte, idTienda,             
-            //createdAt, 
-            createdBy, 
-            //updatedAt, 
-            updatedBy
+            tema,
+            asistentes,
+            hectareas,
+            dosis,
+            efectivo,
+            comentarios,
+            demoplots,
+            estado,
+            programacion,
+            ejecucion,
+            cancelacion,
+            motivo,
+            idVegetacion,
+            idBlanco,
+            idDistrito,
+            idFamilia,
+            idGte,
+            idTienda,
+            //createdAt,
+            createdBy,
+            //updatedAt,
+            updatedBy,
         } = object;
 
         if (!idVegetacion) return ['idVegetacion faltante'];
-        //if (!idBlanco) return ['idBlanco faltante'];
+
         if (!idGte) return ['idGte faltante'];
         if (!idTienda) return ['idTienda faltante'];
 
@@ -45,7 +62,8 @@ export class CreateCharlaDto {
 
         if (hectareas && typeof hectareas !== 'number') {
             hectareasNumber = parseFloat(hectareas);
-            if (isNaN(hectareasNumber)) return ['hectareas debe ser un número válido'];
+            if (isNaN(hectareasNumber))
+                return ['hectareas debe ser un número válido'];
         }
 
         if (dosis && typeof dosis !== 'number') {
@@ -56,14 +74,29 @@ export class CreateCharlaDto {
         return [
             undefined,
             new CreateCharlaDto(
-                tema, asistentes, hectareasNumber, dosisNumber, efectivo, comentarios, demoplots,
-                estado, programacion, ejecucion, cancelacion, motivo, idVegetacion, idBlanco,
-                idDistrito, idFamilia, idGte, idTienda,             
-                //createdAt, 
-                createdBy, 
-                //updatedAt, 
+                tema,
+                asistentes,
+                hectareasNumber,
+                dosisNumber,
+                efectivo,
+                comentarios,
+                demoplots,
+                estado,
+                programacion,
+                ejecucion,
+                cancelacion,
+                motivo,
+                idVegetacion,
+                idBlanco,
+                idDistrito,
+                idFamilia,
+                idGte,
+                idTienda,
+                //createdAt,
+                createdBy,
+                //updatedAt,
                 updatedBy
-            )
+            ),
         ];
     }
 }

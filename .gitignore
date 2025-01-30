@@ -5,4 +5,5 @@ uploads/
 dist/
 build/
 /postgres
+/public
 

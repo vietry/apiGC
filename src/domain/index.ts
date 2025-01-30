@@ -30,3 +30,5 @@ export * from './use-cases/usuario/get-usuario';
 export * from './use-cases/usuario/get-usuarios';
 
 export * from './dtos/shared/pagination.dto';
+
+export * from './common/filters';
