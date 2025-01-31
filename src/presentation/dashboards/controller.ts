@@ -206,4 +206,38 @@ export class DashboardController {
             this.handleError(res, error);
         }
     };
+
+    getJerarquiaRankings = async (req: Request, res: Response) => {
+        try {
+            const {
+                year,
+                month,
+                idColaborador,
+                macrozona,
+                empresa,
+                activo,
+                idGte,
+            } = req.query;
+
+            const filters = {
+                year: year ? +year : undefined,
+                month: month ? +month : undefined,
+                idColaborador: idColaborador ? +idColaborador : undefined,
+                idGte: idGte ? +idGte : undefined,
+                macrozona: macrozona ? +macrozona : undefined,
+                empresa: empresa?.toString(),
+                activo:
+                    activo !== undefined
+                        ? !!(activo === 'true' || activo === '1')
+                        : undefined,
+            };
+
+            this.dashboardService
+                .getJerarquiaRankings(filters)
+                .then((jerarquia) => res.status(200).json(jerarquia))
+                .catch((error) => this.handleError(res, error));
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
 }

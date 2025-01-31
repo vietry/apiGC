@@ -7,7 +7,6 @@ import {
 } from '../../domain';
 import { getCurrentDate } from '../../config/time';
 import { GteRankingFilters } from '../../domain/common/filters';
-import { CreateDemoplotDto } from '../../domain/dtos/demoplot/create-demoplot.dto';
 
 export class VariablePersonalService {
     async createVariablePersonal(
@@ -208,7 +207,7 @@ export class VariablePersonalService {
                         month: variable.month,
                         idGte: variable.idGte,
 
-                        colaborador: variable.Gte.Colaborador?.id,
+                        idColaborador: variable.Gte.Colaborador?.id,
                         empresa:
                             variable.Gte.Colaborador?.ZonaAnterior?.Empresa
                                 .nomEmpresa,
@@ -347,7 +346,7 @@ export class VariablePersonalService {
                     month: variable.month,
                     idGte: variable.idGte,
 
-                    colaborador: variable.Gte.Colaborador?.id,
+                    idColaborador: variable.Gte.Colaborador?.id,
                     empresa:
                         variable.Gte.Colaborador?.ZonaAnterior?.Empresa
                             .nomEmpresa,
@@ -496,16 +495,18 @@ export class VariablePersonalService {
 
                 // Calcular variable según reglas
                 let variableCompletado = 0;
-                if (total >= 30 && total <= 40) {
-                    variableCompletado = total * conteo1;
-                } else if (total > 40) {
-                    variableCompletado = total * conteo2;
-                }
-
-                // Calcular variable campo según reglas
                 let variableCampo = 0;
-                if (totalC >= 4) {
-                    variableCampo = totalC * diaCampo;
+                if (total >= 30) {
+                    if (total <= 40) {
+                        variableCompletado = total * conteo1;
+                    } else {
+                        variableCompletado = total * conteo2;
+                    }
+
+                    // Calcular variableCampo solo si total >= 30
+                    if (totalC >= 1) {
+                        variableCampo = totalC * diaCampo;
+                    }
                 }
                 let variable = variableCompletado + variableCampo;
 

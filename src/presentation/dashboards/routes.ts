@@ -16,6 +16,7 @@ export class DashboardRoutes {
             '/count/demoplots/variable',
             controller.countDemoplotsByFiltersCustomDate
         );
+        router.get('/ranking/jerarquia', controller.getJerarquiaRankings);
         return router;
     }
 }

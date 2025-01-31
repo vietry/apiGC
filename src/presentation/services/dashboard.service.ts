@@ -1,5 +1,5 @@
 import { prisma } from '../../data/sqlserver';
-import { CustomError, GteRankingFilters, PaginationDto } from '../../domain';
+import { CustomError, Empresa, GteRankingFilters } from '../../domain';
 
 import { DemoplotFilters } from './demoplot.service';
 
@@ -73,6 +73,12 @@ export class DashboardService {
                     Colaborador: {
                         select: {
                             id: true,
+                            Usuario: {
+                                select: {
+                                    nombres: true,
+                                    apellidos: true,
+                                },
+                            },
                             ZonaAnterior: {
                                 select: {
                                     nombre: true,
@@ -142,31 +148,101 @@ export class DashboardService {
                 idGte: { in: gteIds },
             };
 
+            // Agregar nuevos where para cada estado
+            const demoWhereProgramado: any = {
+                estado: 'Programado',
+                idGte: { in: gteIds },
+            };
+            const demoWhereIniciado: any = {
+                estado: 'Iniciado',
+                idGte: { in: gteIds },
+            };
+            const demoWhereSeguimiento: any = {
+                estado: 'Seguimiento',
+                idGte: { in: gteIds },
+            };
+            const demoWhereCancelado: any = {
+                estado: 'Cancelado',
+                idGte: { in: gteIds },
+            };
+            const demoWhereReprogramado: any = {
+                estado: 'Reprogramado',
+                idGte: { in: gteIds },
+            };
+
+            /*if (startDate && endDate) {
+                demoWhereCompletado.updatedAt = {
+                    gte: startDate,
+                    lt: endDate,
+                };
+                demoWhereDiaCampo.updatedAt = {
+                    gte: startDate,
+                    lt: endDate,
+                };
+            }*/
+
             if (startDate && endDate) {
-                demoWhereCompletado.finalizacion = {
-                    gte: startDate,
-                    lt: endDate,
+                const dateFilter = {
+                    updatedAt: {
+                        gte: startDate,
+                        lt: endDate,
+                    },
                 };
-                demoWhereDiaCampo.finalizacion = {
-                    gte: startDate,
-                    lt: endDate,
-                };
+                demoWhereCompletado.updatedAt = dateFilter.updatedAt;
+                demoWhereDiaCampo.updatedAt = dateFilter.updatedAt;
+                demoWhereProgramado.updatedAt = dateFilter.updatedAt;
+                demoWhereIniciado.updatedAt = dateFilter.updatedAt;
+                demoWhereSeguimiento.updatedAt = dateFilter.updatedAt;
+                demoWhereCancelado.updatedAt = dateFilter.updatedAt;
+                demoWhereReprogramado.updatedAt = dateFilter.updatedAt;
             }
 
             // 5. Agrupa los demoplots "Completado" y "Día campo"
-            const [completedDemoplotCounts, diaCampoDemoplotCounts] =
-                await Promise.all([
-                    prisma.demoPlot.groupBy({
-                        by: ['idGte'],
-                        where: demoWhereCompletado,
-                        _count: { id: true },
-                    }),
-                    prisma.demoPlot.groupBy({
-                        by: ['idGte'],
-                        where: demoWhereDiaCampo,
-                        _count: { id: true },
-                    }),
-                ]);
+            const [
+                completedDemoplotCounts,
+                diaCampoDemoplotCounts,
+                programadoDemoplotCounts,
+                iniciadoDemoplotCounts,
+                seguimientoDemoplotCounts,
+                canceladoDemoplotCounts,
+                reprogramadoDemoplotCounts,
+            ] = await Promise.all([
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereCompletado,
+                    _count: { id: true },
+                }),
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereDiaCampo,
+                    _count: { id: true },
+                }),
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereProgramado,
+                    _count: { id: true },
+                }),
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereIniciado,
+                    _count: { id: true },
+                }),
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereSeguimiento,
+                    _count: { id: true },
+                }),
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereCancelado,
+                    _count: { id: true },
+                }),
+                prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: demoWhereReprogramado,
+                    _count: { id: true },
+                }),
+            ]);
 
             // 6. Diccionarios para conteo rápido
             const completedCountsByGteId: { [key: number]: number } = {};
@@ -179,11 +255,40 @@ export class DashboardService {
                 diaCampoCountsByGteId[item.idGte] = item._count.id;
             });
 
+            const programadoCountsByGteId: { [key: number]: number } = {};
+            programadoDemoplotCounts.forEach((item) => {
+                programadoCountsByGteId[item.idGte] = item._count.id;
+            });
+
+            const iniciadoCountsByGteId: { [key: number]: number } = {};
+            iniciadoDemoplotCounts.forEach((item) => {
+                iniciadoCountsByGteId[item.idGte] = item._count.id;
+            });
+
+            const seguimientoCountsByGteId: { [key: number]: number } = {};
+            seguimientoDemoplotCounts.forEach((item) => {
+                seguimientoCountsByGteId[item.idGte] = item._count.id;
+            });
+
+            const canceladoCountsByGteId: { [key: number]: number } = {};
+            canceladoDemoplotCounts.forEach((item) => {
+                canceladoCountsByGteId[item.idGte] = item._count.id;
+            });
+
+            const reprogramadoCountsByGteId: { [key: number]: number } = {};
+            reprogramadoDemoplotCounts.forEach((item) => {
+                reprogramadoCountsByGteId[item.idGte] = item._count.id;
+            });
+
             // 7. Armamos la lista final con la info de cada GTE filtrado
             const gteStats = gtes.map((gte) => {
                 const completados = completedCountsByGteId[gte.id] || 0;
                 const diasCampo = diaCampoCountsByGteId[gte.id] || 0;
-
+                const programados = programadoCountsByGteId[gte.id] || 0;
+                const iniciados = iniciadoCountsByGteId[gte.id] || 0;
+                const seguimiento = seguimientoCountsByGteId[gte.id] || 0;
+                const cancelados = canceladoCountsByGteId[gte.id] || 0;
+                const reprogramados = reprogramadoCountsByGteId[gte.id] || 0;
                 // Supongamos meta de 60 para completados y 4 para día de campo
                 const cumplimientoCompletados = completados / 60;
                 const cumplimientoDiaCampo = diasCampo / 4;
@@ -204,8 +309,14 @@ export class DashboardService {
                     zonaanterior: gte.Colaborador?.ZonaAnterior?.nombre?.trim(),
                     empresa: gte.Colaborador?.ZonaAnterior?.Empresa?.nomEmpresa,
                     nombreGte: `${gte.Usuario?.nombres} ${gte.Usuario?.apellidos}`,
+                    colaborador: `${gte.Colaborador?.Usuario?.nombres} ${gte.Colaborador?.Usuario?.apellidos}`,
+                    programados,
+                    iniciados,
                     completados,
+                    seguimiento,
                     diasCampo,
+                    cancelados,
+                    reprogramados,
                     cumplimientoCompletados,
                     cumplimientoDiaCampo,
                     cumplimiento,
@@ -780,6 +891,247 @@ export class DashboardService {
             }
 
             return gteStats;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getJerarquiaRankings(filters: GteRankingFilters = {}) {
+        try {
+            const gteStats = await this.getGteRankings(filters);
+            const empresas: { [key: string]: Empresa } = {};
+
+            gteStats.forEach((gte) => {
+                const empresaName = gte.empresa ?? 'Sin Empresa';
+                const macrozonaId =
+                    gte.macrozona?.toString() ?? 'Sin Macrozona';
+                const rtcId = gte.idColaborador?.toString() ?? 'Sin RTC';
+                const zona = gte.zonaanterior?.toString() ?? 'Sin Zona';
+
+                if (!empresas[empresaName]) {
+                    empresas[empresaName] = {
+                        id: empresaName,
+                        name: empresaName,
+                        macroZonas: [],
+                        total: {
+                            demoplots: 0,
+                            programados: 0,
+                            iniciados: 0,
+                            seguimiento: 0,
+                            completados: 0,
+                            diasCampo: 0,
+                            reprogramados: 0,
+                            cancelados: 0,
+                            cumplimientoCompletados: 0,
+                            cumplimientoDiaCampo: 0,
+                            cumplimiento: 0,
+                        },
+                    };
+                }
+
+                let macrozona = empresas[empresaName].macroZonas.find(
+                    (m) => m.id === macrozonaId
+                );
+
+                if (!macrozona) {
+                    macrozona = {
+                        id: macrozonaId,
+                        name: macrozonaId,
+                        retailers: [],
+                        total: {
+                            demoplots: 0,
+                            programados: 0,
+                            iniciados: 0,
+                            seguimiento: 0,
+                            completados: 0,
+                            diasCampo: 0,
+                            reprogramados: 0,
+                            cancelados: 0,
+                            cumplimientoCompletados: 0,
+                            cumplimientoDiaCampo: 0,
+                            cumplimiento: 0,
+                        },
+                    };
+                    empresas[empresaName].macroZonas.push(macrozona);
+                }
+
+                let rtc = macrozona.retailers.find((r) => r.id === rtcId);
+
+                if (!rtc) {
+                    rtc = {
+                        id: rtcId,
+                        name: zona,
+                        generadores: [],
+                        total: {
+                            demoplots: 0,
+                            programados: 0,
+                            iniciados: 0,
+                            seguimiento: 0,
+                            completados: 0,
+                            diasCampo: 0,
+                            reprogramados: 0,
+                            cancelados: 0,
+                            cumplimientoCompletados: 0,
+                            cumplimientoDiaCampo: 0,
+                            cumplimiento: 0,
+                        },
+                    };
+                    macrozona.retailers.push(rtc);
+                }
+
+                rtc.generadores.push({
+                    id: gte.idGte.toString(),
+                    nombres: gte.nombreGte,
+                    demoplots: gte.completados + gte.diasCampo,
+                    programados: gte.programados,
+                    iniciados: gte.iniciados,
+                    seguimiento: gte.seguimiento,
+                    completados: gte.completados,
+                    diasCampo: gte.diasCampo,
+                    reprogramados: gte.reprogramados,
+                    cancelados: gte.cancelados,
+                    cumplimientoCompletados: gte.cumplimientoCompletados,
+                    cumplimientoDiaCampo: gte.cumplimientoDiaCampo,
+                    cumplimiento: gte.cumplimiento,
+                    rank: gte.rank,
+                });
+            });
+
+            Object.values(empresas).forEach((empresa) => {
+                empresa.macroZonas.forEach((macrozona) => {
+                    macrozona.retailers.forEach((rtc) => {
+                        // Calcular totales de RTC
+                        rtc.total = rtc.generadores.reduce(
+                            (total, gte) => ({
+                                demoplots: total.demoplots + gte.demoplots,
+                                programados:
+                                    total.programados + gte.programados,
+                                iniciados: total.iniciados + gte.iniciados,
+                                seguimiento:
+                                    total.seguimiento + gte.seguimiento,
+                                completados:
+                                    total.completados + gte.completados,
+                                diasCampo: total.diasCampo + gte.diasCampo,
+                                reprogramados:
+                                    total.reprogramados + gte.reprogramados,
+                                cancelados: total.cancelados + gte.cancelados,
+                                cumplimientoCompletados: 0,
+                                cumplimientoDiaCampo: 0,
+                                cumplimiento: 0,
+                            }),
+                            {
+                                demoplots: 0,
+                                programados: 0,
+                                iniciados: 0,
+                                seguimiento: 0,
+                                completados: 0,
+                                diasCampo: 0,
+                                reprogramados: 0,
+                                cancelados: 0,
+                                cumplimientoCompletados: 0,
+                                cumplimientoDiaCampo: 0,
+                                cumplimiento: 0,
+                            }
+                        );
+
+                        // Calcular promedios de RTC
+                        const gteCount = rtc.generadores.length;
+                        if (gteCount > 0) {
+                            rtc.total.cumplimientoCompletados =
+                                rtc.generadores.reduce(
+                                    (sum, gte) =>
+                                        sum + gte.cumplimientoCompletados,
+                                    0
+                                ) / gteCount;
+                            rtc.total.cumplimientoDiaCampo =
+                                rtc.generadores.reduce(
+                                    (sum, gte) =>
+                                        sum + gte.cumplimientoDiaCampo,
+                                    0
+                                ) / gteCount;
+                            rtc.total.cumplimiento =
+                                rtc.generadores.reduce(
+                                    (sum, gte) => sum + gte.cumplimiento,
+                                    0
+                                ) / gteCount;
+                        }
+                    });
+
+                    // Calcular totales de Macrozona
+                    macrozona.total = macrozona.retailers.reduce(
+                        (total, rtc) => ({
+                            demoplots: total.demoplots + rtc.total.demoplots,
+                            programados:
+                                total.programados + rtc.total.programados,
+                            iniciados: total.iniciados + rtc.total.iniciados,
+                            seguimiento:
+                                total.seguimiento + rtc.total.seguimiento,
+                            completados:
+                                total.completados + rtc.total.completados,
+                            diasCampo: total.diasCampo + rtc.total.diasCampo,
+                            reprogramados:
+                                total.reprogramados + rtc.total.reprogramados,
+                            cancelados: total.cancelados + rtc.total.cancelados,
+                            cumplimientoCompletados: 0,
+                            cumplimientoDiaCampo: 0,
+                            cumplimiento: 0,
+                        }),
+                        macrozona.total
+                    );
+
+                    // Calcular promedios de Macrozona
+                    const rtcCount = macrozona.retailers.length;
+                    if (rtcCount > 0) {
+                        macrozona.total.cumplimientoCompletados =
+                            macrozona.retailers.reduce(
+                                (sum, rtc) =>
+                                    sum + rtc.total.cumplimientoCompletados,
+                                0
+                            ) / rtcCount;
+                        macrozona.total.cumplimientoDiaCampo =
+                            macrozona.retailers.reduce(
+                                (sum, rtc) =>
+                                    sum + rtc.total.cumplimientoDiaCampo,
+                                0
+                            ) / rtcCount;
+                        macrozona.total.cumplimiento =
+                            macrozona.retailers.reduce(
+                                (sum, rtc) => sum + rtc.total.cumplimiento,
+                                0
+                            ) / rtcCount;
+                    }
+
+                    // Sumar totales a empresa
+                    empresa.total.demoplots += macrozona.total.demoplots;
+                    empresa.total.programados += macrozona.total.programados;
+                    empresa.total.iniciados += macrozona.total.iniciados;
+                    empresa.total.seguimiento += macrozona.total.seguimiento;
+                    empresa.total.completados += macrozona.total.completados;
+                    empresa.total.diasCampo += macrozona.total.diasCampo;
+                });
+
+                // Calcular promedios de Empresa
+                const macrozonasCount = empresa.macroZonas.length;
+                if (macrozonasCount > 0) {
+                    empresa.total.cumplimientoCompletados =
+                        empresa.macroZonas.reduce(
+                            (sum, mz) => sum + mz.total.cumplimientoCompletados,
+                            0
+                        ) / macrozonasCount;
+                    empresa.total.cumplimientoDiaCampo =
+                        empresa.macroZonas.reduce(
+                            (sum, mz) => sum + mz.total.cumplimientoDiaCampo,
+                            0
+                        ) / macrozonasCount;
+                    empresa.total.cumplimiento =
+                        empresa.macroZonas.reduce(
+                            (sum, mz) => sum + mz.total.cumplimiento,
+                            0
+                        ) / macrozonasCount;
+                }
+            });
+
+            return Object.values(empresas);
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
