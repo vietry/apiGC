@@ -11,6 +11,8 @@ export class DashboardService {
             idColaborador,
             macrozona,
             empresa,
+            clase,
+            idFamilia,
             activo,
             idGte,
         } = filters;
@@ -65,7 +67,13 @@ export class DashboardService {
 
             // 2. Obtén todos los GTEs que cumplan con esos filtros (junto a su info de usuario/colaborador)
             const gtes = await prisma.gte.findMany({
-                where: gteWhere,
+                where: {
+                    NOT: {
+                        id: 1125,
+                    },
+                    ...gteWhere,
+                },
+
                 select: {
                     id: true,
                     idColaborador: true,
@@ -134,7 +142,63 @@ export class DashboardService {
                 }
             }
 
+            const calcularObjetivos = () => {
+                const demosPorMes = 60;
+                const diasCampoPorMes = 4;
+                const fechaActual = new Date();
+                const añoActual = fechaActual.getFullYear();
+                const mesActual = fechaActual.getMonth() + 1;
+
+                if (year && month) {
+                    // Si hay año y mes específico
+                    return {
+                        demosObjetivo: demosPorMes,
+                        diasCampoObjetivo: diasCampoPorMes,
+                    };
+                } else if (year) {
+                    if (year < añoActual) {
+                        // Año anterior completo
+                        return {
+                            demosObjetivo: demosPorMes * 12,
+                            diasCampoObjetivo: diasCampoPorMes * 12,
+                        };
+                    } else if (year === añoActual) {
+                        // Año actual hasta el mes actual
+                        return {
+                            demosObjetivo: demosPorMes * mesActual,
+                            diasCampoObjetivo: diasCampoPorMes * mesActual,
+                        };
+                    } else {
+                        // Año futuro
+                        return {
+                            demosObjetivo: demosPorMes,
+                            diasCampoObjetivo: diasCampoPorMes,
+                        };
+                    }
+                }
+                // Sin filtros de fecha
+                return {
+                    demosObjetivo: demosPorMes,
+                    diasCampoObjetivo: diasCampoPorMes,
+                };
+            };
+
             // 4. Para agrupar demoplots, necesitamos filtrar SOLO por los GTEs obtenidos + estado + finalizacion
+            const claseFamiliaFilter = clase
+                ? {
+                      Familia: {
+                          clase: { contains: clase },
+                      },
+                  }
+                : {};
+
+            const familiaFilter = idFamilia
+                ? {
+                      Familia: {
+                          id: idFamilia,
+                      },
+                  }
+                : {};
             // Obtenemos la lista de IDs de GTE filtrados
             const gteIds = gtes.map((g) => g.id);
 
@@ -142,44 +206,47 @@ export class DashboardService {
             const demoWhereCompletado: any = {
                 estado: 'Completado',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
             const demoWhereDiaCampo: any = {
                 estado: 'Día campo',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
 
             // Agregar nuevos where para cada estado
             const demoWhereProgramado: any = {
                 estado: 'Programado',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
             const demoWhereIniciado: any = {
                 estado: 'Iniciado',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
             const demoWhereSeguimiento: any = {
                 estado: 'Seguimiento',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
             const demoWhereCancelado: any = {
                 estado: 'Cancelado',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
             const demoWhereReprogramado: any = {
                 estado: 'Reprogramado',
                 idGte: { in: gteIds },
+                ...claseFamiliaFilter,
+                ...familiaFilter,
             };
-
-            /*if (startDate && endDate) {
-                demoWhereCompletado.updatedAt = {
-                    gte: startDate,
-                    lt: endDate,
-                };
-                demoWhereDiaCampo.updatedAt = {
-                    gte: startDate,
-                    lt: endDate,
-                };
-            }*/
 
             if (startDate && endDate) {
                 const dateFilter = {
@@ -280,6 +347,8 @@ export class DashboardService {
                 reprogramadoCountsByGteId[item.idGte] = item._count.id;
             });
 
+            const { demosObjetivo, diasCampoObjetivo } = calcularObjetivos();
+
             // 7. Armamos la lista final con la info de cada GTE filtrado
             const gteStats = gtes.map((gte) => {
                 const completados = completedCountsByGteId[gte.id] || 0;
@@ -290,10 +359,18 @@ export class DashboardService {
                 const cancelados = canceladoCountsByGteId[gte.id] || 0;
                 const reprogramados = reprogramadoCountsByGteId[gte.id] || 0;
                 // Supongamos meta de 60 para completados y 4 para día de campo
-                const cumplimientoCompletados = completados / 60;
-                const cumplimientoDiaCampo = diasCampo / 4;
-                const total = completados + diasCampo;
-                const cumplimiento = total / 60;
+                const cumplimientoCompletados = completados / demosObjetivo;
+                const cumplimientoDiaCampo = diasCampo / diasCampoObjetivo;
+                const totalCumplimiento = completados + diasCampo;
+                const total =
+                    completados +
+                    diasCampo +
+                    programados +
+                    iniciados +
+                    seguimiento +
+                    cancelados +
+                    reprogramados;
+                const cumplimiento = totalCumplimiento / demosObjetivo;
 
                 // Extraer macrozona (asumiendo un array de ColaboradorJefe => .[0]?
                 const macrozona =
@@ -309,6 +386,9 @@ export class DashboardService {
                     zonaanterior: gte.Colaborador?.ZonaAnterior?.nombre?.trim(),
                     empresa: gte.Colaborador?.ZonaAnterior?.Empresa?.nomEmpresa,
                     nombreGte: `${gte.Usuario?.nombres} ${gte.Usuario?.apellidos}`,
+                    nomApeGte: `${gte.Usuario?.nombres.split(' ')[0]} ${
+                        gte.Usuario?.apellidos?.split(' ')[0]
+                    }`,
                     colaborador: `${gte.Colaborador?.Usuario?.nombres} ${gte.Colaborador?.Usuario?.apellidos}`,
                     programados,
                     iniciados,
@@ -317,6 +397,8 @@ export class DashboardService {
                     diasCampo,
                     cancelados,
                     reprogramados,
+                    demosObjetivo,
+                    diasCampoObjetivo,
                     cumplimientoCompletados,
                     cumplimientoDiaCampo,
                     cumplimiento,
@@ -370,6 +452,10 @@ export class DashboardService {
             }
             if (filters.idFamilia) {
                 where.idFamilia = filters.idFamilia;
+            }
+
+            if (filters.clase) {
+                where.Familia = { clase: { contains: filters.clase } };
             }
             if (filters.idGte) {
                 where.idGte = filters.idGte;
@@ -516,6 +602,10 @@ export class DashboardService {
             }
             if (filters.idFamilia) {
                 where.idFamilia = filters.idFamilia;
+            }
+
+            if (filters.clase) {
+                where.Familia = { clase: { contains: filters.clase } };
             }
             if (filters.idGte) {
                 where.idGte = filters.idGte;
@@ -668,8 +758,15 @@ export class DashboardService {
     }
 
     async getGteRankingsCustomDate(filters: GteRankingFilters = {}) {
-        const { year, month, idColaborador, macrozona, empresa, activo } =
-            filters;
+        const {
+            year,
+            month,
+            idColaborador,
+            macrozona,
+            empresa,
+            clase,
+            activo,
+        } = filters;
         try {
             // 1. Construir "where" para filtrar GTEs según idColaborador, macrozona, empresa, activo.
             const gteWhere: any = {};
@@ -714,7 +811,12 @@ export class DashboardService {
 
             // 2. Buscar los GTE que cumplan con esos filtros
             const gtes = await prisma.gte.findMany({
-                where: gteWhere,
+                where: {
+                    NOT: {
+                        id: 1125,
+                    },
+                    ...gteWhere,
+                },
                 select: {
                     id: true,
                     idColaborador: true,
@@ -759,13 +861,23 @@ export class DashboardService {
             }
 
             // 3. Construir la lógica de fechas personalizada SOLO si year y month existen
+            const claseFamiliaFilter = clase
+                ? {
+                      Familia: {
+                          clase: { contains: clase },
+                      },
+                  }
+                : {};
+
             let demoWhereCompletado: any = {
                 estado: 'Completado',
                 idGte: { in: gtes.map((g) => g.id) },
+                ...claseFamiliaFilter,
             };
             let demoWhereDiaCampo: any = {
                 estado: 'Día campo',
                 idGte: { in: gtes.map((g) => g.id) },
+                ...claseFamiliaFilter,
             };
 
             if (year && month) {
@@ -922,6 +1034,8 @@ export class DashboardService {
                             diasCampo: 0,
                             reprogramados: 0,
                             cancelados: 0,
+                            demosObjetivo: 0,
+                            diasCampoObjetivo: 0,
                             cumplimientoCompletados: 0,
                             cumplimientoDiaCampo: 0,
                             cumplimiento: 0,
@@ -947,6 +1061,8 @@ export class DashboardService {
                             diasCampo: 0,
                             reprogramados: 0,
                             cancelados: 0,
+                            demosObjetivo: 0,
+                            diasCampoObjetivo: 0,
                             cumplimientoCompletados: 0,
                             cumplimientoDiaCampo: 0,
                             cumplimiento: 0,
@@ -971,6 +1087,8 @@ export class DashboardService {
                             diasCampo: 0,
                             reprogramados: 0,
                             cancelados: 0,
+                            demosObjetivo: 0,
+                            diasCampoObjetivo: 0,
                             cumplimientoCompletados: 0,
                             cumplimientoDiaCampo: 0,
                             cumplimiento: 0,
@@ -990,6 +1108,8 @@ export class DashboardService {
                     diasCampo: gte.diasCampo,
                     reprogramados: gte.reprogramados,
                     cancelados: gte.cancelados,
+                    demosObjetivo: gte.demosObjetivo,
+                    diasCampoObjetivo: gte.diasCampoObjetivo,
                     cumplimientoCompletados: gte.cumplimientoCompletados,
                     cumplimientoDiaCampo: gte.cumplimientoDiaCampo,
                     cumplimiento: gte.cumplimiento,
@@ -1015,6 +1135,11 @@ export class DashboardService {
                                 reprogramados:
                                     total.reprogramados + gte.reprogramados,
                                 cancelados: total.cancelados + gte.cancelados,
+                                demosObjetivo:
+                                    total.demosObjetivo + gte.demosObjetivo,
+                                diasCampoObjetivo:
+                                    total.diasCampoObjetivo +
+                                    gte.diasCampoObjetivo,
                                 cumplimientoCompletados: 0,
                                 cumplimientoDiaCampo: 0,
                                 cumplimiento: 0,
@@ -1028,6 +1153,8 @@ export class DashboardService {
                                 diasCampo: 0,
                                 reprogramados: 0,
                                 cancelados: 0,
+                                demosObjetivo: 0,
+                                diasCampoObjetivo: 0,
                                 cumplimientoCompletados: 0,
                                 cumplimientoDiaCampo: 0,
                                 cumplimiento: 0,
@@ -1072,6 +1199,11 @@ export class DashboardService {
                             reprogramados:
                                 total.reprogramados + rtc.total.reprogramados,
                             cancelados: total.cancelados + rtc.total.cancelados,
+                            demosObjetivo:
+                                total.demosObjetivo + rtc.total.demosObjetivo,
+                            diasCampoObjetivo:
+                                total.diasCampoObjetivo +
+                                rtc.total.diasCampoObjetivo,
                             cumplimientoCompletados: 0,
                             cumplimientoDiaCampo: 0,
                             cumplimiento: 0,
@@ -1108,6 +1240,10 @@ export class DashboardService {
                     empresa.total.seguimiento += macrozona.total.seguimiento;
                     empresa.total.completados += macrozona.total.completados;
                     empresa.total.diasCampo += macrozona.total.diasCampo;
+                    empresa.total.demosObjetivo +=
+                        macrozona.total.demosObjetivo;
+                    empresa.total.diasCampoObjetivo +=
+                        macrozona.total.diasCampoObjetivo;
                 });
 
                 // Calcular promedios de Empresa
@@ -1131,7 +1267,36 @@ export class DashboardService {
                 }
             });
 
-            return Object.values(empresas);
+            // Ordenar generadores dentro de cada RTC
+            Object.values(empresas).forEach((empresa) => {
+                empresa.macroZonas.forEach((macrozona) => {
+                    macrozona.retailers.forEach((rtc) => {
+                        // Ordenar generadores por cumplimiento
+                        rtc.generadores.sort(
+                            (a, b) => b.cumplimiento - a.cumplimiento
+                        );
+                    });
+
+                    // Ordenar retailers por cumplimiento promedio
+                    macrozona.retailers.sort(
+                        (a, b) => b.total.cumplimiento - a.total.cumplimiento
+                    );
+                });
+
+                // Ordenar macrozonas por cumplimiento promedio
+                empresa.macroZonas.sort(
+                    (a, b) => b.total.cumplimiento - a.total.cumplimiento
+                );
+            });
+
+            // Convertir a array y ordenar empresas por cumplimiento
+            const empresasArray = Object.values(empresas);
+            empresasArray.sort(
+                (a, b) => b.total.cumplimiento - a.total.cumplimiento
+            );
+
+            return empresasArray;
+            //return Object.values(empresas);
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

@@ -23,6 +23,8 @@ export interface DemoplotFilters {
 export interface GteRankingFilters {
     idColaborador?: number;
     empresa?: string;
+    clase?: string;
+    idFamilia?: number;
     macrozona?: number;
     year?: number;
     month?: number;
@@ -50,4 +52,16 @@ export interface RegistroLaboralFilters {
     monthIngreso?: number;
     yearCese?: number;
     monthCese?: number;
+}
+
+export interface CharlaFilters {
+    idGte?: number;
+    idColaborador?: number;
+    estado?: string;
+    year?: number;
+    month?: number;
+    idVegetacion?: number;
+    idBlanco?: number;
+    idFamilia?: number;
+    idTienda?: number;
 }

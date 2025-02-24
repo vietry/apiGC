@@ -11,8 +11,10 @@ export class VariablePersonalRoutes {
         );
 
         router.get('/', controller.getVariablesPersonales);
+        router.get('/reporte', controller.getJerarquiaVariables);
         router.get('/all', controller.getAllVariablesPersonales);
         router.get('/:id', controller.getVariablePersonalById);
+
         router.post('/', controller.createVariablePersonal);
         router.put('/:id', controller.updateVariablePersonal);
         router.post('/generate', controller.generateVariablePersonal);

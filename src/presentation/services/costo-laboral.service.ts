@@ -16,6 +16,9 @@ export class CostoLaboralService {
             sueldo,
             viaticos,
             moto,
+            linea,
+            celular,
+            servGte,
             year,
             month,
             createdBy,
@@ -31,6 +34,9 @@ export class CostoLaboralService {
                     sueldo,
                     viaticos,
                     moto,
+                    linea,
+                    celular,
+                    servGte,
                     year,
                     month,
                     createdAt: currentDate,
@@ -142,6 +148,65 @@ export class CostoLaboralService {
                 where,
                 orderBy: [{ year: 'desc' }, { month: 'desc' }],
             });
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async generateMissingCostosLaborales(idUsuario: number) {
+        try {
+            const currentYear = new Date().getFullYear();
+
+            // Obtener registros existentes del año actual
+            const existingCostos = await prisma.costoLaboral.findMany({
+                where: { year: currentYear },
+                select: { month: true },
+            });
+
+            const existingMonths = new Set(existingCostos.map((c) => c.month));
+            const missingMonths: number[] = [];
+
+            // Determinar meses faltantes (1-12)
+            for (let month = 1; month <= 12; month++) {
+                if (!existingMonths.has(month)) {
+                    missingMonths.push(month);
+                }
+            }
+
+            // Valores por defecto
+            const defaultValues = {
+                conteo1: 10,
+                conteo2: 15,
+                diacampo: 75,
+                sueldo: 2000,
+                viaticos: 550,
+                moto: 250,
+                linea: 40,
+                celular: 40,
+                servGte: 400,
+            };
+
+            // Crear registros faltantes
+            const createdCostos = await Promise.all(
+                missingMonths.map((month) =>
+                    prisma.costoLaboral.create({
+                        data: {
+                            ...defaultValues,
+                            year: currentYear,
+                            month,
+                            createdBy: idUsuario,
+                            updatedBy: idUsuario,
+                            createdAt: getCurrentDate(),
+                            updatedAt: getCurrentDate(),
+                        },
+                    })
+                )
+            );
+
+            return {
+                message: `Se crearon ${createdCostos.length} registros de costos laborales`,
+                created: createdCostos,
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

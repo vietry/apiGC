@@ -51,6 +51,9 @@ export * from './registro-laboral-gd/update-registro-laboral-gd.dto';
 export * from './variable-personal/create-variable-personal.dto';
 export * from './variable-personal/update-variable-personal.dto';
 
+export * from './externo/create-externo.dto';
+export * from './externo/update-externo.dto';
+
 //DTOS CHARLA
 export * from './charla/charla/create-charla.dto';
 export * from './charla/charla/update-charla.dto';

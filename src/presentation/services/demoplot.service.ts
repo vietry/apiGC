@@ -14,6 +14,7 @@ export interface DemoplotFilters {
     cultivo?: string;
     estado?: string;
     idFamilia?: number;
+    clase?: string;
     infestacion?: string;
     departamento?: string;
     provincia?: string;
@@ -26,6 +27,8 @@ export interface DemoplotFilters {
     macrozona?: number;
     idColaborador?: number;
     gdactivo?: boolean;
+    idPunto?: number;
+    numDocPunto?: string;
 }
 
 export class DemoplotService {
@@ -58,6 +61,7 @@ export class DemoplotService {
                     idDistrito: createDemoplotDto.idDistrito,
                     idFamilia: createDemoplotDto.idFamilia,
                     idGte: createDemoplotDto.idGte,
+                    idCharla: createDemoplotDto.idCharla,
                     venta: createDemoplotDto.venta,
                     fecVenta: createDemoplotDto.fecVenta,
                     cantidad: createDemoplotDto.cantidad,
@@ -346,6 +350,7 @@ export class DemoplotService {
 
             return {
                 page,
+                pages: Math.ceil(total / limit),
                 limit,
                 total,
                 demoplots: demoplots.map((demoplot) => {
@@ -596,14 +601,26 @@ export class DemoplotService {
                             email: true,
                             celularA: true,
                             tipo: true,
-                            PuntoContacto: true,
+                            PuntoContacto: {
+                                include: {
+                                    ContactoPunto: {
+                                        where: {
+                                            tipo: 'Tienda',
+                                        },
+                                        take: 1,
+                                    },
+                                },
+                            },
                         },
                     },
+
                     Cultivo: {
                         select: {
+                            hectareas: true,
                             Variedad: {
                                 select: {
                                     nombre: true,
+
                                     Vegetacion: true,
                                 },
                             },
@@ -649,6 +666,8 @@ export class DemoplotService {
                 throw CustomError.badRequest(
                     `Demoplot with id ${id} does not exist`
                 );
+            const contactoTienda =
+                demoplot.ContactoDelPunto.PuntoContacto.ContactoPunto[0];
 
             return {
                 id: demoplot.id,
@@ -682,8 +701,15 @@ export class DemoplotService {
                 celularContacto: demoplot.ContactoDelPunto.celularA,
                 idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
                 punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                puntoNumDoc: demoplot.ContactoDelPunto.PuntoContacto.numDoc,
+                nomContactoTienda: contactoTienda
+                    ? `${contactoTienda.nombre} ${contactoTienda.apellido}`
+                    : null,
+                cargoContactoTienda: contactoTienda?.cargo ?? null,
+                celContactoTienda: contactoTienda?.celularA ?? null,
                 idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                 cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                hectareas: demoplot.Cultivo.hectareas,
                 variedad: demoplot.Cultivo.Variedad.nombre,
                 nombreGte: demoplot.Gte.Usuario?.nombres,
                 departamento: demoplot.Distrito.Provincia.Departamento.nombre,
@@ -1336,6 +1362,7 @@ export class DemoplotService {
             cultivo,
             estado,
             idFamilia,
+            clase,
             infestacion,
             departamento,
             provincia,
@@ -1347,6 +1374,8 @@ export class DemoplotService {
             empresa,
             macrozona,
             idColaborador,
+            idPunto,
+            numDocPunto,
         } = filters;
 
         const where: any = {};
@@ -1367,46 +1396,68 @@ export class DemoplotService {
                 Variedad: { Vegetacion: { nombre: { contains: cultivo } } },
             };
         }
+        if (idPunto || numDocPunto) {
+            where.ContactoDelPunto = {
+                PuntoContacto: {
+                    ...(idPunto && { id: idPunto }),
+                    ...(numDocPunto && { numDoc: { contains: numDocPunto } }),
+                },
+            };
+        }
         if (estado) {
             where.estado = estado;
         }
         if (idFamilia) {
             where.idFamilia = idFamilia;
         }
+        if (clase) {
+            where.Familia = { clase: { contains: clase } };
+        }
+
         if (infestacion) {
             where.gradoInfestacion = { contains: infestacion };
         }
 
-        if (empresa) {
+        // Construir condiciones para Gte
+        if (filters.empresa || filters.macrozona || filters.idColaborador) {
             where.Gte = {
-                Colaborador: {
-                    ZonaAnterior: {
-                        Empresa: { nomEmpresa: { contains: empresa } },
-                    },
-                },
-            };
-        }
-
-        if (macrozona) {
-            where.Gte = {
-                Colaborador: {
-                    ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
-                        {
-                            some: {
-                                SuperZona: {
-                                    id: macrozona,
-                                },
-                            },
-                        },
-                },
-            };
-        }
-
-        if (idColaborador) {
-            where.Gte = {
-                Colaborador: {
-                    id: idColaborador,
-                },
+                AND: [
+                    // Condición empresa
+                    filters.empresa
+                        ? {
+                              Colaborador: {
+                                  ZonaAnterior: {
+                                      Empresa: {
+                                          nomEmpresa: {
+                                              contains: filters.empresa,
+                                          },
+                                      },
+                                  },
+                              },
+                          }
+                        : {},
+                    // Condición macrozona
+                    filters.macrozona
+                        ? {
+                              Colaborador: {
+                                  ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
+                                      {
+                                          some: {
+                                              SuperZona: {
+                                                  id: filters.macrozona,
+                                              },
+                                          },
+                                      },
+                              },
+                          }
+                        : {},
+                    // Condición idColaborador
+                    filters.idColaborador
+                        ? {
+                              Colaborador: { id: filters.idColaborador },
+                          }
+                        : {},
+                ].filter((condition) => Object.keys(condition).length > 0),
             };
         }
 
@@ -1454,6 +1505,7 @@ export class DemoplotService {
                         Familia: {
                             select: {
                                 nombre: true,
+                                clase: true,
                             },
                         },
                         BlancoBiologico: {
@@ -1582,6 +1634,7 @@ export class DemoplotService {
                         idFamilia: demoplot.idFamilia,
                         idGte: demoplot.idGte,
                         familia: demoplot.Familia?.nombre.trim(),
+                        clase: demoplot.Familia?.clase,
                         blancoCientifico: demoplot.BlancoBiologico.cientifico,
                         blancoComun: demoplot.BlancoBiologico.estandarizado,
                         contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
@@ -1770,5 +1823,374 @@ export class DemoplotService {
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
+    }
+
+    async getDemoplotsByGteId2(
+        idUsuario: number,
+        paginationDto: PaginationDto,
+        filters: DemoplotFilters = {}
+    ) {
+        const { page, limit } = paginationDto;
+        const where: any = {};
+
+        try {
+            const gte = await prisma.gte.findFirst({
+                where: { idUsuario },
+                select: { id: true },
+            });
+
+            // Construir where con filtros
+            where.idGte = gte?.id;
+
+            if (filters.objetivo)
+                where.objetivo = { contains: filters.objetivo };
+            if (filters.descripcion)
+                where.descripcion = { contains: filters.descripcion };
+            if (filters.estado) where.estado = filters.estado;
+            if (filters.idFamilia) where.idFamilia = filters.idFamilia;
+            if (filters.infestacion)
+                where.gradoInfestacion = { contains: filters.infestacion };
+            if (filters.venta !== undefined) where.venta = filters.venta;
+            if (filters.validacion !== undefined)
+                where.validacion = filters.validacion;
+            if (filters.gdactivo !== undefined)
+                where.gdactivo = filters.gdactivo;
+
+            if (filters.idVegetacion || filters.cultivo) {
+                where.Cultivo = {
+                    Variedad: {
+                        ...(filters.idVegetacion && {
+                            Vegetacion: { id: filters.idVegetacion },
+                        }),
+                        ...(filters.cultivo && {
+                            Vegetacion: {
+                                nombre: { contains: filters.cultivo },
+                            },
+                        }),
+                    },
+                };
+            }
+
+            if (filters.clase) {
+                where.Familia = { clase: { contains: filters.clase } };
+            }
+
+            if (filters.departamento || filters.provincia || filters.distrito) {
+                where.Distrito = {
+                    ...(filters.distrito && {
+                        nombre: { contains: filters.distrito },
+                    }),
+                    Provincia: {
+                        ...(filters.provincia && {
+                            nombre: { contains: filters.provincia },
+                        }),
+                        ...(filters.departamento && {
+                            Departamento: {
+                                nombre: { contains: filters.departamento },
+                            },
+                        }),
+                    },
+                };
+            }
+
+            if (filters.year && filters.month) {
+                const year = filters.year;
+                const month = filters.month;
+
+                // Calcular mes anterior
+                const previousMonth = month === 1 ? 12 : month - 1;
+                const previousYear = month === 1 ? year - 1 : year;
+
+                // Fechas para el mes actual (1-19)
+                const currentMonthStart = new Date(year, month - 1, 1);
+                const currentMonthEnd = new Date(year, month - 1, 20); // día 19 a las 23:59
+
+                // Fechas para el mes anterior (20-fin)
+                const previousMonthStart = new Date(
+                    previousYear,
+                    previousMonth - 1,
+                    20
+                );
+                const previousMonthEnd = new Date(year, month - 1, 1);
+
+                where.OR = [
+                    {
+                        // Registros del 1-19 del mes actual
+                        updatedAt: {
+                            gte: currentMonthStart,
+                            lt: currentMonthEnd,
+                        },
+                    },
+                    {
+                        // Registros del 20-fin del mes anterior
+                        updatedAt: {
+                            gte: previousMonthStart,
+                            lt: previousMonthEnd,
+                        },
+                    },
+                ];
+            }
+
+            const [total, demoplots] = await Promise.all([
+                prisma.demoPlot.count({ where }),
+                prisma.demoPlot.findMany({
+                    where,
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    orderBy: { updatedAt: 'asc' },
+                    include: {
+                        Familia: {
+                            select: {
+                                nombre: true,
+                            },
+                        },
+                        BlancoBiologico: {
+                            select: {
+                                cientifico: true,
+                                estandarizado: true,
+                            },
+                        },
+                        ContactoDelPunto: {
+                            select: {
+                                nombre: true,
+                                cargo: true,
+                                apellido: true,
+                                email: true,
+                                celularA: true,
+                                tipo: true,
+                                PuntoContacto: true,
+                            },
+                        },
+                        Cultivo: {
+                            select: {
+                                Variedad: {
+                                    select: {
+                                        nombre: true,
+                                        Vegetacion: true,
+                                    },
+                                },
+                                Fundo: {
+                                    select: {
+                                        id: true,
+                                        nombre: true,
+                                        idDistrito: true,
+                                    },
+                                },
+                            },
+                        },
+                        Gte: {
+                            select: {
+                                Usuario: {
+                                    select: {
+                                        nombres: true,
+                                        apellidos: true,
+                                    },
+                                },
+                            },
+                        },
+                        Distrito: {
+                            select: {
+                                nombre: true,
+                                Provincia: {
+                                    select: {
+                                        nombre: true,
+                                        Departamento: {
+                                            select: {
+                                                nombre: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+
+                        FotoDemoPlot: true,
+                    },
+                }),
+            ]);
+
+            return {
+                page,
+                pages: Math.ceil(total / limit),
+                limit,
+                total,
+                demoplots: demoplots.map((demoplot) => {
+                    return {
+                        id: demoplot.id,
+                        titulo: demoplot.titulo,
+                        objetivo: demoplot.objetivo,
+                        hasCultivo: demoplot.hasCultivo,
+                        instalacion: demoplot.instalacion,
+                        seguimiento: demoplot.seguimiento,
+                        finalizacion: demoplot.finalizacion,
+                        presentacion: demoplot.presentacion,
+                        estado: demoplot.estado,
+                        gradoInfestacion: demoplot.gradoInfestacion,
+                        dosis: demoplot.dosis,
+                        validacion: demoplot.validacion,
+                        resultado: demoplot.resultado,
+                        programacion: demoplot.programacion,
+                        diaCampo: demoplot.diaCampo,
+                        idCultivo: demoplot.idCultivo,
+                        idContactoP: demoplot.idContactoP,
+                        idBlanco: demoplot.idBlanco,
+                        idDistrito: demoplot.idDistrito,
+                        idFamilia: demoplot.idFamilia,
+                        idGte: demoplot.idGte,
+                        familia: demoplot.Familia?.nombre.trim(),
+                        blancoCientifico: demoplot.BlancoBiologico.cientifico,
+                        blancoComun: demoplot.BlancoBiologico.estandarizado,
+                        contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
+                        cargo: demoplot.ContactoDelPunto.cargo,
+                        tipoContacto: demoplot.ContactoDelPunto.tipo,
+                        emailContacto: demoplot.ContactoDelPunto.email,
+                        celularContacto: demoplot.ContactoDelPunto.celularA,
+                        idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
+                        punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                        idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
+                        cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                        variedad: demoplot.Cultivo.Variedad.nombre,
+                        //FotoDemoPlot: demoplot.FotoDemoPlot,
+                        nombreGte: demoplot.Gte.Usuario?.nombres,
+                        departamento:
+                            demoplot.Distrito.Provincia.Departamento.nombre,
+                        provincia: demoplot.Distrito.Provincia.nombre.trim(),
+                        distrito: demoplot.Distrito.nombre,
+                        idFundo: demoplot.Cultivo.Fundo.id,
+                        fundo: demoplot.Cultivo.Fundo.nombre,
+                        venta: demoplot.venta,
+                        fecVenta: demoplot.fecVenta,
+                        cantidad: demoplot.cantidad,
+                        importe: demoplot.importe,
+                        createdAt: demoplot.createdAt,
+                        createdBy: demoplot.createdBy,
+                        updatedAt: demoplot.updatedAt,
+                        updatedBy: demoplot.updatedBy,
+                    };
+                }),
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getUniquePuntosContactoByFilters(filters: DemoplotFilters = {}) {
+        // Construir condiciones de filtrado (similar a getDemoplotsByPage)
+        const where: any = {};
+        if (filters.objetivo) {
+            where.objetivo = { contains: filters.objetivo };
+        }
+        if (filters.idGte) {
+            where.idGte = filters.idGte;
+        }
+        if (filters.idVegetacion || filters.cultivo) {
+            where.Cultivo = {
+                Variedad: {
+                    ...(filters.idVegetacion && {
+                        Vegetacion: { id: filters.idVegetacion },
+                    }),
+                    ...(filters.cultivo && {
+                        Vegetacion: { nombre: { contains: filters.cultivo } },
+                    }),
+                },
+            };
+        }
+        if (filters.estado) {
+            where.estado = filters.estado;
+        }
+        if (filters.idFamilia) {
+            where.idFamilia = filters.idFamilia;
+        }
+        if (filters.clase) {
+            where.Familia = { clase: { contains: filters.clase } };
+        }
+        if (filters.infestacion) {
+            where.gradoInfestacion = { contains: filters.infestacion };
+        }
+        if (filters.venta !== undefined) {
+            where.venta = filters.venta;
+        }
+        if (filters.validacion !== undefined) {
+            where.validacion = filters.validacion;
+        }
+        if (filters.gdactivo !== undefined) {
+            where.gdactivo = filters.gdactivo;
+        }
+        if (filters.year) {
+            if (filters.month) {
+                where.updatedAt = {
+                    gte: new Date(filters.year, filters.month - 1),
+                    lt: new Date(filters.year, filters.month),
+                };
+            } else {
+                where.updatedAt = {
+                    gte: new Date(filters.year, 0),
+                    lt: new Date(filters.year + 1, 0),
+                };
+            }
+        }
+        if (filters.departamento || filters.provincia || filters.distrito) {
+            where.Distrito = {
+                ...(filters.distrito && {
+                    nombre: { contains: filters.distrito },
+                }),
+                Provincia: {
+                    ...(filters.provincia && {
+                        nombre: { contains: filters.provincia },
+                    }),
+                    ...(filters.departamento && {
+                        Departamento: {
+                            nombre: { contains: filters.departamento },
+                        },
+                    }),
+                },
+            };
+        }
+        // Puedes agregar más condiciones si las requieres
+
+        // Obtener los demoplots con el include del PuntoContacto
+        const demoplots = await prisma.demoPlot.findMany({
+            where,
+            orderBy: {
+                ContactoDelPunto: {
+                    PuntoContacto: {
+                        nombre: 'asc',
+                    },
+                },
+            },
+            select: {
+                ContactoDelPunto: {
+                    select: {
+                        PuntoContacto: {
+                            select: {
+                                id: true,
+                                nombre: true,
+                                numDoc: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // Crear un mapa para filtrar valores únicos por numDoc
+        const puntoMap = new Map<
+            string,
+            { id: number; nombre: string; numDoc: string }
+        >();
+        demoplots.forEach((dp) => {
+            const punto = dp.ContactoDelPunto?.PuntoContacto;
+            if (punto?.numDoc) {
+                // Utilizamos la aserción non-null para numDoc
+                if (!puntoMap.has(punto.numDoc)) {
+                    puntoMap.set(punto.numDoc, {
+                        ...punto,
+                        numDoc: punto.numDoc,
+                    });
+                }
+            }
+        });
+
+        return Array.from(puntoMap.values());
     }
 }

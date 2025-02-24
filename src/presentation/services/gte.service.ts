@@ -461,6 +461,11 @@ export class GteService {
             // Se hace un findMany con los filtros armados en "where".
             const gtes = await prisma.gte.findMany({
                 where,
+                orderBy: {
+                    Usuario: {
+                        nombres: 'asc',
+                    },
+                },
                 include: {
                     Colaborador: {
                         select: {

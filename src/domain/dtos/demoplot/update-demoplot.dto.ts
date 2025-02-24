@@ -1,7 +1,6 @@
-import { Validators } from "../../../config";
+import { Validators } from '../../../config';
 
 export class UpdateDemoplotDto {
-
     private constructor(
         public readonly id: number,
         public readonly titulo?: string | null,
@@ -22,41 +21,43 @@ export class UpdateDemoplotDto {
         public readonly idDistrito?: string,
         public readonly idFamilia?: number | null,
         public readonly idGte?: number,
+        public readonly idCharla?: number | null,
         public readonly programacion?: Date | null,
         public readonly diaCampo?: boolean | null,
-
         public readonly venta?: boolean | null,
         public readonly fecVenta?: Date | null,
         public readonly cantidad?: number | null,
         public readonly importe?: number | null,
         public readonly updatedAt?: Date | null,
-        public readonly updatedBy?: number | null,
-        
+        public readonly updatedBy?: number | null
     ) {}
 
     get values() {
-        const returnObj: {[key: string]: any} = {};
+        const returnObj: { [key: string]: any } = {};
 
-        if (this.titulo ) returnObj.titulo = this.titulo;
-        if (this.objetivo ) returnObj.objetivo = this.objetivo;
-        if (this.hasCultivo !== undefined) returnObj.hasCultivo = this.hasCultivo;
-        if (this.instalacion ) returnObj.instalacion = this.instalacion;
-        if (this.seguimiento ) returnObj.seguimiento = this.seguimiento;
-        if (this.finalizacion ) returnObj.finalizacion = this.finalizacion;
-        if (this.presentacion ) returnObj.presentacion = this.presentacion;
-        if (this.estado ) returnObj.estado = this.estado;
-        if (this.gradoInfestacion ) returnObj.gradoInfestacion = this.gradoInfestacion;
-        if (this.dosis ) returnObj.dosis = this.dosis;
-        if (this.validacion ) returnObj.validacion = this.validacion;
-        if (this.resultado ) returnObj.resultado = this.resultado;
-        if (this.idCultivo ) returnObj.idCultivo = this.idCultivo;
-        if (this.idContactoP ) returnObj.idContactoP = this.idContactoP;
-        if (this.idBlanco ) returnObj.idBlanco = this.idBlanco;
-        if (this.idDistrito ) returnObj.idDistrito = this.idDistrito;
-        if (this.idFamilia ) returnObj.idFamilia = this.idFamilia;
-        if (this.idGte ) returnObj.idGte = this.idGte;
-        if (this.programacion ) returnObj.programacion = this.programacion;
-        if (this.diaCampo ) returnObj.diaCampo = this.diaCampo;
+        if (this.titulo) returnObj.titulo = this.titulo;
+        if (this.objetivo) returnObj.objetivo = this.objetivo;
+        if (this.hasCultivo !== undefined)
+            returnObj.hasCultivo = this.hasCultivo;
+        if (this.instalacion) returnObj.instalacion = this.instalacion;
+        if (this.seguimiento) returnObj.seguimiento = this.seguimiento;
+        if (this.finalizacion) returnObj.finalizacion = this.finalizacion;
+        if (this.presentacion) returnObj.presentacion = this.presentacion;
+        if (this.estado) returnObj.estado = this.estado;
+        if (this.gradoInfestacion)
+            returnObj.gradoInfestacion = this.gradoInfestacion;
+        if (this.dosis) returnObj.dosis = this.dosis;
+        if (this.validacion) returnObj.validacion = this.validacion;
+        if (this.resultado) returnObj.resultado = this.resultado;
+        if (this.idCultivo) returnObj.idCultivo = this.idCultivo;
+        if (this.idContactoP) returnObj.idContactoP = this.idContactoP;
+        if (this.idBlanco) returnObj.idBlanco = this.idBlanco;
+        if (this.idDistrito) returnObj.idDistrito = this.idDistrito;
+        if (this.idFamilia) returnObj.idFamilia = this.idFamilia;
+        if (this.idGte) returnObj.idGte = this.idGte;
+        if (this.idCharla !== undefined) returnObj.idCharla = this.idCharla;
+        if (this.programacion) returnObj.programacion = this.programacion;
+        if (this.diaCampo) returnObj.diaCampo = this.diaCampo;
         if (this.venta) returnObj.venta = this.venta;
         if (this.fecVenta !== undefined) returnObj.fecVenta = this.fecVenta;
         if (this.cantidad !== undefined) returnObj.cantidad = this.cantidad;
@@ -64,17 +65,41 @@ export class UpdateDemoplotDto {
         if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
         if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
 
-
         return returnObj;
     }
 
-    static async create(props: {[key: string]: any}): Promise<[string?, UpdateDemoplotDto?]> {
-        const { id, titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,presentacion, estado,
-            gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idFamilia, idGte, programacion, diaCampo,venta,fecVenta,cantidad,importe,
-            updatedAt, updatedBy,
-            
-        
+    static async create(props: {
+        [key: string]: any;
+    }): Promise<[string?, UpdateDemoplotDto?]> {
+        const {
+            id,
+            titulo,
+            objetivo,
+            hasCultivo,
+            instalacion,
+            seguimiento,
+            finalizacion,
+            presentacion,
+            estado,
+            gradoInfestacion,
+            dosis,
+            validacion,
+            resultado,
+            idCultivo,
+            idContactoP,
+            idBlanco,
+            idDistrito,
+            idFamilia,
+            idGte,
+            idCharla,
+            programacion,
+            diaCampo,
+            venta,
+            fecVenta,
+            cantidad,
+            importe,
+            updatedAt,
+            updatedBy,
         } = props;
 
         if (!id || isNaN(Number(id))) {
@@ -96,7 +121,8 @@ export class UpdateDemoplotDto {
 
         if (hasCultivo !== undefined && typeof hasCultivo !== 'number') {
             hasCultivoNumber = parseFloat(hasCultivo);
-            if (isNaN(hasCultivoNumber)) return ['hasCultivo debe ser un número válido'];
+            if (isNaN(hasCultivoNumber))
+                return ['hasCultivo debe ser un número válido'];
         }
 
         if (dosis !== undefined && typeof dosis !== 'number') {
@@ -106,17 +132,20 @@ export class UpdateDemoplotDto {
 
         if (idCultivo !== undefined && typeof idCultivo !== 'number') {
             idCultivoNumber = parseInt(idCultivo);
-            if (isNaN(idCultivoNumber)) return ['idCultivo debe ser un número válido'];
+            if (isNaN(idCultivoNumber))
+                return ['idCultivo debe ser un número válido'];
         }
 
         if (idContactoP !== undefined && typeof idContactoP !== 'number') {
             idContactoPNumber = parseInt(idContactoP);
-            if (isNaN(idContactoPNumber)) return ['idContactoP debe ser un número válido'];
+            if (isNaN(idContactoPNumber))
+                return ['idContactoP debe ser un número válido'];
         }
 
         if (idBlanco !== undefined && typeof idBlanco !== 'number') {
             idBlancoNumber = parseInt(idBlanco);
-            if (isNaN(idBlancoNumber)) return ['idBlanco debe ser un número válido'];
+            if (isNaN(idBlancoNumber))
+                return ['idBlanco debe ser un número válido'];
         }
 
         if (idGte !== undefined && typeof idGte !== 'number') {
@@ -126,34 +155,48 @@ export class UpdateDemoplotDto {
 
         if (idFamilia !== undefined && typeof idFamilia !== 'number') {
             idFamiliaNumber = parseInt(idFamilia);
-            if (isNaN(idFamiliaNumber)) return ['idFamilia debe ser un número válido'];
+            if (isNaN(idFamiliaNumber))
+                return ['idFamilia debe ser un número válido'];
         }
 
-        return [undefined, new UpdateDemoplotDto(
-            id,
-            titulo,
-            objetivo,
-            hasCultivoNumber,
-            instalacion,
-            seguimiento,
-            finalizacion,
-            presentacion,
-            estado,
-            gradoInfestacion,
-            dosisNumber,
-            validacion,
-            resultado,
-            idCultivoNumber,
-            idContactoPNumber,
-            idBlancoNumber,
-            idDistrito,
-            idFamiliaNumber,
-            idGteNumber,
-            programacion,
-            diaCampo,
-            venta, fecVenta, cantidadNum, importeNum,
-            updatedAt,updatedBy,
-            
-        )];
+        const parseNumber = (value: any) => {
+            if (value === null || value === undefined) return null;
+            const num = Number(value);
+            return isNaN(num) ? null : num;
+        };
+
+        return [
+            undefined,
+            new UpdateDemoplotDto(
+                id,
+                titulo,
+                objetivo,
+                hasCultivoNumber,
+                instalacion,
+                seguimiento,
+                finalizacion,
+                presentacion,
+                estado,
+                gradoInfestacion,
+                dosisNumber,
+                validacion,
+                resultado,
+                idCultivoNumber,
+                idContactoPNumber,
+                idBlancoNumber,
+                idDistrito,
+                idFamiliaNumber,
+                idGteNumber,
+                parseNumber(idCharla),
+                programacion,
+                diaCampo,
+                venta,
+                fecVenta,
+                cantidadNum,
+                importeNum,
+                updatedAt,
+                updatedBy
+            ),
+        ];
     }
 }

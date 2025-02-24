@@ -453,7 +453,7 @@ model DemoPlot {
   updatedAt                           DateTime?         @db.DateTime
   resultado                           String?           @db.VarChar(255)
   seguimiento                         DateTime?         @db.DateTime
-  dosis                               Decimal?          @db.Decimal(6, 2)
+  dosis                               Decimal?          @db.Decimal(7, 2)
   gradoInfestacion                    String?           @db.VarChar(5)
   hasCultivo                          Decimal?          @db.Decimal(6, 2)
   idFamilia                           Int?
@@ -466,7 +466,9 @@ model DemoPlot {
   createdBy                           Int?
   updatedBy                           Int?
   fecVenta                            DateTime?         @db.DateTime
+  idCharla                            Int?
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
+  Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
   ContactoDelPunto                    ContactoPunto     @relation(fields: [idContactoP], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_ContactoP1")
   Usuario_DemoPlot_createdByToUsuario Usuario?          @relation("DemoPlot_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_createdBy1")
   Cultivo                             Cultivo           @relation(fields: [idCultivo], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Cultivo1")
@@ -699,6 +701,7 @@ model Charla {
   Usuario_Charla_updatedByToUsuario Usuario?         @relation("Charla_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Charla_Usuario2")
   Vegetacion                        Vegetacion       @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Charla_Vegetacion1")
   CharlaProducto                    CharlaProducto[]
+  DemoPlot                          DemoPlot[]
   FotoCharla                        FotoCharla[]
 }
 
@@ -759,7 +762,7 @@ model FotoDemoPlotLog {
 
 model Externo {
   id             Int          @id(map: "PK__Externo__3213E83FC7A0FB3D") @default(autoincrement())
-  cargo          String?      @db.VarChar(20)
+  cargo          String?      @db.VarChar(45)
   idRepresentada Int
   idUsuario      Int?
   createdAt      DateTime?    @db.DateTime
@@ -782,6 +785,9 @@ model CostoLaboral {
   createdBy                               Int?
   updatedAt                               DateTime? @db.DateTime
   updatedBy                               Int?
+  linea                                   Decimal?  @db.Decimal(18, 0)
+  celular                                 Decimal?  @db.Decimal(18, 0)
+  servGte                                 Decimal?  @db.Decimal(18, 0)
   Usuario_CostoLaboral_createdByToUsuario Usuario?  @relation("CostoLaboral_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_CostoLaboralCreated")
   Usuario_CostoLaboral_updatedByToUsuario Usuario?  @relation("CostoLaboral_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_CostoLaboralUpdated")
 }
@@ -800,10 +806,12 @@ model VariablePersonal {
   createdBy                                   Int?
   updatedAt                                   DateTime? @db.DateTime
   updatedBy                                   Int?
+  sctr                                        Decimal?  @db.Decimal(6, 0)
   Usuario_VariablePersonal_createdByToUsuario Usuario?  @relation("VariablePersonal_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalCreated")
   Gte                                         Gte       @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VariablePersonalGenerador")
   Usuario_VariablePersonal_updatedByToUsuario Usuario?  @relation("VariablePersonal_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalUpdated")
   @@unique([idGte, year, month], name: "idGte_year_month")
+
 }
 
 model RegistroLaboralGD {

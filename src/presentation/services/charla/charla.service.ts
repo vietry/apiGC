@@ -1,21 +1,22 @@
-
-import { prisma } from "../../../data/sqlserver";
-import { CreateCharlaDto, CustomError, PaginationDto, UpdateCharlaDto } from "../../../domain";
-
+import { prisma } from '../../../data/sqlserver';
+import {
+    CharlaFilters,
+    CreateCharlaDto,
+    CustomError,
+    PaginationDto,
+    UpdateCharlaDto,
+} from '../../../domain';
 
 export class CharlaService {
-
-    constructor() {}
-
     async createCharla(createCharlaDto: CreateCharlaDto) {
-
-        const tiendaExists = await prisma.puntoContacto.findUnique({where: {id: createCharlaDto.idTienda}});
-        if ( !tiendaExists ) throw CustomError.badRequest( `La tienda no existe` );
+        const tiendaExists = await prisma.puntoContacto.findUnique({
+            where: { id: createCharlaDto.idTienda },
+        });
+        if (!tiendaExists) throw CustomError.badRequest(`La tienda no existe`);
 
         const date = new Date();
         const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         try {
-            
             const charla = await prisma.charla.create({
                 data: {
                     tema: createCharlaDto.tema,
@@ -49,10 +50,16 @@ export class CharlaService {
         }
     }
 
-    async updateCharla(updateCharlaDto: UpdateCharlaDto) {        const date = new Date();
-      const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
-        const charlaExists = await prisma.charla.findFirst({ where: { id: updateCharlaDto.id } });
-        if (!charlaExists) throw CustomError.badRequest(`Charla with id ${updateCharlaDto.id} does not exist`);
+    async updateCharla(updateCharlaDto: UpdateCharlaDto) {
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
+        const charlaExists = await prisma.charla.findFirst({
+            where: { id: updateCharlaDto.id },
+        });
+        if (!charlaExists)
+            throw CustomError.badRequest(
+                `Charla with id ${updateCharlaDto.id} does not exist`
+            );
 
         try {
             const updatedCharla = await prisma.charla.update({
@@ -69,26 +76,434 @@ export class CharlaService {
         }
     }
 
-    async getCharlas(offset: number, limit: number) {
+    async getCharlas(
+        paginationDto: PaginationDto,
+        filters: CharlaFilters = {}
+    ) {
+        const { page, limit } = paginationDto;
+        const {
+            idGte,
+            idColaborador,
+            estado,
+            year,
+            month,
+            idVegetacion,
+            idBlanco,
+            idFamilia,
+            idTienda,
+        } = filters;
+
         try {
-            const charlas = await prisma.charla.findMany({
-                    skip: offset,
+            const where: any = {};
+
+            if (idGte) where.idGte = idGte;
+            if (estado) where.estado = estado;
+            if (idVegetacion) where.idVegetacion = idVegetacion;
+            if (idBlanco) where.idBlanco = idBlanco;
+            if (idFamilia) where.idFamilia = idFamilia;
+            if (idTienda) where.idTienda = idTienda;
+
+            if (idColaborador) {
+                where.Gte = {
+                    Colaborador: { id: idColaborador },
+                };
+            }
+
+            if (year) {
+                where.updatedAt = {
+                    gte: new Date(year, 0),
+                    lt: new Date(year + 1, 0),
+                };
+            }
+
+            if (month && year) {
+                where.updatedAt = {
+                    gte: new Date(year, month - 1),
+                    lt: new Date(year, month),
+                };
+            }
+
+            const [total, charlas] = await Promise.all([
+                prisma.charla.count({ where }),
+                prisma.charla.findMany({
+                    skip: (page - 1) * limit,
                     take: limit,
-                    orderBy: { programacion: 'desc' },
+                    where,
+                    orderBy: { updatedAt: 'desc' },
                     include: {
                         Vegetacion: true,
                         BlancoBiologico: true,
-                        Distrito: true,
+                        Distrito: {
+                            select: {
+                                nombre: true,
+                                Provincia: {
+                                    select: {
+                                        nombre: true,
+                                        Departamento: {
+                                            select: { nombre: true },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                         Familia: true,
-                        Gte: { select: { Usuario: { select: { nombres: true } } } },
+                        Gte: {
+                            select: {
+                                id: true,
+                                Usuario: true,
+                                Colaborador: {
+                                    select: {
+                                        id: true,
+                                        Usuario: true,
+                                    },
+                                },
+                            },
+                        },
                         PuntoContacto: true,
                     },
-                });
-            
+                }),
+            ]);
 
-            //return 
-                //variedades.map((variedad) => ({
-            return charlas.map((charla) => ({
+            // Obtener los charlaProductos asociados a las charlas
+            const charlaIds = charlas.map((charla) => charla.id);
+            const charlaProductos = await prisma.charlaProducto.findMany({
+                where: { idCharla: { in: charlaIds } },
+                include: {
+                    Familia: { select: { nombre: true } },
+                    BlancoBiologico: { select: { estandarizado: true } },
+                },
+            });
+
+            return {
+                page,
+                pages: Math.ceil(total / limit),
+                limit,
+                total,
+                charlas: charlas.map((charla) => {
+                    const productos = charlaProductos.filter(
+                        (producto) => producto.idCharla === charla.id
+                    );
+
+                    const familia1 =
+                        productos[0]?.Familia?.nombre.trimEnd() || null;
+                    const familia2 =
+                        productos[1]?.Familia?.nombre.trimEnd() || null;
+                    const blanco1 = productos[0]?.BlancoBiologico?.estandarizado
+                        ? productos[0]?.BlancoBiologico?.estandarizado.trimEnd()
+                        : null;
+                    const blanco2 = productos[1]?.BlancoBiologico?.estandarizado
+                        ? productos[1]?.BlancoBiologico?.estandarizado.trimEnd()
+                        : null;
+
+                    return {
+                        id: charla.id,
+                        tema: charla.tema,
+                        asistentes: charla.asistentes,
+                        hectareas: charla.hectareas,
+                        dosis: charla.dosis,
+                        efectivo: charla.efectivo,
+                        comentarios: charla.comentarios,
+                        demoplots: charla.demoplots,
+                        estado: charla.estado,
+                        programacion: charla.programacion,
+                        ejecucion: charla.ejecucion,
+                        cancelacion: charla.cancelacion,
+                        motivo: charla.motivo,
+                        idVegetacion: charla.idVegetacion,
+                        idBlanco: charla.idBlanco,
+                        idDistrito: charla.idDistrito,
+                        idFamilia: charla.idFamilia,
+                        idGte: charla.idGte,
+                        idTienda: charla.idTienda,
+                        createdAt: charla.createdAt,
+                        createdBy: charla.createdBy,
+                        updatedAt: charla.updatedAt,
+                        updatedBy: charla.updatedBy,
+                        codZona: charla.PuntoContacto?.codZona,
+                        familia:
+                            familia2 == null
+                                ? familia1
+                                : `${familia1} - ${familia2}`,
+                        vegetacion: charla.Vegetacion?.nombre,
+                        blancoCientifico: charla.BlancoBiologico?.cientifico,
+                        estandarizado:
+                            blanco2 == null
+                                ? blanco1
+                                : `${blanco1} - ${blanco2}`,
+                        distrito: charla.Distrito?.nombre,
+                        provincia: charla.Distrito?.Provincia?.nombre,
+                        departamento:
+                            charla.Distrito?.Provincia?.Departamento?.nombre,
+                        nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
+                        rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
+                        puntoContacto: charla.PuntoContacto?.nombre,
+                        familia1: familia1,
+                        familia2: familia2,
+                        blanco1: blanco1,
+                        blanco2: blanco2,
+                    };
+                }),
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getCharlaById(id: number) {
+        try {
+            // Obtener charlaProductos asociados a la charla
+            const charlaProductos = await prisma.charlaProducto.findMany({
+                where: { idCharla: id },
+                include: {
+                    Familia: { select: { id: true, nombre: true } },
+                    BlancoBiologico: {
+                        select: { estandarizado: true, id: true },
+                    },
+                },
+            });
+
+            const charla = await prisma.charla.findUnique({
+                where: { id },
+                include: {
+                    Vegetacion: true,
+                    BlancoBiologico: true,
+                    Distrito: {
+                        select: {
+                            nombre: true,
+                            Provincia: {
+                                select: {
+                                    nombre: true,
+                                    Departamento: {
+                                        select: { nombre: true },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    Familia: true,
+                    Gte: {
+                        select: {
+                            id: true,
+                            Usuario: true,
+                            Colaborador: {
+                                select: {
+                                    id: true,
+                                    Usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    PuntoContacto: true,
+                },
+            });
+
+            if (!charla)
+                throw CustomError.badRequest(
+                    `Charla with id ${id} does not exist`
+                );
+
+            const cProductos = charlaProductos
+                .map((cp) => cp.id)
+                .filter(Boolean);
+            const [idCP1, idCP2] = cProductos;
+            const familias = charlaProductos
+                .map((cp) => cp.Familia?.nombre)
+                .filter(Boolean);
+            const [familia1, familia2] = familias;
+            const idFamilias = charlaProductos
+                .map((cp) => cp.Familia?.id)
+                .filter(Boolean);
+            const [idFamilia1, idFamilia2] = idFamilias;
+            const blancos = charlaProductos
+                .map((cp) => cp.BlancoBiologico?.estandarizado)
+                .filter(Boolean);
+            const [blanco1, blanco2] = blancos;
+            const idblancos = charlaProductos
+                .map((cp) => cp.BlancoBiologico?.id)
+                .filter(Boolean);
+            const [idBlanco1, idBlanco2] = idblancos;
+
+            return {
+                id: charla.id,
+                tema: charla.tema,
+                asistentes: charla.asistentes,
+                hectareas: charla.hectareas,
+                dosis: charla.dosis,
+                efectivo: charla.efectivo,
+                comentarios: charla.comentarios,
+                demoplots: charla.demoplots,
+                estado: charla.estado,
+                programacion: charla.programacion,
+                ejecucion: charla.ejecucion,
+                cancelacion: charla.cancelacion,
+                motivo: charla.motivo,
+                idVegetacion: charla.idVegetacion,
+                idBlanco: charla.idBlanco,
+                idDistrito: charla.idDistrito,
+                idFamilia: charla.idFamilia,
+                idGte: charla.idGte,
+                idTienda: charla.idTienda,
+                createdAt: charla.createdAt,
+                createdBy: charla.createdBy,
+                updatedAt: charla.updatedAt,
+                updatedBy: charla.updatedBy,
+                codZona: charla.PuntoContacto.codZona,
+                familia:
+                    familia2 == null
+                        ? familia1.trimEnd()
+                        : `${familia1.trimEnd()} - ${familia2.trimEnd()}`,
+                vegetacion: charla.Vegetacion?.nombre,
+                blancoCientifico: charla.BlancoBiologico?.cientifico,
+                estandarizado:
+                    blanco2 == null
+                        ? blanco1!.trimEnd()
+                        : `${blanco1!.trimEnd()} - ${blanco2.trimEnd()}`,
+                distrito: charla.Distrito?.nombre,
+                provincia: charla.Distrito?.Provincia?.nombre,
+                departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
+                nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
+                rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
+                puntoContacto: charla.PuntoContacto?.nombre,
+                idCharlaProd1: idCP1,
+                idCharlaProd2: idCP2,
+                idFamilia1: idFamilia1,
+                idFamilia2: idFamilia2,
+                familia1: familia1,
+                familia2: familia2,
+                blanco1: blanco1,
+                blanco2: blanco2,
+                idBlanco1: idBlanco1,
+                idBlanco2: idBlanco2,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async countCharlasByMonthAnio(
+        idUsuario: number,
+        mes: number,
+        anio: number
+    ) {
+        try {
+            // Obtener el Gte que corresponde al idUsuario
+            const colaborador = await prisma.colaborador.findFirst({
+                where: { idUsuario },
+                select: { id: true },
+            });
+
+            if (!colaborador)
+                throw CustomError.badRequest(
+                    `Colaborador with idUsuario ${idUsuario} does not exist`
+                );
+
+            // Calcular el rango de fechas para el mes específico
+            const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
+            const endDate = new Date(anio, mes, 1); // Último día del mes
+
+            const charlaCounts = await prisma.charla.groupBy({
+                by: ['estado'],
+                where: {
+                    createdBy: idUsuario,
+                    programacion: {
+                        gte: startDate, // Mayor o igual al primer día del mes
+                        lte: endDate, // Menor o igual al último día del mes
+                    },
+                },
+                _count: {
+                    estado: true,
+                },
+            });
+
+            // Inicializar los contadores en cero
+            const counts = {
+                todos: 0,
+                programados: 0,
+                completados: 0,
+                cancelados: 0,
+                reprogramados: 0,
+            };
+
+            // Asignar los valores de los contadores según los resultados de la consulta
+            charlaCounts.forEach((charla) => {
+                counts.todos += charla._count.estado;
+                switch (charla.estado) {
+                    case 'Programado':
+                        counts.programados = charla._count.estado;
+                        break;
+                    case 'Completado':
+                        counts.completados = charla._count.estado;
+                        break;
+                    case 'Cancelado':
+                        counts.cancelados = charla._count.estado;
+                        break;
+                    case 'Reprogramado':
+                        counts.reprogramados = charla._count.estado;
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            return counts;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getCharlasByUsuarioId(
+        idUsuario: number,
+        offset: number,
+        limit: number
+    ) {
+        try {
+            // Obtener el Gte que corresponde al idUsuario
+            const colaborador = await prisma.colaborador.findFirst({
+                where: { idUsuario },
+                select: { id: true },
+            });
+
+            if (!colaborador) {
+                throw CustomError.badRequest(
+                    `Colaborador with idUsuario ${idUsuario} does not exist`
+                );
+            }
+
+            // Obtener el total de charlas y las charlas paginadas
+            const charlas = await prisma.charla.findMany({
+                where: { createdBy: idUsuario },
+                skip: (offset - 1) * limit,
+                take: limit,
+                orderBy: { programacion: 'asc' },
+                include: {
+                    Vegetacion: true,
+                    BlancoBiologico: true,
+                    Distrito: {
+                        select: {
+                            nombre: true,
+                            Provincia: {
+                                select: {
+                                    nombre: true,
+                                    Departamento: {
+                                        select: { nombre: true },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    Familia: { select: { nombre: true } },
+                    Gte: {
+                        select: {
+                            Usuario: { select: { nombres: true } },
+                        },
+                    },
+                    PuntoContacto: true,
+                },
+            });
+
+            // Mapear las charlas con los campos requeridos
+            return {
+                charlas: charlas.map((charla) => ({
                     id: charla.id,
                     tema: charla.tema,
                     asistentes: charla.asistentes,
@@ -108,165 +523,204 @@ export class CharlaService {
                     idFamilia: charla.idFamilia,
                     idGte: charla.idGte,
                     idTienda: charla.idTienda,
-                    codZona: charla.PuntoContacto.codZona,
                     createdAt: charla.createdAt,
                     createdBy: charla.createdBy,
                     updatedAt: charla.updatedAt,
-                    updatedBy: charla.updatedBy
-                }));
-            
+                    updatedBy: charla.updatedBy,
+                    codZona: charla.PuntoContacto.codZona,
+                    familia: charla.Familia?.nombre,
+                    vegetacion: charla.Vegetacion?.nombre,
+                    blancoCientifico: charla.BlancoBiologico?.cientifico,
+                    distrito: charla.Distrito?.nombre,
+                    provincia: charla.Distrito?.Provincia?.nombre,
+                    departamento:
+                        charla.Distrito?.Provincia?.Departamento?.nombre,
+                    nombreGte: charla.Gte?.Usuario?.nombres,
+                    puntoContacto: charla.PuntoContacto?.nombre,
+                })),
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
     }
 
-    async getCharlaById(id: number) {
-      
-      
-      try {
-
-        // Obtener charlaProductos asociados a la charla
-        const charlaProductos = await prisma.charlaProducto.findMany({
-          where: { idCharla: id },
-          include: {
-              Familia: { select: { id:true, nombre: true } },
-              BlancoBiologico: {select: {estandarizado: true, id: true} },
-          }
-      });
-
-
-
-            const charla = await prisma.charla.findUnique({
-                where: { id },
-                include: {
-                    Vegetacion: true,
-                    BlancoBiologico: true,
-                    Distrito: {
-                      select: {
-                        nombre: true,
-                        Provincia: {
-                          select: {
-                            nombre: true,
-                            Departamento: {
-                              select: { nombre: true },
-                            },
-                          },
-                        },
-                      },
-                    },
-                    Familia: true,
-                    Gte: {
-                      select: {
-                        id: true,
-                        Usuario: true,
-                        Colaborador: { 
-                            select: {
-                                id: true,
-                                Usuario: true
-                            }
-                        }
-                      },
-                    },
-                    PuntoContacto: true,
-                  },
-            });
-
-            if (!charla) throw CustomError.badRequest(`Charla with id ${id} does not exist`);
-
-        const cProductos = charlaProductos.map(cp => cp.id).filter(Boolean);
-        const [idCP1, idCP2] = cProductos;
-        const familias = charlaProductos.map(cp => cp.Familia?.nombre).filter(Boolean);
-        const [familia1, familia2] = familias;
-        const idFamilias = charlaProductos.map(cp => cp.Familia?.id).filter(Boolean);
-        const [idFamilia1, idFamilia2] = idFamilias;
-        const blancos = charlaProductos.map(cp => cp.BlancoBiologico?.estandarizado).filter(Boolean);
-        const [blanco1, blanco2] = blancos;
-        const idblancos = charlaProductos.map(cp => cp.BlancoBiologico?.id).filter(Boolean);
-        const [idBlanco1, idBlanco2] = idblancos;
-
-            return {
-                
-                  id: charla.id,
-                  tema: charla.tema,
-                  asistentes: charla.asistentes,
-                  hectareas: charla.hectareas,
-                  dosis: charla.dosis,
-                  efectivo: charla.efectivo,
-                  comentarios: charla.comentarios,
-                  demoplots: charla.demoplots,
-                  estado: charla.estado,
-                  programacion: charla.programacion,
-                  ejecucion: charla.ejecucion,
-                  cancelacion: charla.cancelacion,
-                  motivo: charla.motivo,
-                  idVegetacion: charla.idVegetacion,
-                  idBlanco: charla.idBlanco,
-                  idDistrito: charla.idDistrito,
-                  idFamilia: charla.idFamilia,
-                  idGte: charla.idGte,
-                  idTienda: charla.idTienda,
-                  createdAt: charla.createdAt,
-                  createdBy: charla.createdBy,
-                  updatedAt: charla.updatedAt,
-                  updatedBy: charla.updatedBy,
-                  codZona: charla.PuntoContacto.codZona,
-                  familia: familia2 == null ? familia1.trimEnd() : `${familia1.trimEnd()} - ${familia2.trimEnd()}`,
-                  vegetacion: charla.Vegetacion?.nombre,
-                  blancoCientifico: charla.BlancoBiologico?.cientifico,
-                  estandarizado: blanco2 == null ? blanco1!.trimEnd() : `${blanco1!.trimEnd()} - ${blanco2.trimEnd()}`,
-                  distrito: charla.Distrito?.nombre,
-                  provincia: charla.Distrito?.Provincia?.nombre,
-                  departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
-                  nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
-                  rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
-                  puntoContacto: charla.PuntoContacto?.nombre,
-                  idCharlaProd1: idCP1,
-                  idCharlaProd2: idCP2,
-                  idFamilia1: idFamilia1,
-                  idFamilia2: idFamilia2,
-                  familia1: familia1,
-                  familia2: familia2,
-                  blanco1: blanco1,
-                  blanco2: blanco2,
-                  idBlanco1: idBlanco1,
-                  idBlanco2: idBlanco2,
-                
-              };
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
-    }
-
-
-    async countCharlasByMonthAnio(idUsuario: number, mes: number, anio: number) {
+    async getCharlasByUsuarioId2(
+        idUsuario: number,
+        paginationDto: PaginationDto
+    ) {
+        const { page, limit } = paginationDto;
         try {
             // Obtener el Gte que corresponde al idUsuario
             const colaborador = await prisma.colaborador.findFirst({
                 where: { idUsuario },
-                select: { id: true }
+                select: { id: true },
             });
-    
-            if (!colaborador) throw CustomError.badRequest(`Colaborador with idUsuario ${idUsuario} does not exist`);
-    
-            // Calcular el rango de fechas para el mes específico
-            const startDate = new Date(anio, mes - 1, 1); // Primer día del mes
-            const endDate = new Date(anio, mes, 1); // Último día del mes
-    
+
+            if (!colaborador) {
+                throw CustomError.badRequest(
+                    `Colaborador with idUsuario ${idUsuario} does not exist`
+                );
+            }
+
+            // Obtener el total de charlas y las charlas paginadas
+            const charlas = await prisma.charla.findMany({
+                where: { createdBy: idUsuario },
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { programacion: 'asc' },
+                include: {
+                    Vegetacion: true,
+                    BlancoBiologico: true,
+                    Distrito: {
+                        select: {
+                            nombre: true,
+                            Provincia: {
+                                select: {
+                                    nombre: true,
+                                    Departamento: {
+                                        select: { nombre: true },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    Familia: { select: { nombre: true } },
+                    Gte: {
+                        select: {
+                            id: true,
+                            Usuario: true,
+                            Colaborador: {
+                                select: {
+                                    id: true,
+                                    Usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    PuntoContacto: true,
+                },
+            });
+
+            // Obtener los charlaProductos asociados a las charlas
+            const charlaIds = charlas.map((charla) => charla.id);
+            const charlaProductos = await prisma.charlaProducto.findMany({
+                where: { idCharla: { in: charlaIds } },
+                include: {
+                    Familia: { select: { nombre: true } },
+                    BlancoBiologico: { select: { estandarizado: true } },
+                },
+            });
+
+            // Mapear las charlas con los campos requeridos y añadir familia1, familia2
+            return {
+                charlas: charlas.map((charla) => {
+                    const productos = charlaProductos.filter(
+                        (producto) => producto.idCharla === charla.id
+                    );
+
+                    const familia1 =
+                        productos[0]?.Familia?.nombre.trimEnd() || null;
+                    const familia2 =
+                        productos[1]?.Familia?.nombre.trimEnd() || null;
+                    const blanco1 = productos[0]?.BlancoBiologico?.estandarizado
+                        ? productos[0]?.BlancoBiologico?.estandarizado.trimEnd()
+                        : null;
+                    const blanco2 = productos[1]?.BlancoBiologico?.estandarizado
+                        ? productos[1]?.BlancoBiologico?.estandarizado.trimEnd()
+                        : null;
+
+                    return {
+                        id: charla.id,
+                        tema: charla.tema,
+                        asistentes: charla.asistentes,
+                        hectareas: charla.hectareas,
+                        dosis: charla.dosis,
+                        efectivo: charla.efectivo,
+                        comentarios: charla.comentarios,
+                        demoplots: charla.demoplots,
+                        estado: charla.estado,
+                        programacion: charla.programacion,
+                        ejecucion: charla.ejecucion,
+                        cancelacion: charla.cancelacion,
+                        motivo: charla.motivo,
+                        idVegetacion: charla.idVegetacion,
+                        idBlanco: charla.idBlanco,
+                        idDistrito: charla.idDistrito,
+                        idFamilia: charla.idFamilia,
+                        idGte: charla.idGte,
+                        idTienda: charla.idTienda,
+                        createdAt: charla.createdAt,
+                        createdBy: charla.createdBy,
+                        updatedAt: charla.updatedAt,
+                        updatedBy: charla.updatedBy,
+                        codZona: charla.PuntoContacto?.codZona,
+                        familia:
+                            familia2 == null
+                                ? familia1
+                                : `${familia1} - ${familia2}`,
+                        vegetacion: charla.Vegetacion?.nombre,
+                        blancoCientifico: charla.BlancoBiologico?.cientifico,
+                        estandarizado:
+                            blanco2 == null
+                                ? blanco1
+                                : `${blanco1} - ${blanco2}`,
+                        distrito: charla.Distrito?.nombre,
+                        provincia: charla.Distrito?.Provincia?.nombre,
+                        departamento:
+                            charla.Distrito?.Provincia?.Departamento?.nombre,
+                        nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
+                        rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
+                        puntoContacto: charla.PuntoContacto?.nombre,
+                        familia1: familia1,
+                        familia2: familia2,
+                        blanco1: blanco1,
+                        blanco2: blanco2,
+                    };
+                }),
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async countCharlas(filters: CharlaFilters = {}) {
+        try {
+            const where: any = {};
+
+            // Aplicar filtros
+            if (filters.idGte) where.idGte = filters.idGte;
+            if (filters.idColaborador) {
+                where.Gte = { Colaborador: { id: filters.idColaborador } };
+            }
+            if (filters.estado) where.estado = filters.estado;
+            if (filters.idVegetacion) where.idVegetacion = filters.idVegetacion;
+            if (filters.idBlanco) where.idBlanco = filters.idBlanco;
+            if (filters.idFamilia) where.idFamilia = filters.idFamilia;
+            if (filters.idTienda) where.idTienda = filters.idTienda;
+
+            // Filtros de fecha
+            if (filters.year) {
+                where.programacion = {
+                    gte: new Date(
+                        filters.year,
+                        filters.month ? filters.month - 1 : 0
+                    ),
+                    lt: new Date(
+                        filters.year,
+                        filters.month ? filters.month : 12,
+                        filters.month ? 1 : 31
+                    ),
+                };
+            }
+
             const charlaCounts = await prisma.charla.groupBy({
                 by: ['estado'],
-                where: {
-                    createdBy: idUsuario,
-                    programacion: {
-                        gte: startDate, // Mayor o igual al primer día del mes
-                        lte: endDate    // Menor o igual al último día del mes
-                    }
-                },
+                where,
                 _count: {
-                    estado: true
-                }
+                    estado: true,
+                },
             });
-    
-            // Inicializar los contadores en cero
+
             const counts = {
                 todos: 0,
                 programados: 0,
@@ -274,9 +728,8 @@ export class CharlaService {
                 cancelados: 0,
                 reprogramados: 0,
             };
-    
-            // Asignar los valores de los contadores según los resultados de la consulta
-            charlaCounts.forEach(charla => {
+
+            charlaCounts.forEach((charla) => {
                 counts.todos += charla._count.estado;
                 switch (charla.estado) {
                     case 'Programado':
@@ -295,216 +748,168 @@ export class CharlaService {
                         break;
                 }
             });
-    
+
             return counts;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
     }
 
-    async getCharlasByUsuarioId(idUsuario: number, offset: number, limit: number) {
+    async getAllCharlas(filters: CharlaFilters = {}) {
+        const {
+            idGte,
+            idColaborador,
+            estado,
+            year,
+            month,
+            idVegetacion,
+            idBlanco,
+            idFamilia,
+            idTienda,
+        } = filters;
 
         try {
-          // Obtener el Gte que corresponde al idUsuario
-          const colaborador = await prisma.colaborador.findFirst({
-            where: { idUsuario },
-            select: { id: true }
-        });
+            const where: any = {};
 
-        if (!colaborador) {throw CustomError.badRequest(`Colaborador with idUsuario ${idUsuario} does not exist`);}
-    
-          // Obtener el total de charlas y las charlas paginadas
-          const charlas = await prisma.charla.findMany({
-              where: { createdBy: idUsuario },
-              skip: (offset - 1) * limit,
-              take: limit,
-              orderBy: { programacion: "asc" },
-              include: {
-                Vegetacion: true,
-                BlancoBiologico: true,
-                Distrito: {
-                  select: {
-                    nombre: true,
-                    Provincia: {
-                      select: {
-                        nombre: true,
-                        Departamento: {
-                          select: { nombre: true },
+            if (idGte) where.idGte = idGte;
+            if (estado) where.estado = estado;
+            if (idVegetacion) where.idVegetacion = idVegetacion;
+            if (idBlanco) where.idBlanco = idBlanco;
+            if (idFamilia) where.idFamilia = idFamilia;
+            if (idTienda) where.idTienda = idTienda;
+
+            if (idColaborador) {
+                where.Gte = {
+                    Colaborador: { id: idColaborador },
+                };
+            }
+
+            if (year) {
+                where.updatedAt = {
+                    gte: new Date(year, 0),
+                    lt: new Date(year + 1, 0),
+                };
+            }
+
+            if (month && year) {
+                where.updatedAt = {
+                    gte: new Date(year, month - 1),
+                    lt: new Date(year, month),
+                };
+            }
+
+            const charlas = await prisma.charla.findMany({
+                where,
+                orderBy: { updatedAt: 'desc' },
+                include: {
+                    Vegetacion: true,
+                    BlancoBiologico: true,
+                    Distrito: {
+                        select: {
+                            nombre: true,
+                            Provincia: {
+                                select: {
+                                    nombre: true,
+                                    Departamento: {
+                                        select: { nombre: true },
+                                    },
+                                },
+                            },
                         },
-                      },
                     },
-                  },
-                },
-                Familia: { select: { nombre: true } },
-                Gte: {
-                  select: {
-                    Usuario: { select: { nombres: true } },
-                  },
-                },
-                PuntoContacto: true,
-              },
-            });
-    
-          // Mapear las charlas con los campos requeridos
-          return {
-            charlas: charlas.map((charla) => ({
-              id: charla.id,
-              tema: charla.tema,
-              asistentes: charla.asistentes,
-              hectareas: charla.hectareas,
-              dosis: charla.dosis,
-              efectivo: charla.efectivo,
-              comentarios: charla.comentarios,
-              demoplots: charla.demoplots,
-              estado: charla.estado,
-              programacion: charla.programacion,
-              ejecucion: charla.ejecucion,
-              cancelacion: charla.cancelacion,
-              motivo: charla.motivo,
-              idVegetacion: charla.idVegetacion,
-              idBlanco: charla.idBlanco,
-              idDistrito: charla.idDistrito,
-              idFamilia: charla.idFamilia,
-              idGte: charla.idGte,
-              idTienda: charla.idTienda,
-              createdAt: charla.createdAt,
-              createdBy: charla.createdBy,
-              updatedAt: charla.updatedAt,
-              updatedBy: charla.updatedBy,
-              codZona: charla.PuntoContacto.codZona,
-              familia: charla.Familia?.nombre,
-              vegetacion: charla.Vegetacion?.nombre,
-              blancoCientifico: charla.BlancoBiologico?.cientifico,
-              distrito: charla.Distrito?.nombre,
-              provincia: charla.Distrito?.Provincia?.nombre,
-              departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
-              nombreGte: charla.Gte?.Usuario?.nombres,
-              puntoContacto: charla.PuntoContacto?.nombre,
-
-            })),
-          };
-        } catch (error) {
-          throw CustomError.internalServer(`${error}`);
-        }
-      }
-
-      async getCharlasByUsuarioId2(idUsuario: number, paginationDto: PaginationDto) {
-        const { page, limit } = paginationDto;
-        try {
-          // Obtener el Gte que corresponde al idUsuario
-          const colaborador = await prisma.colaborador.findFirst({
-            where: { idUsuario },
-            select: { id: true }
-        });
-
-        if (!colaborador) {throw CustomError.badRequest(`Colaborador with idUsuario ${idUsuario} does not exist`);}
-    
-          // Obtener el total de charlas y las charlas paginadas
-          const charlas = await prisma.charla.findMany({
-              where: { createdBy: idUsuario },
-              skip: (page - 1) * limit,
-              take: limit,
-              orderBy: { programacion: "asc" },
-              include: {
-                Vegetacion: true,
-                BlancoBiologico: true,
-                Distrito: {
-                  select: {
-                    nombre: true,
-                    Provincia: {
-                      select: {
-                        nombre: true,
-                        Departamento: {
-                          select: { nombre: true },
-                        },
-                      },
-                    },
-                  },
-                },
-                Familia: { select: { nombre: true } },
-                Gte: {
-                  select: {
-                    id: true,
-                    Usuario: true,
-                    Colaborador: { 
+                    Familia: true,
+                    Gte: {
                         select: {
                             id: true,
-                            Usuario: true
-                        }
-                    }
-                  },
+                            Usuario: true,
+                            Colaborador: {
+                                select: {
+                                    id: true,
+                                    Usuario: true,
+                                },
+                            },
+                        },
+                    },
+                    PuntoContacto: true,
+                    Asistencia: true,
                 },
-                PuntoContacto: true,
-              },
             });
-            
-    
-              // Obtener los charlaProductos asociados a las charlas
-    const charlaIds = charlas.map((charla) => charla.id);
-    const charlaProductos = await prisma.charlaProducto.findMany({
-      where: { idCharla: { in: charlaIds } },
-      include: {
-        Familia: { select: { nombre: true } },
-        BlancoBiologico: { select: { estandarizado: true } },
-      },
-    });
 
-    // Mapear las charlas con los campos requeridos y añadir familia1, familia2
-    return {
-      charlas: charlas.map((charla) => {
-        const productos = charlaProductos.filter(
-          (producto) => producto.idCharla === charla.id
-        );
+            const charlaIds = charlas.map((charla) => charla.id);
+            const charlaProductos = await prisma.charlaProducto.findMany({
+                where: { idCharla: { in: charlaIds } },
+                include: {
+                    Familia: { select: { nombre: true } },
+                    BlancoBiologico: { select: { estandarizado: true } },
+                },
+            });
 
-        const familia1 = productos[0]?.Familia?.nombre.trimEnd() || null;
-        const familia2 = productos[1]?.Familia?.nombre.trimEnd() || null;
-        const blanco1 = productos[0]?.BlancoBiologico?.estandarizado ? productos[0]?.BlancoBiologico?.estandarizado.trimEnd() : null;
-        const blanco2 = productos[1]?.BlancoBiologico?.estandarizado ? productos[1]?.BlancoBiologico?.estandarizado.trimEnd() : null;
+            return charlas.map((charla) => {
+                const productos = charlaProductos.filter(
+                    (producto) => producto.idCharla === charla.id
+                );
 
-        return {
-          id: charla.id,
-          tema: charla.tema,
-          asistentes: charla.asistentes,
-          hectareas: charla.hectareas,
-          dosis: charla.dosis,
-          efectivo: charla.efectivo,
-          comentarios: charla.comentarios,
-          demoplots: charla.demoplots,
-          estado: charla.estado,
-          programacion: charla.programacion,
-          ejecucion: charla.ejecucion,
-          cancelacion: charla.cancelacion,
-          motivo: charla.motivo,
-          idVegetacion: charla.idVegetacion,
-          idBlanco: charla.idBlanco,
-          idDistrito: charla.idDistrito,
-          idFamilia: charla.idFamilia,
-          idGte: charla.idGte,
-          idTienda: charla.idTienda,
-          createdAt: charla.createdAt,
-          createdBy: charla.createdBy,
-          updatedAt: charla.updatedAt,
-          updatedBy: charla.updatedBy,
-          codZona: charla.PuntoContacto?.codZona,
-          familia: familia2 == null ? familia1 : `${familia1} - ${familia2}`,
-          vegetacion: charla.Vegetacion?.nombre,
-          blancoCientifico: charla.BlancoBiologico?.cientifico,
-          estandarizado: blanco2 == null ? blanco1 : `${blanco1} - ${blanco2}`,
-          distrito: charla.Distrito?.nombre,
-          provincia: charla.Distrito?.Provincia?.nombre,
-          departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
-          nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
-          rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
-          puntoContacto: charla.PuntoContacto?.nombre,
-          familia1: familia1,
-          familia2: familia2,
-          blanco1: blanco1,
-          blanco2: blanco2,
-        };
-      }),
-    };
-  } catch (error) {
-    throw CustomError.internalServer(`${error}`);
-  }
-}
+                const familia1 =
+                    productos[0]?.Familia?.nombre.trimEnd() || null;
+                const familia2 =
+                    productos[1]?.Familia?.nombre.trimEnd() || null;
+                const blanco1 =
+                    productos[0]?.BlancoBiologico?.estandarizado?.trimEnd() ??
+                    null;
+                const blanco2 =
+                    productos[1]?.BlancoBiologico?.estandarizado?.trimEnd() ??
+                    null;
+
+                const numAsistencias = charla.Asistencia?.length ?? 0;
+
+                return {
+                    id: charla.id,
+                    tema: charla.tema,
+                    asistentes: numAsistencias,
+                    hectareas: charla.hectareas,
+                    dosis: charla.dosis,
+                    efectivo: charla.efectivo,
+                    comentarios: charla.comentarios,
+                    demoplots: charla.demoplots,
+                    estado: charla.estado,
+                    programacion: charla.programacion,
+                    ejecucion: charla.ejecucion,
+                    cancelacion: charla.cancelacion,
+                    motivo: charla.motivo,
+                    idVegetacion: charla.idVegetacion,
+                    idBlanco: charla.idBlanco,
+                    idDistrito: charla.idDistrito,
+                    idFamilia: charla.idFamilia,
+                    idGte: charla.idGte,
+                    idTienda: charla.idTienda,
+                    createdAt: charla.createdAt,
+                    createdBy: charla.createdBy,
+                    updatedAt: charla.updatedAt,
+                    updatedBy: charla.updatedBy,
+                    codZona: charla.PuntoContacto?.codZona,
+                    familia:
+                        familia2 == null
+                            ? familia1
+                            : `${familia1} - ${familia2}`,
+                    vegetacion: charla.Vegetacion?.nombre,
+                    blancoCientifico: charla.BlancoBiologico?.cientifico,
+                    estandarizado:
+                        blanco2 == null ? blanco1 : `${blanco1} - ${blanco2}`,
+                    distrito: charla.Distrito?.nombre,
+                    provincia: charla.Distrito?.Provincia?.nombre,
+                    departamento:
+                        charla.Distrito?.Provincia?.Departamento?.nombre,
+                    nombreGte: `${charla.Gte?.Usuario?.nombres} ${charla.Gte?.Usuario?.apellidos}`,
+                    rtc: `${charla.Gte?.Colaborador?.Usuario?.nombres} ${charla.Gte?.Colaborador?.Usuario?.apellidos}`,
+                    puntoContacto: charla.PuntoContacto?.nombre,
+                    familia1: familia1,
+                    familia2: familia2,
+                    blanco1: blanco1,
+                    blanco2: blanco2,
+                };
+            });
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 }

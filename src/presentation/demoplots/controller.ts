@@ -71,7 +71,7 @@ export class DemoplotController {
 
     getDemoplotsByGteId = async (req: Request, res: Response) => {
         const idGte = +req.params.idGte;
-        const { page = 1, limit = 200 } = req.query;
+        const { page = 1, limit = 500 } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
 
@@ -205,6 +205,7 @@ export class DemoplotController {
             cultivo,
             estado,
             idFamilia,
+            clase,
             infestacion,
             departamento,
             provincia,
@@ -216,6 +217,8 @@ export class DemoplotController {
             empresa,
             macrozona,
             idColaborador,
+            idPunto,
+            numDocPunto,
         } = req.query;
 
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
@@ -228,6 +231,7 @@ export class DemoplotController {
             cultivo: cultivo?.toString(),
             estado: estado?.toString(),
             idFamilia: idFamilia ? +idFamilia : undefined,
+            clase: clase?.toString(),
             infestacion: infestacion?.toString(),
             departamento: departamento?.toString(),
             provincia: provincia?.toString(),
@@ -246,11 +250,131 @@ export class DemoplotController {
             //macrozona: macrozona?.toString(),
             macrozona: macrozona ? +macrozona : undefined,
             idColaborador: idColaborador ? +idColaborador : undefined,
+            idPunto: idPunto ? +idPunto : undefined,
+            numDocPunto: numDocPunto?.toString(),
         };
 
         this.demoplotService
             .getDemoplotsByPage(paginationDto!, filters)
             .then((demoplots) => res.status(200).json(demoplots))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    getDemoplotsByGteId2 = async (req: Request, res: Response) => {
+        const {
+            page = 1,
+            limit = 10,
+            objetivo,
+            descripcion,
+            estado,
+            idFamilia,
+            clase,
+            infestacion,
+            departamento,
+            provincia,
+            distrito,
+            year,
+            month,
+            venta,
+            validacion,
+            gdactivo,
+            idVegetacion,
+            cultivo,
+        } = req.query;
+
+        const idGte = +req.params.idGte;
+
+        if (isNaN(idGte))
+            return res.status(400).json({ error: 'ID de usuario inválido' });
+
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
+
+        const filters = {
+            objetivo: objetivo?.toString(),
+            descripcion: descripcion?.toString(),
+            estado: estado?.toString(),
+            idFamilia: idFamilia ? +idFamilia : undefined,
+            clase: clase?.toString(),
+            infestacion: infestacion?.toString(),
+            departamento: departamento?.toString(),
+            provincia: provincia?.toString(),
+            distrito: distrito?.toString(),
+            year: year ? +year : undefined,
+            month: month ? +month : undefined,
+            venta:
+                venta !== undefined
+                    ? !!(venta === 'true' || venta === '1')
+                    : undefined,
+            validacion:
+                validacion !== undefined
+                    ? !!(validacion === 'true' || validacion === '1')
+                    : undefined,
+            gdactivo:
+                gdactivo !== undefined
+                    ? !!(gdactivo === 'true' || gdactivo === '1')
+                    : undefined,
+            idVegetacion: idVegetacion ? +idVegetacion : undefined,
+            cultivo: cultivo?.toString(),
+        };
+
+        this.demoplotService
+            .getDemoplotsByGteId2(idGte, paginationDto!, filters)
+            .then((demoplots) => res.status(200).json(demoplots))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    getUniquePuntosContactoByFilters = async (req: Request, res: Response) => {
+        const {
+            objetivo,
+            idGte,
+            idVegetacion,
+            cultivo,
+            estado,
+            idFamilia,
+            clase,
+            infestacion,
+            venta,
+            validacion,
+            gdactivo,
+            departamento,
+            provincia,
+            distrito,
+            year,
+            month,
+        } = req.query;
+
+        const filters = {
+            objetivo: objetivo?.toString(),
+            idGte: idGte ? +idGte : undefined,
+            idVegetacion: idVegetacion ? +idVegetacion : undefined,
+            cultivo: cultivo?.toString(),
+            estado: estado?.toString(),
+            idFamilia: idFamilia ? +idFamilia : undefined,
+            clase: clase?.toString(),
+            infestacion: infestacion?.toString(),
+            venta:
+                venta !== undefined
+                    ? venta === 'true' || venta === '1'
+                    : undefined,
+            validacion:
+                validacion !== undefined
+                    ? validacion === 'true' || validacion === '1'
+                    : undefined,
+            gdactivo:
+                gdactivo !== undefined
+                    ? gdactivo === 'true' || gdactivo === '1'
+                    : undefined,
+            departamento: departamento?.toString(),
+            provincia: provincia?.toString(),
+            distrito: distrito?.toString(),
+            year: year ? +year : undefined,
+            month: month ? +month : undefined,
+        };
+
+        this.demoplotService
+            .getUniquePuntosContactoByFilters(filters)
+            .then((puntos) => res.status(200).json(puntos))
             .catch((error) => this.handleError(res, error));
     };
 }

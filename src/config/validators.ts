@@ -1,4 +1,5 @@
 import { prisma } from '../data/sqlserver';
+import { Empresa } from '../domain/entities/dashboard/cumplimiento_jerarquia.entity';
 
 export class Validators {
     static get email() {
@@ -57,6 +58,7 @@ export class Validators {
                                 id: true,
                             },
                         },
+                        Empresa: true,
                     },
                 },
                 Area: true,
@@ -67,6 +69,7 @@ export class Validators {
             where: { idJefe: colaborador?.id },
             include: {
                 SuperZona: true,
+                Empresa: true,
             },
         });
 
@@ -96,6 +99,11 @@ export class Validators {
                     .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
                     ?.SuperZona?.id ?? null;
 
+            const idEmpresaJefe =
+                colaborador
+                    .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
+                    ?.Empresa?.id ?? null;
+
             return {
                 idTipo: colaborador.id,
                 tipo: 'colaborador',
@@ -105,8 +113,10 @@ export class Validators {
                 idMacrozona: isJefe ? isJefe.idMacroZona! : idMacrozona ?? 0,
                 idEmpresa: isJefe
                     ? isJefe.idEmpresa ?? idEmpresa
-                    : idEmpresa ?? 0,
-                empresa: colaborador.ZonaAnterior?.Empresa?.nomEmpresa!,
+                    : idEmpresa ?? idEmpresaJefe,
+                empresa: isJefe
+                    ? isJefe.Empresa?.nomEmpresa
+                    : colaborador.ZonaAnterior?.Empresa?.nomEmpresa!,
             };
         }
 

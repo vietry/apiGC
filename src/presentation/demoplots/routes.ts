@@ -11,8 +11,10 @@ export class DemoplotRoutes {
 
         router.get('/', controller.getDemoplots);
         router.get('/web', controller.getDemoplotsByPage);
+        router.get('/tiendas', controller.getUniquePuntosContactoByFilters);
         router.get('/:id', controller.getDemoplotById);
         router.get('/gte/:idGte', controller.getDemoplotsByGteId);
+        router.get('/app/gte/:idGte', controller.getDemoplotsByGteId2);
         router.get(
             '/gte/:anio/:mes/:idGte',
             controller.getDemoplotsByAnioMesGte

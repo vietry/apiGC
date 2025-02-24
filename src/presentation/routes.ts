@@ -31,6 +31,7 @@ import { ZonaAnteriorRoutes } from './zona-anterior/routes';
 import { RegistroLaboralGdRoutes } from './registro-laboral-gd/routes';
 import { CostoLaboralRoutes } from './costo-laboral/routes';
 import { VariablePersonalRoutes } from './variable-personal/routes';
+import { ExternoRoutes } from './externos/routes';
 
 export class AppRoutes {
     static get routes(): Router {
@@ -66,6 +67,7 @@ export class AppRoutes {
         router.use('/api/registroslaborales', RegistroLaboralGdRoutes.routes);
         router.use('/api/costoslaborales', CostoLaboralRoutes.routes);
         router.use('/api/variables', VariablePersonalRoutes.routes);
+        router.use('/api/externos', ExternoRoutes.routes);
         return router;
     }
 }

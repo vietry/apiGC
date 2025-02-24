@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
-  <channel>
-    <title>For unit test only</title>
-    <item>
-        <title>Version 1.2.0</title>
-        <description>Ahora es posible calificar el demoplot e ingresar una venta. Además, ahora se debe agregar un motivo para la eliminación de una foto</description>
-        <pubDate>Wed, 06 Dec 2024 10:00:00 +0000</pubDate>
-        <enclosure url="http://localhost/v1/apps/demoplots/demoplots/AppDemoplot_v1.2.0.apk" sparkle:version="1.2.0"/>
-    </item>
-  </channel>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Demoplots Updates</title>
+        <item>
+            <title>Version 1.3.2</title>
+            <description>
+                Actualización obligatoria:
+                - Corrección de errores de registro y actualización de demoplots
+                - Ahora es posible registrar asistencias a charlas
+                - Es posible anexar una charla al demoplot
+            
+            </description>
+            <pubDate>Tue, 18 Feb 2024 12:00:00 +0000</pubDate>
+            <enclosure 
+                url="http://localhost/v1/apps/demoplots/apk/AppDemoplot.apk" 
+                sparkle:version="1.3.2"
+                sparkle:os="android" 
+            />
+            <sparkle:criticalUpdate>true</sparkle:criticalUpdate>
+        </item>
+    </channel>
 </rss>

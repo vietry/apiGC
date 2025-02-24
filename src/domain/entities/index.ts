@@ -7,9 +7,10 @@ export * from './demoplot.entity';
 export * from './articulo.entity';
 export * from './blanco.entity';
 export * from './cultivo.entity';
+export * from './externo.entity';
 export * from './registro_laboral_gd.entity';
 export * from './variable-personal.entity';
-export * from './cumplimiento_jerarquia.entity';
+export * from './dashboard/cumplimiento_jerarquia.entity';
 //ENTITY CHARLA
 export * from './charla/charla.entity';
 export * from './charla/asistencia.entity';

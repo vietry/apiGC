@@ -126,13 +126,59 @@ export class VariablePersonalController {
     };
 
     generateVariablePersonal = async (req: Request, res: Response) => {
-        const idUsuario = +req.body.idUsuario;
-        if (isNaN(idUsuario))
-            return res.status(400).json({ error: 'idUsuario inválido' });
+        try {
+            const idUsuario = +req.body.idUsuario;
+            const { year, month } = req.query;
 
-        this.variablePersonalService
-            .generateVariablePersonal(idUsuario)
-            .then((variables) => res.status(201).json(variables))
-            .catch((error) => this.handleError(res, error));
+            // Validar idUsuario
+            if (isNaN(idUsuario)) {
+                return res.status(400).json({ error: 'idUsuario inválido' });
+            }
+
+            // Convertir y validar year y month si existen
+            const yearNum = year ? +year : undefined;
+            const monthNum = month ? +month : undefined;
+
+            this.variablePersonalService
+                .generateVariablePersonal(idUsuario, yearNum, monthNum)
+                .then((variables) => res.status(201).json(variables))
+                .catch((error) => this.handleError(res, error));
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
+
+    getJerarquiaVariables = async (req: Request, res: Response) => {
+        try {
+            const {
+                year,
+                month,
+                idColaborador,
+                macrozona,
+                empresa,
+                activo,
+                idGte,
+            } = req.query;
+
+            const filters = {
+                year: year ? +year : undefined,
+                month: month ? +month : undefined,
+                idColaborador: idColaborador ? +idColaborador : undefined,
+                idGte: idGte ? +idGte : undefined,
+                macrozona: macrozona ? +macrozona : undefined,
+                empresa: empresa?.toString(),
+                activo:
+                    activo !== undefined
+                        ? !!(activo === 'true' || activo === '1')
+                        : undefined,
+            };
+
+            this.variablePersonalService
+                .getJerarquiaVariables(filters)
+                .then((jerarquia) => res.status(200).json(jerarquia))
+                .catch((error) => this.handleError(res, error));
+        } catch (error) {
+            this.handleError(res, error);
+        }
     };
 }

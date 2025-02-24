@@ -7,6 +7,9 @@ export class UpdateCostoLaboralDto {
         public readonly sueldo?: number | null,
         public readonly viaticos?: number | null,
         public readonly moto?: number | null,
+        public readonly linea?: number | null,
+        public readonly celular?: number | null,
+        public readonly servGte?: number | null,
         public readonly year?: number,
         public readonly month?: number,
         public readonly updatedBy?: number | null
@@ -20,6 +23,9 @@ export class UpdateCostoLaboralDto {
         if (this.sueldo !== undefined) returnObj.sueldo = this.sueldo;
         if (this.viaticos !== undefined) returnObj.viaticos = this.viaticos;
         if (this.moto !== undefined) returnObj.moto = this.moto;
+        if (this.linea !== undefined) returnObj.linea = this.linea;
+        if (this.celular !== undefined) returnObj.celular = this.celular;
+        if (this.servGte !== undefined) returnObj.servGte = this.servGte;
         if (this.year !== undefined) returnObj.year = this.year;
         if (this.month !== undefined) returnObj.month = this.month;
         if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
@@ -37,6 +43,9 @@ export class UpdateCostoLaboralDto {
             sueldo,
             viaticos,
             moto,
+            linea,
+            celular,
+            servGte,
             year,
             month,
             updatedBy,
@@ -64,6 +73,9 @@ export class UpdateCostoLaboralDto {
                 parseNumber(sueldo),
                 parseNumber(viaticos),
                 parseNumber(moto),
+                parseNumber(linea),
+                parseNumber(celular),
+                parseNumber(servGte),
                 year ? Number(year) : undefined,
                 month ? Number(month) : undefined,
                 updatedBy

@@ -5,6 +5,7 @@ export class UpdateVariablePersonalDto {
         public readonly bono10?: number | null,
         public readonly vidaLey?: number | null,
         public readonly beneficio?: number | null,
+        public readonly sctr?: number | null,
         public readonly total?: number | null,
         public readonly year?: number,
         public readonly month?: number,
@@ -18,6 +19,7 @@ export class UpdateVariablePersonalDto {
         if (this.bono10 !== undefined) returnObj.bono10 = this.bono10;
         if (this.vidaLey !== undefined) returnObj.vidaLey = this.vidaLey;
         if (this.beneficio !== undefined) returnObj.beneficio = this.beneficio;
+        if (this.sctr !== undefined) returnObj.sctr = this.sctr;
         if (this.total !== undefined) returnObj.total = this.total;
         if (this.year !== undefined) returnObj.year = this.year;
         if (this.month !== undefined) returnObj.month = this.month;
@@ -35,6 +37,7 @@ export class UpdateVariablePersonalDto {
             bono10,
             vidaLey,
             beneficio,
+            sctr,
             total,
             year,
             month,
@@ -61,6 +64,7 @@ export class UpdateVariablePersonalDto {
                 parseNumber(bono10),
                 parseNumber(vidaLey),
                 parseNumber(beneficio),
+                parseNumber(sctr),
                 parseNumber(total),
                 year ? Number(year) : undefined,
                 month ? Number(month) : undefined,

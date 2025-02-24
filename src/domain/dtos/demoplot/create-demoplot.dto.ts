@@ -1,6 +1,4 @@
-
 export class CreateDemoplotDto {
-
     private constructor(
         public readonly titulo: string | null,
         public readonly objetivo: string | null,
@@ -20,6 +18,7 @@ export class CreateDemoplotDto {
         public readonly idDistrito: string,
         public readonly idFamilia: number | null,
         public readonly idGte: number,
+        public readonly idCharla: number | null,
         public readonly programacion: Date | null,
         public readonly diaCampo: boolean | null,
         public readonly venta: boolean | null,
@@ -30,14 +29,38 @@ export class CreateDemoplotDto {
         public readonly updatedBy: number | null
     ) {}
 
-    static async create(object: { [key: string]: any }): Promise<[string?, CreateDemoplotDto?]> {
+    static async create(object: {
+        [key: string]: any;
+    }): Promise<[string?, CreateDemoplotDto?]> {
         const {
-            titulo, objetivo, hasCultivo, instalacion, seguimiento, finalizacion,presentacion, estado,
-            gradoInfestacion, dosis, validacion, resultado, idCultivo, idContactoP, idBlanco,
-            idDistrito, idFamilia, idGte, programacion, diaCampo, venta, fecVenta, cantidad, importe,
-                       createdBy, 
+            titulo,
+            objetivo,
+            hasCultivo,
+            instalacion,
+            seguimiento,
+            finalizacion,
+            presentacion,
+            estado,
+            gradoInfestacion,
+            dosis,
+            validacion,
+            resultado,
+            idCultivo,
+            idContactoP,
+            idBlanco,
+            idDistrito,
+            idFamilia,
+            idGte,
+            idCharla,
+            programacion,
+            diaCampo,
+            venta,
+            fecVenta,
+            cantidad,
+            importe,
+            createdBy,
 
-                       updatedBy
+            updatedBy,
         } = object;
 
         if (!idCultivo) return ['idCultivo faltante'];
@@ -52,7 +75,8 @@ export class CreateDemoplotDto {
 
         if (hasCultivo && typeof hasCultivo !== 'number') {
             hasCultivoNumber = parseFloat(hasCultivo);
-            if (isNaN(hasCultivoNumber)) return ['hasCultivo debe ser un número válido'];
+            if (isNaN(hasCultivoNumber))
+                return ['hasCultivo debe ser un número válido'];
         }
 
         if (dosis && typeof dosis !== 'number') {
@@ -62,20 +86,31 @@ export class CreateDemoplotDto {
 
         if (programacion && typeof programacion === 'string') {
             programacionDate = new Date(programacion);
-            if (isNaN(programacionDate.getTime())) return ['programacion debe ser una fecha válida'];
+            if (isNaN(programacionDate.getTime()))
+                return ['programacion debe ser una fecha válida'];
         }
-        
+
         const idCultivoNumber = parseInt(idCultivo);
         const idContactoPNumber = parseInt(idContactoP);
         const idBlancoNumber = parseInt(idBlanco);
         const idGteNumber = parseInt(idGte);
         const idFamiliaNumber = parseInt(idFamilia);
 
-        if (isNaN(idCultivoNumber)) return ['idCultivo debe ser un número válido'];
-        if (isNaN(idContactoPNumber)) return ['idContactoP debe ser un número válido'];
-        if (isNaN(idBlancoNumber)) return ['idBlanco debe ser un número válido'];
+        if (isNaN(idCultivoNumber))
+            return ['idCultivo debe ser un número válido'];
+        if (isNaN(idContactoPNumber))
+            return ['idContactoP debe ser un número válido'];
+        if (isNaN(idBlancoNumber))
+            return ['idBlanco debe ser un número válido'];
         if (isNaN(idGteNumber)) return ['idGte debe ser un número válido'];
-        if (isNaN(idFamiliaNumber)) return ['idFamilia debe ser un número válido'];
+        if (isNaN(idFamiliaNumber))
+            return ['idFamilia debe ser un número válido'];
+
+        const parseNumber = (value: any) => {
+            if (value === null || value === undefined) return null;
+            const num = Number(value);
+            return isNaN(num) ? null : num;
+        };
 
         // Validar si los IDs existen en la base de datos usando validadores
 
@@ -100,16 +135,16 @@ export class CreateDemoplotDto {
                 idDistrito,
                 idFamiliaNumber,
                 idGteNumber,
-                programacion, 
+                parseNumber(idCharla),
+                programacion,
                 diaCampo,
                 venta,
                 fecVenta,
                 cantidad,
                 importe,
-                                createdBy, 
-                                updatedBy
-
-            )
+                createdBy,
+                updatedBy
+            ),
         ];
     }
 }

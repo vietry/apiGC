@@ -37,7 +37,9 @@ export class ColaboradorService {
             where: { idUsuario: createColaboradorDto.idUsuario },
         });
         if (colaboradorExists)
-            throw CustomError.badRequest(`Colaborador no exists`);
+            throw CustomError.badRequest(
+                `Colaborador with IdUsuario already  exists`
+            );
 
         try {
             const currentDate = new Date();
@@ -301,6 +303,11 @@ export class ColaboradorService {
             // Se realiza la consulta sin paginación.
             const colaboradores = await prisma.colaborador.findMany({
                 where,
+                orderBy: {
+                    Usuario: {
+                        nombres: 'asc',
+                    },
+                },
                 include: {
                     Usuario: true,
                     Area: true,

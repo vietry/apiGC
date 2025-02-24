@@ -1,6 +1,6 @@
-import { Router } from "express";
-import { AsistenciaController } from "./controller";
-import { AsistenciaService } from "../services/charla/asistencia.service";
+import { Router } from 'express';
+import { AsistenciaController } from './controller';
+import { AsistenciaService } from '../services/charla/asistencia.service';
 
 export class AsistenciaRoutes {
     static get routes(): Router {
@@ -9,6 +9,7 @@ export class AsistenciaRoutes {
         const controller = new AsistenciaController(asistenciaService);
 
         router.get('/', controller.getAsistencias);
+        router.get('/all', controller.getAllAsistencias);
         router.get('/:id', controller.getAsistenciaById);
         router.get('/charla/:idCharla', controller.getAsistenciasByIdCharla); // Nueva ruta
         router.get('/usuario/:idUsuario', controller.getAsistenciasByUsuario);

@@ -26,6 +26,8 @@ export class DashboardController {
                 idColaborador,
                 macrozona,
                 empresa,
+                clase,
+                idFamilia,
                 activo,
                 idGte,
             } = req.query;
@@ -38,6 +40,8 @@ export class DashboardController {
                 idGte: idGte ? +idGte : undefined,
                 macrozona: macrozona ? +macrozona : undefined,
                 empresa: empresa?.toString(),
+                clase: clase?.toString(),
+                idFamilia: idFamilia ? +idFamilia : undefined,
                 activo:
                     activo !== undefined
                         ? !!(activo === 'true' || activo === '1')
@@ -63,6 +67,7 @@ export class DashboardController {
                 cultivo,
                 estado,
                 idFamilia,
+                clase,
                 infestacion,
                 departamento,
                 provincia,
@@ -84,6 +89,7 @@ export class DashboardController {
                 cultivo: cultivo?.toString(),
                 estado: estado?.toString(),
                 idFamilia: idFamilia ? +idFamilia : undefined,
+                clase: clase?.toString(),
                 infestacion: infestacion?.toString(),
                 departamento: departamento?.toString(),
                 provincia: provincia?.toString(),
@@ -125,6 +131,7 @@ export class DashboardController {
                 cultivo,
                 estado,
                 idFamilia,
+                clase,
                 infestacion,
                 departamento,
                 provincia,
@@ -146,6 +153,7 @@ export class DashboardController {
                 cultivo: cultivo?.toString(),
                 estado: estado?.toString(),
                 idFamilia: idFamilia ? +idFamilia : undefined,
+                clase: clase?.toString(),
                 infestacion: infestacion?.toString(),
                 departamento: departamento?.toString(),
                 provincia: provincia?.toString(),
@@ -181,8 +189,15 @@ export class DashboardController {
     getGteRankingsVariable = async (req: Request, res: Response) => {
         try {
             // Extrae los filtros de req.query
-            const { year, month, idColaborador, macrozona, empresa, activo } =
-                req.query;
+            const {
+                year,
+                month,
+                idColaborador,
+                macrozona,
+                empresa,
+                clase,
+                activo,
+            } = req.query;
 
             // Construye el objeto de filtros
             const filters = {
@@ -191,6 +206,7 @@ export class DashboardController {
                 idColaborador: idColaborador ? +idColaborador : undefined,
                 macrozona: macrozona ? +macrozona : undefined,
                 empresa: empresa?.toString(),
+                clase: clase?.toString(),
                 activo:
                     activo !== undefined
                         ? !!(activo === 'true' || activo === '1')

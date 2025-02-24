@@ -88,4 +88,23 @@ export class CostoLaboralController {
             .then((costoLaboral) => res.status(200).json(costoLaboral))
             .catch((error) => this.handleError(res, error));
     };
+
+    generateCostosLaborales = async (req: Request, res: Response) => {
+        try {
+            const idUsuario = +req.body.idUsuario;
+
+            if (!idUsuario) {
+                return res.status(400).json({
+                    error: 'Se requiere el ID del usuario',
+                });
+            }
+
+            this.costoLaboralService
+                .generateMissingCostosLaborales(idUsuario)
+                .then((result) => res.status(201).json(result))
+                .catch((error) => this.handleError(res, error));
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
 }

@@ -13,6 +13,7 @@ export class CostoLaboralRoutes {
         router.get('/:id', controller.getCostoLaboralById);
         router.post('/', controller.createCostoLaboral);
         router.put('/:id', controller.updateCostoLaboral);
+        router.post('/generate', controller.generateCostosLaborales);
 
         return router;
     }
