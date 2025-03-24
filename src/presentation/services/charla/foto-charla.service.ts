@@ -1,10 +1,7 @@
-import { prisma } from "../../../data/sqlserver";
-import { CustomError, PaginationDto } from "../../../domain";
-
+import { prisma } from '../../../data/sqlserver';
+import { CustomError, PaginationDto } from '../../../domain';
 
 export class FotoCharlaService {
-    constructor() {}
-
     /*async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, foto: FotoDemoplotEntity) {
         try {
             // Subir el archivo
@@ -34,18 +31,22 @@ export class FotoCharlaService {
             const fotoCharla = await prisma.fotoCharla.findUnique({
                 where: { id },
             });
-    
+
             if (!fotoCharla) {
-                throw CustomError.badRequest(`FotoCharla with id ${id} does not exist`);
+                throw CustomError.badRequest(
+                    `FotoCharla with id ${id} does not exist`
+                );
             }
-    
+
             await prisma.fotoCharla.delete({
                 where: { id },
             });
-    
-            return { message: `FotoCharla with id ${id} has been successfully deleted` };
+
+            return {
+                message: `FotoCharla with id ${id} has been successfully deleted`,
+            };
         } catch (error) {
-                throw CustomError.internalServer(`${error}`);
+            throw CustomError.internalServer(`${error}`);
         }
     }
 
@@ -66,8 +67,8 @@ export class FotoCharlaService {
                                 idGte: true,
                                 idBlanco: true,
                                 tema: true,
-                            }
-                        }
+                            },
+                        },
                     },
                 }),
             ]);
@@ -77,10 +78,12 @@ export class FotoCharlaService {
                 limit,
                 total,
                 next: `/v1/fotoscharlas?page=${page + 1}&limit=${limit}`,
-                prev: page - 1 > 0 ? `/api/fotoscharlas?page=${page - 1}&limit=${limit}` : null,
+                prev:
+                    page - 1 > 0
+                        ? `/api/fotoscharlas?page=${page - 1}&limit=${limit}`
+                        : null,
                 fotoCharlas,
             };
-
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -98,12 +101,15 @@ export class FotoCharlaService {
                             idGte: true,
                             idBlanco: true,
                             tema: true,
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            if (!fotoCharla) throw CustomError.badRequest(`FotoDemoPlot with id ${id} does not exist`);
+            if (!fotoCharla)
+                throw CustomError.badRequest(
+                    `FotoDemoPlot with id ${id} does not exist`
+                );
 
             return fotoCharla;
         } catch (error) {
@@ -111,40 +117,40 @@ export class FotoCharlaService {
         }
     }
 
-        async getFotosByIdCharla(idCharla: number) {
-            try {
-                const fotosCharlas = await prisma.fotoCharla.findMany({
-                    where: { idCharla: idCharla },
-                    include: {
-                        Charla: {
-                            select: {
-                                id: true,
-                                idVegetacion: true,
-                                idGte: true,
-                                idBlanco: true,
-                                tema: true,
-                            }
-                        }
+    async getFotosByIdCharla(idCharla: number) {
+        try {
+            const fotosCharlas = await prisma.fotoCharla.findMany({
+                where: { idCharla: idCharla },
+                include: {
+                    Charla: {
+                        select: {
+                            id: true,
+                            idVegetacion: true,
+                            idGte: true,
+                            idBlanco: true,
+                            tema: true,
+                        },
                     },
-                });
-        
-                return fotosCharlas.map((foto) => ({
-                    id: foto.id,
-                    nombre: foto.nombre,
-                    comentario: foto.comentario,
-                    estado: foto.estado,
-                    rutaFoto: foto.rutaFoto,
-                    tipo: foto.tipo,
-                    latitud: foto.latitud,
-                    longitud: foto.longitud,
-                    createdAt: foto.createdAt,
-                    createdBy: foto.createdBy,
-                    updatedAt: foto.updatedAt,
-                    updatedBy: foto.updatedBy,
-                    idCharla: foto.idCharla
-                }));
-            } catch (error) {
-                throw CustomError.internalServer(`${error}`);
-            }
+                },
+            });
+
+            return fotosCharlas.map((foto) => ({
+                id: foto.id,
+                nombre: foto.nombre,
+                comentario: foto.comentario,
+                estado: foto.estado,
+                rutaFoto: foto.rutaFoto,
+                tipo: foto.tipo,
+                latitud: foto.latitud,
+                longitud: foto.longitud,
+                createdAt: foto.createdAt,
+                createdBy: foto.createdBy,
+                updatedAt: foto.updatedAt,
+                updatedBy: foto.updatedBy,
+                idCharla: foto.idCharla,
+            }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
         }
+    }
 }

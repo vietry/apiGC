@@ -24,8 +24,6 @@ interface UsuarioFilters {
 }
 
 export class UsuariosService {
-    constructor() {}
-
     async createUsuario(createUsuarioDto: CreateUsuarioDto) {
         const usuarioExists = await prisma.usuario.findFirst({
             where: { email: createUsuarioDto.email },
@@ -68,6 +66,7 @@ export class UsuariosService {
                 `No existe el usuario con id ${updateUsuarioDto.id}`
             );
         }
+        console.log('service1', updateUsuarioDto.values);
 
         try {
             const currentDate = getCurrentDate();
@@ -78,6 +77,8 @@ export class UsuariosService {
                     updatedAt: currentDate,
                 },
             });
+            console.log('service2', updatedUsuario);
+
             return updatedUsuario;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -146,7 +147,7 @@ export class UsuariosService {
                 apellidos: usuario.apellidos,
                 email: usuario.email,
                 emailValidado: usuario.emailValidado ?? false,
-                password: usuario.password,
+                //password: usuario.password,
                 celular: usuario.celular,
                 rol: usuario.rol,
                 idFoto: usuario.idFoto,
@@ -222,7 +223,7 @@ export class UsuariosService {
                 apellidos: usuario.apellidos,
                 email: usuario.email,
                 emailValidado: usuario.emailValidado ?? false,
-                password: usuario.password,
+                //password: usuario.password,
                 celular: usuario.celular,
                 rol: usuario.rol,
                 idFoto: usuario.idFoto,

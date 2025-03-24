@@ -537,6 +537,7 @@ export class GteService {
                     codZona: gte.Colaborador?.ZonaAnterior?.codigo.trim(),
                     macrozona: macrozona,
                     empresa: gte.Colaborador?.ZonaAnterior?.Empresa?.nomEmpresa,
+                    idEmpresa: gte.Colaborador?.ZonaAnterior?.Empresa?.id,
                     createdAt: gte.createdAt,
                     updatedAt: gte.updatedAt,
                 };

@@ -84,6 +84,7 @@ export class AuthService {
     public async loginUser(loginUsuarioDto: LoginUsuarioDto) {
         const user = await prisma.usuario.findFirst({
             where: { email: loginUsuarioDto.email },
+            include: { Foto: true },
         });
         if (!user) throw CustomError.badRequest('El email no existe');
 
@@ -116,6 +117,7 @@ export class AuthService {
                 idEmpresa: tipoUser.idEmpresa,
                 empresa: tipoUser.empresa,
                 token: token,
+                foto: user.Foto?.nombre,
             },
             token: token,
         };

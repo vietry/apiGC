@@ -11,7 +11,7 @@ export class AuthMiddleware {
         if (!authorization.startsWith('Bearer'))
             return res.status(401).json({ error: 'Invalid Bearer token' });
 
-        const token = authorization.split(' ').at(1) || '';
+        const token = authorization.split(' ').at(1) ?? '';
 
         try {
             const payload = await JwtAdapter.validateToken<{ id: string }>(
@@ -42,7 +42,7 @@ export class AuthMiddleware {
         if (!authorization.startsWith('Bearer'))
             return res.status(401).json({ error: 'Invalid Bearer token' });
 
-        const token = authorization.split(' ').at(1) || '';
+        const token = authorization.split(' ').at(1) ?? '';
 
         try {
             const payload = await JwtAdapter.validateToken<{ id: string }>(
@@ -52,6 +52,9 @@ export class AuthMiddleware {
 
             const user = await prisma.usuario.findFirst({
                 where: { id: parseInt(payload.id) },
+                include: {
+                    Foto: true,
+                },
             });
             if (!user)
                 return res.status(401).json({ error: 'Invalid token-user' });
@@ -71,6 +74,7 @@ export class AuthMiddleware {
             return res.status(200).json({
                 user: {
                     ...userEntity,
+                    foto: user.Foto?.nombre,
                     idTipo: tipoUser.idTipo,
                     tipo: tipoUser.tipo,
                     area: tipoUser.area,

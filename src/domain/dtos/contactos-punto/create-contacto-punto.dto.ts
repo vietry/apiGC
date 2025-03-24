@@ -1,7 +1,6 @@
-import { Validators } from "../../../config";
+import { Validators } from '../../../config';
 
-export class CreateContactoPuntoDto{
-
+export class CreateContactoPuntoDto {
     private constructor(
         public readonly nombre: string,
         public readonly apellido: string,
@@ -10,13 +9,26 @@ export class CreateContactoPuntoDto{
         public readonly email: string | null,
         public readonly celularA: string | null,
         public readonly celularB: string | null,
-        public readonly activo: boolean  | null,
+        public readonly activo: boolean | null,
         public readonly idPunto: number,
-        public readonly idGte: number | null,
-    ){}
+        public readonly idGte: number | null
+    ) {}
 
-    static async create(object: { [key: string]: any }): Promise<[string?, CreateContactoPuntoDto?]> {
-        const { nombre, apellido, cargo, tipo, email, celularA, celularB, activo,idPunto, idGte } = object;
+    static async create(object: {
+        [key: string]: any;
+    }): Promise<[string?, CreateContactoPuntoDto?]> {
+        const {
+            nombre,
+            apellido,
+            cargo,
+            tipo,
+            email,
+            celularA,
+            celularB,
+            activo,
+            idPunto,
+            idGte,
+        } = object;
 
         let idPuntoNumber = idPunto;
 
@@ -28,27 +40,27 @@ export class CreateContactoPuntoDto{
 
         if (typeof idPunto !== 'number') {
             idPuntoNumber = parseInt(idPunto);
-            if (isNaN(idPuntoNumber)) return ['idPunto debe ser un número válido'];
+            if (isNaN(idPuntoNumber))
+                return ['idPunto debe ser un número válido'];
         }
 
         const isUnique = await Validators.isPuntoID(idPuntoNumber);
         if (!isUnique) return ['Invalid idPunto'];
 
-
         return [
             undefined,
             new CreateContactoPuntoDto(
-                nombre, 
-                apellido, 
+                nombre,
+                apellido,
                 cargo,
                 tipo,
-                email, 
-                celularA, 
-                celularB, 
+                email,
+                celularA,
+                celularB,
                 activo,
                 idPuntoNumber,
                 idGte
-            )
+            ),
         ];
     }
 }

@@ -1,7 +1,6 @@
-import { Validators } from "../../../config";
+import { Validators } from '../../../config';
 
 export class UpdateUsuarioDto {
-
     private constructor(
         public readonly id: number,
         public readonly nombres?: string,
@@ -13,10 +12,10 @@ export class UpdateUsuarioDto {
         public readonly idFoto?: number | null,
         public readonly createdAt?: Date | null,
         public readonly updatedAt?: Date | null
-    ){}
+    ) {}
 
-    get values(){
-        const returnObj: {[key: string]:any} = {};
+    get values() {
+        const returnObj: { [key: string]: any } = {};
 
         if (this.nombres) returnObj.nombres = this.nombres;
         if (this.apellidos) returnObj.apellidos = this.apellidos;
@@ -24,18 +23,28 @@ export class UpdateUsuarioDto {
         if (this.celular) returnObj.celular = this.celular;
         if (this.email) returnObj.email = this.email;
         if (this.rol) returnObj.rol = this.rol;
-        if (this.idFoto) returnObj.idFoto = this.idFoto;
+        if (this.idFoto !== undefined) returnObj.idFoto = this.idFoto;
         if (this.createdAt) returnObj.createdAt = this.createdAt;
         if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
 
         return returnObj;
     }
 
-    static create( props: {[key:string]: any}): [string?, UpdateUsuarioDto?]{
+    static create(props: { [key: string]: any }): [string?, UpdateUsuarioDto?] {
+        const {
+            id,
+            nombres,
+            apellidos,
+            password,
+            celular,
+            email,
+            rol,
+            idFoto,
+            createdAt,
+            updatedAt,
+        } = props;
 
-        const {id, nombres, apellidos, password, celular, email, rol, idFoto, createdAt, updatedAt} = props;
-
-        if (!id || isNaN(Number(id))){
+        if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
         }
 
@@ -47,6 +56,20 @@ export class UpdateUsuarioDto {
             if (password.length < 6) return ['El password es muy corto'];
         }
 
-        return [undefined, new UpdateUsuarioDto(id, nombres, apellidos, password, celular, email, rol, idFoto, createdAt, updatedAt)];
+        return [
+            undefined,
+            new UpdateUsuarioDto(
+                id,
+                nombres,
+                apellidos,
+                password,
+                celular,
+                email,
+                rol,
+                idFoto,
+                createdAt,
+                updatedAt
+            ),
+        ];
     }
 }

@@ -225,7 +225,10 @@ export class DemoplotController {
         if (error) return res.status(400).json({ error });
 
         const filters = {
-            objetivo: objetivo?.toString(),
+            objetivo:
+                typeof objetivo === 'object'
+                    ? JSON.stringify(objetivo)
+                    : objetivo?.toString(),
             idGte: idGte ? +idGte : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
             cultivo: cultivo?.toString(),
@@ -280,6 +283,7 @@ export class DemoplotController {
             gdactivo,
             idVegetacion,
             cultivo,
+            tipoFecha,
         } = req.query;
 
         const idGte = +req.params.idGte;
@@ -291,31 +295,35 @@ export class DemoplotController {
         if (error) return res.status(400).json({ error });
 
         const filters = {
-            objetivo: objetivo?.toString(),
-            descripcion: descripcion?.toString(),
-            estado: estado?.toString(),
+            objetivo: typeof objetivo === 'string' ? objetivo : undefined,
+            descripcion:
+                typeof descripcion === 'string' ? descripcion : undefined,
+            estado: typeof estado === 'string' ? estado : undefined,
             idFamilia: idFamilia ? +idFamilia : undefined,
-            clase: clase?.toString(),
-            infestacion: infestacion?.toString(),
-            departamento: departamento?.toString(),
-            provincia: provincia?.toString(),
-            distrito: distrito?.toString(),
+            clase: typeof clase === 'string' ? clase : undefined,
+            infestacion:
+                typeof infestacion === 'string' ? infestacion : undefined,
+            departamento:
+                typeof departamento === 'string' ? departamento : undefined,
+            provincia: typeof provincia === 'string' ? provincia : undefined,
+            distrito: typeof distrito === 'string' ? distrito : undefined,
             year: year ? +year : undefined,
             month: month ? +month : undefined,
             venta:
                 venta !== undefined
-                    ? !!(venta === 'true' || venta === '1')
+                    ? venta === 'true' || venta === '1'
                     : undefined,
             validacion:
                 validacion !== undefined
-                    ? !!(validacion === 'true' || validacion === '1')
+                    ? validacion === 'true' || validacion === '1'
                     : undefined,
             gdactivo:
                 gdactivo !== undefined
-                    ? !!(gdactivo === 'true' || gdactivo === '1')
+                    ? gdactivo === 'true' || gdactivo === '1'
                     : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
-            cultivo: cultivo?.toString(),
+            cultivo: typeof cultivo === 'string' ? cultivo : undefined,
+            tipoFecha: typeof tipoFecha === 'string' ? tipoFecha : undefined,
         };
 
         this.demoplotService
@@ -349,7 +357,10 @@ export class DemoplotController {
             idGte: idGte ? +idGte : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
             cultivo: cultivo?.toString(),
-            estado: estado?.toString(),
+            estado:
+                typeof estado === 'object'
+                    ? JSON.stringify(estado)
+                    : estado?.toString(),
             idFamilia: idFamilia ? +idFamilia : undefined,
             clase: clase?.toString(),
             infestacion: infestacion?.toString(),

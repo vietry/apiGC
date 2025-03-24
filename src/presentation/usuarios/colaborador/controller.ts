@@ -65,12 +65,14 @@ export class ColaboradorController {
 
         this.colaboradorService
             .getColaboradores(paginationDto!, {
-                nombres: nombres?.toString(),
-                apellidos: apellidos?.toString(),
-                cargo: cargo?.toString(),
-                area: area?.toString(),
-                codigoZona: codigoZona?.toString(),
-                zonaAnt: zonaAnt?.toString(),
+                nombres: typeof nombres === 'string' ? nombres : undefined,
+                apellidos:
+                    typeof apellidos === 'string' ? apellidos : undefined,
+                cargo: typeof cargo === 'string' ? cargo : undefined,
+                area: typeof area === 'string' ? area : undefined,
+                codigoZona:
+                    typeof codigoZona === 'string' ? codigoZona : undefined,
+                zonaAnt: typeof zonaAnt === 'string' ? zonaAnt : undefined,
                 macrozona: macrozona ? +macrozona : undefined,
             })
             .then((colaboradores) => res.status(200).json(colaboradores))
@@ -90,12 +92,13 @@ export class ColaboradorController {
         } = req.query;
 
         const filters = {
-            nombres: nombres ? String(nombres) : undefined,
-            apellidos: apellidos ? String(apellidos) : undefined,
-            cargo: cargo ? String(cargo) : undefined,
-            area: area ? String(area) : undefined,
-            codigoZona: codigoZona ? String(codigoZona) : undefined,
-            zonaAnt: zonaAnt ? String(zonaAnt) : undefined,
+            nombres: typeof nombres === 'string' ? nombres : undefined,
+            apellidos: typeof apellidos === 'string' ? apellidos : undefined,
+            cargo: typeof cargo === 'string' ? cargo.trim() : undefined,
+            area: typeof area === 'string' ? area.trim() : undefined,
+            codigoZona:
+                typeof codigoZona === 'string' ? codigoZona.trim() : undefined,
+            zonaAnt: typeof zonaAnt === 'string' ? zonaAnt.trim() : undefined,
             macrozona: macrozona ? +macrozona : undefined,
             empresa: empresa?.toString(),
         };

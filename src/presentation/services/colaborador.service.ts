@@ -338,6 +338,10 @@ export class ColaboradorService {
                     colaborador
                         ?.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
                         ?.SuperZona?.id ?? null;
+                const nmacrozona =
+                    colaborador
+                        ?.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
+                        ?.SuperZona?.nombre ?? null;
 
                 return {
                     id: colaborador.id,
@@ -353,6 +357,7 @@ export class ColaboradorService {
                     zonaDemoplot: colaborador.ZonaAnterior?.demoplot,
                     empresa: colaborador.ZonaAnterior?.Empresa?.nomEmpresa,
                     macrozona: macrozona,
+                    nmacrozona: nmacrozona,
                     createdAt: colaborador.createdAt,
                     updatedAt: colaborador.updatedAt,
                 };

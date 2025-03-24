@@ -1,7 +1,6 @@
-import { CustomError } from "../errors/custom.error";
+import { CustomError } from '../errors/custom.error';
 
 export class ContactoPuntoEntity {
-
     constructor(
         public id: number,
         public nombre: string,
@@ -13,14 +12,26 @@ export class ContactoPuntoEntity {
         public celularB: string | null,
         public activo: boolean | null,
         public idPunto: number,
-        public idGte: number,
-        //public createdAt: Date | null,
-        //public updatedAt: Date | null
-    ) {}
+        public idGte: number | null
+    ) //public createdAt: Date | null,
+    //public updatedAt: Date | null
+    {}
 
-    public static fromObject(object: { [key: string]: any }): ContactoPuntoEntity {
+    public static fromObject(object: {
+        [key: string]: any;
+    }): ContactoPuntoEntity {
         const {
-            id, nombre, apellido, cargo, tipo,email, celularA, celularB, activo,idPunto, idGte/* createdAt, updatedAt */
+            id,
+            nombre,
+            apellido,
+            cargo,
+            tipo,
+            email,
+            celularA,
+            celularB,
+            activo,
+            idPunto,
+            idGte /* createdAt, updatedAt */,
         } = object;
 
         if (!nombre) throw CustomError.badRequest('Nombre is required');
@@ -30,7 +41,17 @@ export class ContactoPuntoEntity {
         if (!idPunto) throw CustomError.badRequest('idPunto is required');
 
         return new ContactoPuntoEntity(
-            id, nombre, apellido, cargo, tipo, email, celularA, celularB, activo,idPunto, idGte,
+            id,
+            nombre,
+            apellido,
+            cargo,
+            tipo,
+            email,
+            celularA,
+            celularB,
+            activo,
+            idPunto,
+            idGte
             //createdAt, updatedAt
         );
     }

@@ -65,3 +65,58 @@ export interface CharlaFilters {
     idFamilia?: number;
     idTienda?: number;
 }
+
+export interface VisitaFilters {
+    idColaborador?: number;
+    estado?: string;
+    semana?: number;
+    year?: number;
+    month?: number;
+    idVegetacion?: number;
+    idFamilia?: number;
+    idPuntoContacto?: number;
+    idContacto?: number;
+    idRepresentada?: number;
+    idSubLabor?: number;
+}
+
+export interface ConsumoFilters {
+    idEntrega?: number;
+    idDemoplot?: number;
+    idColaborador?: number;
+    idMacrozona?: number;
+    empresa?: string;
+    year?: number;
+    month?: number;
+    idFamilia?: number;
+    clase?: string;
+    idGte?: number;
+}
+
+export interface EntregaFilters {
+    agotado?: boolean;
+    idColaborador?: number;
+    idMacrozona?: number;
+    empresa?: string;
+    year?: number;
+    month?: number;
+    idFamilia?: number;
+    clase?: string;
+    idGte?: number;
+}
+
+export interface PuntoFilters {
+    nombre?: string;
+    numDoc?: string;
+    idGte?: number;
+    idColaborador?: number;
+    idMacrozona?: number;
+    idEmpresa?: number;
+    activo?: boolean;
+    idDistrito?: number;
+    idProvincia?: number;
+    idDepartamento?: number;
+    idSubzona?: number;
+    codZona?: string;
+    nomZona?: string;
+}

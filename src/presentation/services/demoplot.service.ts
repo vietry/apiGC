@@ -29,6 +29,7 @@ export interface DemoplotFilters {
     gdactivo?: boolean;
     idPunto?: number;
     numDocPunto?: string;
+    tipoFecha?: string;
 }
 
 export class DemoplotService {
@@ -644,6 +645,7 @@ export class DemoplotService {
                     },
                     Distrito: {
                         select: {
+                            id: true,
                             nombre: true,
                             Provincia: {
                                 select: {
@@ -714,6 +716,7 @@ export class DemoplotService {
                 nombreGte: demoplot.Gte.Usuario?.nombres,
                 departamento: demoplot.Distrito.Provincia.Departamento.nombre,
                 provincia: demoplot.Distrito.Provincia.nombre.trim(),
+
                 distrito: demoplot.Distrito.nombre,
                 idFundo: demoplot.Cultivo.Fundo.id,
                 fundo: demoplot.Cultivo.Fundo.nombre,
@@ -1371,9 +1374,7 @@ export class DemoplotService {
             month,
             venta,
             validacion,
-            empresa,
-            macrozona,
-            idColaborador,
+
             idPunto,
             numDocPunto,
         } = filters;
@@ -1893,19 +1894,26 @@ export class DemoplotService {
                 };
             }
 
+            // Seleccionar el campo de fecha según el filtro 'tipoFecha'
+            let dateField = 'updatedAt';
+            if (
+                filters.tipoFecha &&
+                filters.tipoFecha.toLowerCase() === 'createdat'
+            ) {
+                dateField = 'createdAt';
+            }
+
             if (filters.year && filters.month) {
                 const year = filters.year;
                 const month = filters.month;
-
                 // Calcular mes anterior
                 const previousMonth = month === 1 ? 12 : month - 1;
                 const previousYear = month === 1 ? year - 1 : year;
 
-                // Fechas para el mes actual (1-19)
+                // Fechas para el mes actual (del día 1 al 19)
                 const currentMonthStart = new Date(year, month - 1, 1);
-                const currentMonthEnd = new Date(year, month - 1, 20); // día 19 a las 23:59
-
-                // Fechas para el mes anterior (20-fin)
+                const currentMonthEnd = new Date(year, month - 1, 20);
+                // Fechas para el mes anterior (del día 20 en adelante)
                 const previousMonthStart = new Date(
                     previousYear,
                     previousMonth - 1,
@@ -1915,15 +1923,13 @@ export class DemoplotService {
 
                 where.OR = [
                     {
-                        // Registros del 1-19 del mes actual
-                        updatedAt: {
+                        [dateField]: {
                             gte: currentMonthStart,
                             lt: currentMonthEnd,
                         },
                     },
                     {
-                        // Registros del 20-fin del mes anterior
-                        updatedAt: {
+                        [dateField]: {
                             gte: previousMonthStart,
                             lt: previousMonthEnd,
                         },
@@ -1940,15 +1946,10 @@ export class DemoplotService {
                     orderBy: { updatedAt: 'asc' },
                     include: {
                         Familia: {
-                            select: {
-                                nombre: true,
-                            },
+                            select: { nombre: true },
                         },
                         BlancoBiologico: {
-                            select: {
-                                cientifico: true,
-                                estandarizado: true,
-                            },
+                            select: { cientifico: true, estandarizado: true },
                         },
                         ContactoDelPunto: {
                             select: {
@@ -1981,10 +1982,7 @@ export class DemoplotService {
                         Gte: {
                             select: {
                                 Usuario: {
-                                    select: {
-                                        nombres: true,
-                                        apellidos: true,
-                                    },
+                                    select: { nombres: true, apellidos: true },
                                 },
                             },
                         },
@@ -1995,15 +1993,12 @@ export class DemoplotService {
                                     select: {
                                         nombre: true,
                                         Departamento: {
-                                            select: {
-                                                nombre: true,
-                                            },
+                                            select: { nombre: true },
                                         },
                                     },
                                 },
                             },
                         },
-
                         FotoDemoPlot: true,
                     },
                 }),
@@ -2014,60 +2009,48 @@ export class DemoplotService {
                 pages: Math.ceil(total / limit),
                 limit,
                 total,
-                demoplots: demoplots.map((demoplot) => {
-                    return {
-                        id: demoplot.id,
-                        titulo: demoplot.titulo,
-                        objetivo: demoplot.objetivo,
-                        hasCultivo: demoplot.hasCultivo,
-                        instalacion: demoplot.instalacion,
-                        seguimiento: demoplot.seguimiento,
-                        finalizacion: demoplot.finalizacion,
-                        presentacion: demoplot.presentacion,
-                        estado: demoplot.estado,
-                        gradoInfestacion: demoplot.gradoInfestacion,
-                        dosis: demoplot.dosis,
-                        validacion: demoplot.validacion,
-                        resultado: demoplot.resultado,
-                        programacion: demoplot.programacion,
-                        diaCampo: demoplot.diaCampo,
-                        idCultivo: demoplot.idCultivo,
-                        idContactoP: demoplot.idContactoP,
-                        idBlanco: demoplot.idBlanco,
-                        idDistrito: demoplot.idDistrito,
-                        idFamilia: demoplot.idFamilia,
-                        idGte: demoplot.idGte,
-                        familia: demoplot.Familia?.nombre.trim(),
-                        blancoCientifico: demoplot.BlancoBiologico.cientifico,
-                        blancoComun: demoplot.BlancoBiologico.estandarizado,
-                        contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
-                        cargo: demoplot.ContactoDelPunto.cargo,
-                        tipoContacto: demoplot.ContactoDelPunto.tipo,
-                        emailContacto: demoplot.ContactoDelPunto.email,
-                        celularContacto: demoplot.ContactoDelPunto.celularA,
-                        idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
-                        punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
-                        idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
-                        cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
-                        variedad: demoplot.Cultivo.Variedad.nombre,
-                        //FotoDemoPlot: demoplot.FotoDemoPlot,
-                        nombreGte: demoplot.Gte.Usuario?.nombres,
-                        departamento:
-                            demoplot.Distrito.Provincia.Departamento.nombre,
-                        provincia: demoplot.Distrito.Provincia.nombre.trim(),
-                        distrito: demoplot.Distrito.nombre,
-                        idFundo: demoplot.Cultivo.Fundo.id,
-                        fundo: demoplot.Cultivo.Fundo.nombre,
-                        venta: demoplot.venta,
-                        fecVenta: demoplot.fecVenta,
-                        cantidad: demoplot.cantidad,
-                        importe: demoplot.importe,
-                        createdAt: demoplot.createdAt,
-                        createdBy: demoplot.createdBy,
-                        updatedAt: demoplot.updatedAt,
-                        updatedBy: demoplot.updatedBy,
-                    };
-                }),
+                demoplots: demoplots.map((demoplot) => ({
+                    id: demoplot.id,
+                    titulo: demoplot.titulo,
+                    objetivo: demoplot.objetivo,
+                    hasCultivo: demoplot.hasCultivo,
+                    instalacion: demoplot.instalacion,
+                    seguimiento: demoplot.seguimiento,
+                    finalizacion: demoplot.finalizacion,
+                    presentacion: demoplot.presentacion,
+                    estado: demoplot.estado,
+                    gradoInfestacion: demoplot.gradoInfestacion,
+                    dosis: demoplot.dosis,
+                    validacion: demoplot.validacion,
+                    resultado: demoplot.resultado,
+                    programacion: demoplot.programacion,
+                    diaCampo: demoplot.diaCampo,
+                    idCultivo: demoplot.idCultivo,
+                    idContactoP: demoplot.idContactoP,
+                    idBlanco: demoplot.idBlanco,
+                    idDistrito: demoplot.idDistrito,
+                    idFamilia: demoplot.idFamilia,
+                    idGte: demoplot.idGte,
+                    familia: demoplot.Familia?.nombre.trim(),
+                    blancoCientifico: demoplot.BlancoBiologico.cientifico,
+                    blancoComun: demoplot.BlancoBiologico.estandarizado,
+                    contacto: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
+                    cargo: demoplot.ContactoDelPunto.cargo,
+                    tipoContacto: demoplot.ContactoDelPunto.tipo,
+                    emailContacto: demoplot.ContactoDelPunto.email,
+                    celularContacto: demoplot.ContactoDelPunto.celularA,
+                    idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
+                    punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                    idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
+                    cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                    variedad: demoplot.Cultivo.Variedad.nombre,
+                    //FotoDemoPlot: demoplot.FotoDemoPlot,
+                    nombreGte: demoplot.Gte.Usuario?.nombres,
+                    departamento:
+                        demoplot.Distrito.Provincia.Departamento.nombre,
+                    provincia: demoplot.Distrito.Provincia.nombre.trim(),
+                    distrito: demoplot.Distrito.nombre,
+                })),
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

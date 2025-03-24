@@ -1,9 +1,7 @@
-import { prisma } from "../../data/sqlserver";
-import { CustomError, PaginationDto } from "../../domain";
+import { prisma } from '../../data/sqlserver';
+import { CustomError, PaginationDto } from '../../domain';
 
 export class FotoDemoplotService {
-    constructor() {}
-
     /*async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, foto: FotoDemoplotEntity) {
         try {
             // Subir el archivo
@@ -45,8 +43,8 @@ export class FotoDemoplotService {
                                 idGte: true,
                                 idBlanco: true,
                                 gradoInfestacion: true,
-                            }
-                        }
+                            },
+                        },
                     },
                 }),
             ]);
@@ -56,10 +54,12 @@ export class FotoDemoplotService {
                 limit,
                 total,
                 next: `/api/fotosdemoplots?page=${page + 1}&limit=${limit}`,
-                prev: page - 1 > 0 ? `/api/fotosdemoplots?page=${page - 1}&limit=${limit}` : null,
+                prev:
+                    page - 1 > 0
+                        ? `/api/fotosdemoplots?page=${page - 1}&limit=${limit}`
+                        : null,
                 fotoDemoplots,
             };
-
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -77,12 +77,15 @@ export class FotoDemoplotService {
                             idGte: true,
                             idBlanco: true,
                             gradoInfestacion: true,
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
-            if (!fotoDemoplot) throw CustomError.badRequest(`FotoDemoPlot with id ${id} does not exist`);
+            if (!fotoDemoplot)
+                throw CustomError.badRequest(
+                    `FotoDemoPlot with id ${id} does not exist`
+                );
 
             return fotoDemoplot;
         } catch (error) {
@@ -90,58 +93,62 @@ export class FotoDemoplotService {
         }
     }
 
-        async getFotosByIdDemoplot(idDemoPlot: number) {
-            try {
-                const fotosDemoplots = await prisma.fotoDemoPlot.findMany({
-                    where: { idDemoPlot: idDemoPlot },
-                    include: {
-                        DemoPlot: {
-                            select: {
-                                id: true,
-                                idCultivo: true,
-                                idGte: true,
-                                idBlanco: true,
-                                gradoInfestacion: true,
-                            }
-                        }
+    async getFotosByIdDemoplot(idDemoPlot: number) {
+        try {
+            const fotosDemoplots = await prisma.fotoDemoPlot.findMany({
+                where: { idDemoPlot: idDemoPlot },
+                include: {
+                    DemoPlot: {
+                        select: {
+                            id: true,
+                            idCultivo: true,
+                            idGte: true,
+                            idBlanco: true,
+                            gradoInfestacion: true,
+                        },
                     },
-                });
-        
-                return fotosDemoplots.map((foto) => ({
-                    id: foto.id,
-                    nombre: foto.nombre,
-                    comentario: foto.comentario,
-                    estado: foto.estado,
-                    rutaFoto: foto.rutaFoto,
-                    tipo: foto.tipo,
-                    latitud: foto.latitud,
-                    longitud: foto.longitud,
-                    createdAt: foto.createdAt,
-                    updatedAt: foto.updatedAt,
-                    idDemoPlot: foto.idDemoPlot
-                }));
-            } catch (error) {
-                throw CustomError.internalServer(`${error}`);
-            }
-        }
+                },
+            });
 
-        async deleteFotoDemoplotById(id: number) {
-            try {
-                const fotoDemoplot = await prisma.fotoDemoPlot.findUnique({
-                    where: { id },
-                });
-        
-                if (!fotoDemoplot) {
-                    throw CustomError.badRequest(`FotoDemoplot with id ${id} does not exist`);
-                }
-        
-                await prisma.fotoDemoPlot.delete({
-                    where: { id },
-                });
-        
-                return { message: `FotoDemoplot with id ${id} has been successfully deleted` };
-            } catch (error) {
-                    throw CustomError.internalServer(`${error}`);
-            }
+            return fotosDemoplots.map((foto) => ({
+                id: foto.id,
+                nombre: foto.nombre,
+                comentario: foto.comentario,
+                estado: foto.estado,
+                rutaFoto: foto.rutaFoto,
+                tipo: foto.tipo,
+                latitud: foto.latitud,
+                longitud: foto.longitud,
+                createdAt: foto.createdAt,
+                updatedAt: foto.updatedAt,
+                idDemoPlot: foto.idDemoPlot,
+            }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
         }
+    }
+
+    async deleteFotoDemoplotById(id: number) {
+        try {
+            const fotoDemoplot = await prisma.fotoDemoPlot.findUnique({
+                where: { id },
+            });
+
+            if (!fotoDemoplot) {
+                throw CustomError.badRequest(
+                    `FotoDemoplot with id ${id} does not exist`
+                );
+            }
+
+            await prisma.fotoDemoPlot.delete({
+                where: { id },
+            });
+
+            return {
+                message: `FotoDemoplot with id ${id} has been successfully deleted`,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 }

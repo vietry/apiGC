@@ -27,3 +27,4 @@ export * from './foto-demoplot-log.service';
 export * from './registro-laboral-gd.service';
 export * from './costo-laboral.service';
 export * from './variable-personal.service';
+export * from './file-upload.service';

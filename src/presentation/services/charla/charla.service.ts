@@ -37,6 +37,13 @@ export class CharlaService {
                     idFamilia: createCharlaDto.idFamilia,
                     idGte: createCharlaDto.idGte,
                     idTienda: createCharlaDto.idTienda,
+                    visita: createCharlaDto.visita,
+                    planificacion: createCharlaDto.planificacion,
+                    duracionVisita: createCharlaDto.duracionVisita,
+                    duracionCharla: createCharlaDto.duracionCharla,
+                    objetivo: createCharlaDto.objetivo,
+                    idPropietario: createCharlaDto.idPropietario,
+                    idMostrador: createCharlaDto.idMostrador,
                     createdAt: currentDate,
                     createdBy: createCharlaDto.createdBy,
                     updatedAt: currentDate,
@@ -160,6 +167,8 @@ export class CharlaService {
                             },
                         },
                         PuntoContacto: true,
+                        ContactoPunto_Charla_idPropietarioToContactoPunto: true,
+                        ContactoPunto_Charla_idMostradorToContactoPunto: true,
                     },
                 }),
             ]);
@@ -241,6 +250,15 @@ export class CharlaService {
                         familia2: familia2,
                         blanco1: blanco1,
                         blanco2: blanco2,
+                        idPropietario: charla.idPropietario,
+                        idMostrador: charla.idMostrador,
+                        visita: charla.visita,
+                        planificacion: charla.planificacion,
+                        duracionVisita: charla.duracionVisita,
+                        duracionCharla: charla.duracionCharla,
+                        objetivo: charla.objetivo,
+                        propietario: `${charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.nombre.trim()} ${charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.apellido.trim()}`,
+                        mostrador: `${charla.ContactoPunto_Charla_idMostradorToContactoPunto?.nombre.trim()} ${charla.ContactoPunto_Charla_idMostradorToContactoPunto?.apellido.trim()}`,
                     };
                 }),
             };
@@ -294,6 +312,8 @@ export class CharlaService {
                         },
                     },
                     PuntoContacto: true,
+                    ContactoPunto_Charla_idPropietarioToContactoPunto: true,
+                    ContactoPunto_Charla_idMostradorToContactoPunto: true,
                 },
             });
 
@@ -343,6 +363,8 @@ export class CharlaService {
                 idFamilia: charla.idFamilia,
                 idGte: charla.idGte,
                 idTienda: charla.idTienda,
+                idPropietario: charla.idPropietario,
+                idMostrador: charla.idMostrador,
                 createdAt: charla.createdAt,
                 createdBy: charla.createdBy,
                 updatedAt: charla.updatedAt,
@@ -350,14 +372,12 @@ export class CharlaService {
                 codZona: charla.PuntoContacto.codZona,
                 familia:
                     familia2 == null
-                        ? familia1.trimEnd()
-                        : `${familia1.trimEnd()} - ${familia2.trimEnd()}`,
+                        ? familia1
+                        : `${familia1 || ''} - ${familia2}`,
                 vegetacion: charla.Vegetacion?.nombre,
                 blancoCientifico: charla.BlancoBiologico?.cientifico,
                 estandarizado:
-                    blanco2 == null
-                        ? blanco1!.trimEnd()
-                        : `${blanco1!.trimEnd()} - ${blanco2.trimEnd()}`,
+                    blanco2 == null ? blanco1! : `${blanco1!} - ${blanco2}`,
                 distrito: charla.Distrito?.nombre,
                 provincia: charla.Distrito?.Provincia?.nombre,
                 departamento: charla.Distrito?.Provincia?.Departamento?.nombre,
@@ -374,6 +394,26 @@ export class CharlaService {
                 blanco2: blanco2,
                 idBlanco1: idBlanco1,
                 idBlanco2: idBlanco2,
+
+                visita: charla.visita,
+                planificacion: charla.planificacion,
+                duracionVisita: charla.duracionVisita,
+                duracionCharla: charla.duracionCharla,
+                objetivo: charla.objetivo,
+                propietario: `${
+                    charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.nombre.trim() ||
+                    ''
+                } ${
+                    charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.apellido.trim() ||
+                    ''
+                }`,
+                mostrador: `${
+                    charla.ContactoPunto_Charla_idMostradorToContactoPunto?.nombre.trim() ||
+                    ''
+                } ${
+                    charla.ContactoPunto_Charla_idMostradorToContactoPunto?.apellido.trim() ||
+                    ''
+                }`,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -422,6 +462,7 @@ export class CharlaService {
                 completados: 0,
                 cancelados: 0,
                 reprogramados: 0,
+                visitados: 0,
             };
 
             // Asignar los valores de los contadores según los resultados de la consulta
@@ -439,6 +480,9 @@ export class CharlaService {
                         break;
                     case 'Reprogramado':
                         counts.reprogramados = charla._count.estado;
+                        break;
+                    case 'Visitado':
+                        counts.visitados = charla._count.estado;
                         break;
                     default:
                         break;
@@ -598,6 +642,8 @@ export class CharlaService {
                         },
                     },
                     PuntoContacto: true,
+                    ContactoPunto_Charla_idPropietarioToContactoPunto: true,
+                    ContactoPunto_Charla_idMostradorToContactoPunto: true,
                 },
             });
 
@@ -675,6 +721,15 @@ export class CharlaService {
                         familia2: familia2,
                         blanco1: blanco1,
                         blanco2: blanco2,
+                        idPropietario: charla.idPropietario,
+                        idMostrador: charla.idMostrador,
+                        visita: charla.visita,
+                        planificacion: charla.planificacion,
+                        duracionVisita: charla.duracionVisita,
+                        duracionCharla: charla.duracionCharla,
+                        objetivo: charla.objetivo,
+                        propietario: `${charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.nombre.trim()} ${charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.apellido.trim()}`,
+                        mostrador: `${charla.ContactoPunto_Charla_idMostradorToContactoPunto?.nombre.trim()} ${charla.ContactoPunto_Charla_idMostradorToContactoPunto?.apellido.trim()}`,
                     };
                 }),
             };
@@ -727,6 +782,7 @@ export class CharlaService {
                 completados: 0,
                 cancelados: 0,
                 reprogramados: 0,
+                visitados: 0,
             };
 
             charlaCounts.forEach((charla) => {
@@ -743,6 +799,9 @@ export class CharlaService {
                         break;
                     case 'Reprogramado':
                         counts.reprogramados = charla._count.estado;
+                        break;
+                    case 'Visitado':
+                        counts.visitados = charla._count.estado;
                         break;
                     default:
                         break;
@@ -832,6 +891,8 @@ export class CharlaService {
                     },
                     PuntoContacto: true,
                     Asistencia: true,
+                    ContactoPunto_Charla_idPropietarioToContactoPunto: true,
+                    ContactoPunto_Charla_idMostradorToContactoPunto: true,
                 },
             });
 
@@ -906,6 +967,15 @@ export class CharlaService {
                     familia2: familia2,
                     blanco1: blanco1,
                     blanco2: blanco2,
+                    idPropietario: charla.idPropietario,
+                    idMostrador: charla.idMostrador,
+                    visita: charla.visita,
+                    planificacion: charla.planificacion,
+                    duracionVisita: charla.duracionVisita,
+                    duracionCharla: charla.duracionCharla,
+                    objetivo: charla.objetivo,
+                    propietario: `${charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.nombre.trim()} ${charla.ContactoPunto_Charla_idPropietarioToContactoPunto?.apellido.trim()}`,
+                    mostrador: `${charla.ContactoPunto_Charla_idMostradorToContactoPunto?.nombre.trim()} ${charla.ContactoPunto_Charla_idMostradorToContactoPunto?.apellido.trim()}`,
                 };
             });
         } catch (error) {

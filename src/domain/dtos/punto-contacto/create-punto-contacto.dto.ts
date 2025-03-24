@@ -12,11 +12,34 @@ export class CreatePuntoContactoDto {
         public readonly idDistrito: string,
         public readonly idEmpresa: number | null,
         public readonly codZona: string | null,
+        public readonly subTipo: string | null,
+        public readonly cantR0: number | null,
+        public readonly cantR1: number | null,
+        public readonly cantR2: number | null,
+        public readonly aniversario: Date | null = null
     ) {}
 
-    static create(object: { [key: string]: any }): [string?, CreatePuntoContactoDto?] {
+    static create(object: {
+        [key: string]: any;
+    }): [string?, CreatePuntoContactoDto?] {
         const {
-            nombre, tipoDoc, numDoc, hectareas, tipo, dirReferencia, lider, activo, idGte, idDistrito, idEmpresa, codZona
+            nombre,
+            tipoDoc,
+            numDoc,
+            hectareas,
+            tipo,
+            dirReferencia,
+            lider,
+            activo,
+            idGte,
+            idDistrito,
+            idEmpresa,
+            codZona,
+            subTipo,
+            cantR0,
+            cantR1,
+            cantR2,
+            aniversario,
         } = object;
 
         if (!nombre) return ['Nombre is required'];
@@ -39,8 +62,24 @@ export class CreatePuntoContactoDto {
         return [
             undefined,
             new CreatePuntoContactoDto(
-                nombre, tipoDoc, numDoc, hectareasNumber, tipo, dirReferencia, lider, activo, idGteNumber, idDistrito, idEmpresaNumber, codZona,
-            )
+                nombre,
+                tipoDoc,
+                numDoc,
+                hectareasNumber,
+                tipo,
+                dirReferencia,
+                lider,
+                activo,
+                idGteNumber,
+                idDistrito,
+                idEmpresaNumber,
+                codZona,
+                subTipo,
+                cantR0,
+                cantR1,
+                cantR2,
+                aniversario
+            ),
         ];
     }
 }

@@ -1,5 +1,4 @@
 import { prisma } from '../data/sqlserver';
-import { Empresa } from '../domain/entities/dashboard/cumplimiento_jerarquia.entity';
 
 export class Validators {
     static get email() {

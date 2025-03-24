@@ -1,16 +1,16 @@
+import { prisma } from '../../data/sqlserver';
+import {
+    CreateContactoPuntoDto,
+    CustomError,
+    PaginationDto,
+    UpdateContactoPuntoDto,
+} from '../../domain';
 
-
-
-import { prisma } from "../../data/sqlserver";
-import { CreateContactoPuntoDto, CustomError, PaginationDto, UpdateContactoPuntoDto } from "../../domain";
-
-export class ContactoPuntoService{
-
+export class ContactoPuntoService {
     //DI
-    constructor(){}
+    constructor() {}
 
-    async createContactoPunto( createContactoPuntoDto: CreateContactoPuntoDto){
-
+    async createContactoPunto(createContactoPuntoDto: CreateContactoPuntoDto) {
         const nombreApellido = `${createContactoPuntoDto.nombre} ${createContactoPuntoDto.apellido}`;
 
         const contactoExists = await prisma.contactoPunto.findFirst({
@@ -18,12 +18,15 @@ export class ContactoPuntoService{
                 AND: [
                     { nombre: createContactoPuntoDto.nombre },
                     { apellido: createContactoPuntoDto.apellido },
-                    { idPunto: createContactoPuntoDto.idPunto}
-                  ]
-                }
-              });
-            
-        if ( contactoExists ) throw CustomError.badRequest( `El contacto: ${nombreApellido}, ya existe para su tienda` );
+                    { idPunto: createContactoPuntoDto.idPunto },
+                ],
+            },
+        });
+
+        if (contactoExists)
+            throw CustomError.badRequest(
+                `El contacto: ${nombreApellido}, ya existe para su tienda`
+            );
 
         try {
             const currentDate = new Date();
@@ -45,7 +48,7 @@ export class ContactoPuntoService{
                 },
             });
 
-            return contacto; 
+            return contacto;
             /*{
                 id: contacto.id,
                 nombre: contacto.cargo,
@@ -56,16 +59,19 @@ export class ContactoPuntoService{
                 celularB: contacto.celularB,
                 idPunto: contacto.idPunto,
             }*/
-
         } catch (error) {
-            throw CustomError.internalServer(`${error}`)
+            throw CustomError.internalServer(`${error}`);
         }
-
     }
 
     async updateContactoPunto(updateContactoPuntoDto: UpdateContactoPuntoDto) {
-        const contactoExists = await prisma.contactoPunto.findFirst({ where: { id: updateContactoPuntoDto.id } });
-        if (!contactoExists) throw CustomError.badRequest(`ContactoPunto with id ${updateContactoPuntoDto.id} does not exist`);
+        const contactoExists = await prisma.contactoPunto.findFirst({
+            where: { id: updateContactoPuntoDto.id },
+        });
+        if (!contactoExists)
+            throw CustomError.badRequest(
+                `ContactoPunto with id ${updateContactoPuntoDto.id} does not exist`
+            );
 
         try {
             const updatedContacto = await prisma.contactoPunto.update({
@@ -77,18 +83,15 @@ export class ContactoPuntoService{
             });
 
             return updatedContacto;
-
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
     }
 
-    async getContactos(paginationDto: PaginationDto){
-
-        const {page, limit} = paginationDto;
+    async getContactos(paginationDto: PaginationDto) {
+        const { page, limit } = paginationDto;
 
         try {
-            
             const [total, contactos] = await Promise.all([
                 await prisma.contactoPunto.count(),
                 await prisma.contactoPunto.findMany({
@@ -105,50 +108,46 @@ export class ContactoPuntoService{
                                 Gte: {
                                     select: {
                                         id: true,
-                                    
-                                    }
-                                }
-                        }}
+                                    },
+                                },
+                            },
+                        },
                     },
-                })
-            ])
+                }),
+            ]);
 
             return {
-
                 //page: page,
                 //limit: limit,
                 total: total,
                 //next: `/api/contactospuntos?page${(page + 1)}&limit=${limit}`,
                 //prev: (page - 1 > 0)  ? `/api/contactospuntos?page${(page - 1)}&limit=${limit}`: null ,
 
-                contactos: 
-                //contactos,
-                
-                contactos.map((contacto) => {
-                    return {
-                        id: contacto.id,
-                        nombre: contacto.nombre,
-                        apellido: contacto.apellido,
-                        cargo: contacto.cargo,
-                        tipo: contacto.tipo,
-                        email: contacto.email,
-                        celularA: contacto.celularA,
-                        celularB: contacto.celularB,
-                        activo: contacto.activo,
-                        idPunto: contacto.idPunto,
-                        punto: contacto.PuntoContacto.nombre,
-                        tipoDocPunto: contacto.PuntoContacto.tipoDoc,
-                        numDocPunto: contacto.PuntoContacto.numDoc,
-                        idGte: contacto.idGte
+                contactos:
+                    //contactos,
 
-                        }
-                        })
-            }
-
+                    contactos.map((contacto) => {
+                        return {
+                            id: contacto.id,
+                            nombre: contacto.nombre,
+                            apellido: contacto.apellido,
+                            cargo: contacto.cargo,
+                            tipo: contacto.tipo,
+                            email: contacto.email,
+                            celularA: contacto.celularA,
+                            celularB: contacto.celularB,
+                            activo: contacto.activo,
+                            idPunto: contacto.idPunto,
+                            punto: contacto.PuntoContacto.nombre,
+                            tipoDocPunto: contacto.PuntoContacto.tipoDoc,
+                            numDocPunto: contacto.PuntoContacto.numDoc,
+                            idGte: contacto.idGte,
+                        };
+                    }),
+            };
         } catch (error) {
-            throw CustomError.internalServer(`${error}`)
+            throw CustomError.internalServer(`${error}`);
         }
-
     }
 
     async getContactoById(id: number) {
@@ -160,13 +159,16 @@ export class ContactoPuntoService{
                         select: {
                             id: true,
                             nombre: true,
-                            numDoc: true
-                        }
-                    }
-                }
+                            numDoc: true,
+                        },
+                    },
+                },
             });
 
-            if (!contacto) throw CustomError.badRequest(`ContactoPunto with id ${id} does not exist`);
+            if (!contacto)
+                throw CustomError.badRequest(
+                    `ContactoPunto with id ${id} does not exist`
+                );
 
             return contacto;
         } catch (error) {
@@ -212,32 +214,34 @@ export class ContactoPuntoService{
         }
     }*/
 
+    async getContactoByPuntoId(idPunto: number) {
+        try {
+            const contactos = await prisma.contactoPunto.findMany({
+                where: { idPunto: idPunto },
+                include: {
+                    PuntoContacto: {
+                        select: {
+                            id: true,
+                            nombre: true,
+                            numDoc: true,
+                            tipoDoc: true,
+                            Gte: {
+                                select: {
+                                    id: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
 
-        async getContactoByPuntoId(idPunto: number) {
-            try {
-                const contactos = await prisma.contactoPunto.findMany({
-                    where: { idPunto: idPunto },
-                    include: {
-                        PuntoContacto: {
-                            select: {
-                                id: true,
-                                nombre: true,
-                                numDoc: true,
-                                tipoDoc: true,
-                                Gte: {
-                                    select: {
-                                        id: true,
-                                    
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-        
-                if (contactos.length === 0) throw CustomError.badRequest(`No ContactoPunto found with PuntoContacto id ${idPunto}`);
-        
-                return {contactos: contactos.map(contacto => ({
+            if (contactos.length === 0)
+                throw CustomError.badRequest(
+                    `No ContactoPunto found with PuntoContacto id ${idPunto}`
+                );
+
+            return {
+                contactos: contactos.map((contacto) => ({
                     id: contacto.id,
                     nombre: contacto.nombre,
                     apellido: contacto.apellido,
@@ -247,16 +251,15 @@ export class ContactoPuntoService{
                     celularB: contacto.celularB,
                     activo: contacto.activo,
                     email: contacto.email,
-                    idPuntoContacto: contacto.idPunto,
+                    idPunto: contacto.idPunto,
+                    //idPuntoContacto: contacto.idPunto,
                     tipoDoc: contacto.PuntoContacto.tipoDoc,
                     numDocPunto: contacto.PuntoContacto.numDoc,
-                    idGte: contacto.idGte
-                    
-                }))};
-            } catch (error) {
-                throw CustomError.internalServer(`${error}`);
-            }
+                    idGte: contacto.idGte,
+                })),
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
         }
-
+    }
 }
-
