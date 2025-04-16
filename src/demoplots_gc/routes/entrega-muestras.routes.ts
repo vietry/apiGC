@@ -12,8 +12,10 @@ export class EntregaMuestrasRoutes {
 
         router.get('/', controller.getEntregaMuestras);
         router.get('/all', controller.getAllEntregaMuestras);
+        router.get('/stats', controller.calculateStats);
         router.get('/:id', controller.getEntregaMuestrasById);
         router.post('/', controller.createEntregaMuestras);
+        router.post('/multiple', controller.createMultipleEntregaMuestras);
         router.put('/:id', controller.updateEntregaMuestras);
 
         return router;

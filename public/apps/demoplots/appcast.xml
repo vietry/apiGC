@@ -3,17 +3,17 @@
     <channel>
         <title>Demoplots Updates</title>
         <item>
-            <title>Version 1.4.4</title>
+            <title>Version 1.5.2</title>
             <description>
-                Actualización menor:
-                - Se añadio comentarios a la opción de charla en la visita.
-                - Corregido error que no mostraba los últimos demoplots en el home
+                Actualización menor con correccion de errores:
+                - Se agrego el indicador de demoplots completados por producto foco.
+                - Se mejoro la logica de registro de demoplots y consumo de muestra.
             
             </description>
-            <pubDate>Tue, 18 Feb 2024 12:00:00 +0000</pubDate>
+            <pubDate>Fri, 11 Apr 2025 12:20:00 +0000</pubDate>
             <enclosure 
                 url="http://localhost/v1/apps/demoplots/apk/AppDemoplot.apk" 
-                sparkle:version="1.4.4"
+                sparkle:version="1.5.0"
                 sparkle:os="android" 
             />
             <sparkle:criticalUpdate>true</sparkle:criticalUpdate>

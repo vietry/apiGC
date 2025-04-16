@@ -1,3 +1,5 @@
+import { parse } from 'path';
+
 export class CreateEntregaMuestrasDto {
     private constructor(
         public readonly idFamilia: number,
@@ -6,6 +8,8 @@ export class CreateEntregaMuestrasDto {
         public readonly unidades: number | null,
         public readonly total: number | null,
         public readonly agotado: boolean | null,
+        public readonly precio: number | null,
+        public readonly perdida: number | null,
         public readonly facturacion: Date | null,
         public readonly recepcion: Date | null,
         public readonly createdBy: number | null,
@@ -22,6 +26,8 @@ export class CreateEntregaMuestrasDto {
             unidades,
             total,
             agotado,
+            precio,
+            perdida,
             facturacion,
             recepcion,
             createdBy,
@@ -74,6 +80,8 @@ export class CreateEntregaMuestrasDto {
                 parseNumber(unidades),
                 parseNumber(total),
                 parsedAgotado(),
+                parseNumber(precio),
+                parseNumber(perdida),
                 facturacion ? new Date(facturacion) : null,
                 recepcion ? new Date(recepcion) : null,
                 createdBy ? Number(createdBy) : null,

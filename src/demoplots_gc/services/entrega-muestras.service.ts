@@ -2,6 +2,7 @@ import { getCurrentDate } from '../../config/time';
 import { prisma } from '../../data/sqlserver';
 import { CustomError, EntregaFilters, PaginationDto } from '../../domain';
 import { CreateEntregaMuestrasDto } from '../dtos/create-entrega-muestras.dto';
+import { CreateMultipleEntregaMuestrasDto } from '../dtos/create-multiple-entrega-muestras.dto';
 import { UpdateEntregaMuestrasDto } from '../dtos/update-entrega-muestras.dto';
 
 export class EntregaMuestrasService {
@@ -39,6 +40,7 @@ export class EntregaMuestrasService {
                     agotado: createEntregaMuestrasDto.agotado,
                     facturacion: createEntregaMuestrasDto.facturacion,
                     recepcion: createEntregaMuestrasDto.recepcion,
+                    precio: createEntregaMuestrasDto.precio,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                     createdBy: createEntregaMuestrasDto.createdBy,
@@ -47,6 +49,88 @@ export class EntregaMuestrasService {
             });
 
             return entregaMuestras;
+        } catch (error) {
+            console.log(error);
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async createMultipleEntregaMuestras(
+        createMultipleEntregaMuestrasDto: CreateMultipleEntregaMuestrasDto
+    ) {
+        try {
+            const BATCH_SIZE = 50; // Procesar 50 registros a la vez
+            const allResults = [];
+            const entregas = createMultipleEntregaMuestrasDto.entregas;
+
+            // Procesar en lotes
+            for (let i = 0; i < entregas.length; i += BATCH_SIZE) {
+                const batch = entregas.slice(i, i + BATCH_SIZE);
+
+                // Procesar cada lote en una transacción separada
+                const batchResults = await prisma.$transaction(
+                    async (prismaClient) => {
+                        const results = [];
+
+                        for (const entregaDto of batch) {
+                            // Verificar que la familia existe
+                            const familiaExists =
+                                await prismaClient.familia.findUnique({
+                                    where: { id: entregaDto.idFamilia },
+                                });
+                            if (!familiaExists)
+                                throw CustomError.badRequest(
+                                    `La familia con id ${entregaDto.idFamilia} no existe`
+                                );
+
+                            // Verificar que el GTE existe
+                            const gteExists = await prismaClient.gte.findUnique(
+                                {
+                                    where: { id: entregaDto.idGte },
+                                }
+                            );
+                            if (!gteExists)
+                                throw CustomError.badRequest(
+                                    `El GTE con id ${entregaDto.idGte} no existe`
+                                );
+
+                            const currentDate = getCurrentDate();
+
+                            const entregaMuestras =
+                                await prismaClient.entregaMuestras.create({
+                                    data: {
+                                        idFamilia: entregaDto.idFamilia,
+                                        idGte: entregaDto.idGte,
+                                        presentacion: entregaDto.presentacion,
+                                        unidades: entregaDto.unidades,
+                                        total: entregaDto.total,
+                                        agotado: entregaDto.agotado,
+                                        precio: entregaDto.precio,
+                                        perdida: entregaDto.perdida,
+                                        facturacion: entregaDto.facturacion,
+                                        recepcion: entregaDto.recepcion,
+                                        createdAt: currentDate,
+                                        updatedAt: currentDate,
+                                        createdBy: entregaDto.createdBy,
+                                        updatedBy: entregaDto.updatedBy,
+                                    },
+                                });
+
+                            results.push(entregaMuestras);
+                        }
+
+                        return results;
+                    },
+                    {
+                        timeout: 20000, // 20 segundos por lote
+                        maxWait: 25000, // máximo tiempo de espera
+                    }
+                );
+
+                allResults.push(...batchResults);
+            }
+
+            return allResults;
         } catch (error) {
             console.log(error);
             throw CustomError.internalServer(`${error}`);
@@ -227,6 +311,7 @@ export class EntregaMuestrasService {
                             ?.SuperZona?.id ?? null;
                     return {
                         ...entrega,
+                        precio: entrega.precio,
                         macrozona,
                         idMacrozona,
                         familia: entrega.Familia?.nombre,
@@ -390,6 +475,7 @@ export class EntregaMuestrasService {
                     ...entrega,
                     idMacrozona,
                     macrozona,
+
                     familia: entrega.Familia?.nombre,
                     empresa:
                         entrega.Gte?.Colaborador?.ZonaAnterior?.Empresa
@@ -464,6 +550,8 @@ export class EntregaMuestrasService {
                 unidades: entrega.unidades,
                 total: entrega.total,
                 agotado: entrega.agotado,
+                precio: entrega.precio,
+                perdida: entrega.perdida,
                 facturacion: entrega.facturacion,
                 recepcion: entrega.recepcion,
                 createdAt: entrega.createdAt,
@@ -485,6 +573,81 @@ export class EntregaMuestrasService {
                       }`.trim()
                     : null,
                 idColaborador: entrega.Gte?.Colaborador?.id,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async calculateStats(filters: {
+        idGte?: number;
+        idFamilia?: number;
+        year?: number;
+        month?: number;
+        presentacion?: string;
+    }) {
+        const { idGte, idFamilia, year, month, presentacion } = filters;
+
+        const where: any = {};
+
+        // Aplicar filtros
+        if (idGte) {
+            where.idGte = idGte;
+        }
+
+        if (idFamilia) {
+            where.idFamilia = idFamilia;
+        }
+
+        if (presentacion) {
+            where.presentacion = presentacion;
+        }
+
+        // Filtros de fecha para facturación
+        if (year && month) {
+            where.facturacion = {
+                gte: new Date(year, month - 1),
+                lt: new Date(year, month),
+            };
+        } else if (year) {
+            where.facturacion = {
+                gte: new Date(year, 0),
+                lt: new Date(year + 1, 0),
+            };
+        }
+
+        try {
+            // Buscar todas las entregas que coincidan con los filtros
+            const entregas = await prisma.entregaMuestras.findMany({
+                where,
+                select: {
+                    unidades: true,
+                    presentacion: true,
+                    precio: true,
+                    total: true,
+                },
+            });
+
+            // Calcular estadísticas
+            const totalUnidades = entregas.reduce(
+                (sum, item) => sum + Number(item.unidades),
+                0
+            );
+            const totalMonto = entregas.reduce(
+                (sum, item) => sum + Number(item.total),
+                0
+            );
+            const totalPrecio = entregas.reduce(
+                (sum, item) =>
+                    sum + Number(item.precio) * Number(item.unidades),
+                0
+            );
+
+            return {
+                totalUnidades,
+                totalMonto,
+                totalPrecio,
+                cantidadRegistros: entregas.length,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

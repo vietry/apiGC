@@ -255,6 +255,7 @@ model Familia {
   updatedAt       DateTime?         @db.DateTime
   escuela         Boolean?
   clase           String?           @db.VarChar(25)
+  visitas         Boolean?
   Articulo        Articulo[]
   Charla          Charla[]
   CharlaProducto  CharlaProducto[]
@@ -388,6 +389,8 @@ model Visita {
   idRepresentada Int?
   createdAt      DateTime?        @db.DateTime
   updatedAt      DateTime?        @db.DateTime
+  empGrupo       String?          @db.VarChar(10)
+  programada     Boolean?
   FotoVisita     FotoVisita[]
   LaborVisita    LaborVisita[]
   Colaborador    Colaborador      @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_Visita_Colaborador1")
@@ -866,7 +869,7 @@ model EntregaMuestras {
   idFamilia                                  Int
   idGte                                      Int
   presentacion                               Int?
-  unidades                                   Int?
+  unidades                                   Decimal?          @db.Decimal(6, 2)
   total                                      Decimal?          @db.Decimal(8, 2)
   agotado                                    Boolean?
   facturacion                                DateTime?         @db.DateTime
@@ -875,6 +878,8 @@ model EntregaMuestras {
   updatedAt                                  DateTime?         @db.DateTime
   createdBy                                  Int?
   updatedBy                                  Int?
+  precio                                     Decimal?          @db.Decimal(6, 2)
+  perdida                                    Decimal?          @db.Decimal(8, 0)
   ConsumoMuestras                            ConsumoMuestras[]
   Usuario_EntregaMuestras_createdByToUsuario Usuario?          @relation("EntregaMuestras_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_EntregaMuestrasCreated")
   Familia                                    Familia           @relation(fields: [idFamilia], references: [id], onUpdate: NoAction, map: "fk_EntregaMuestrasFamilia")

@@ -6,6 +6,7 @@ interface FamiliaFilters {
     clase?: string;
     enfoque?: boolean;
     escuela?: boolean;
+    visitas?: boolean;
 }
 
 export class FamiliaService {
@@ -19,6 +20,7 @@ export class FamiliaService {
             }
             if (filters.enfoque !== undefined) where.enfoque = filters.enfoque;
             if (filters.escuela !== undefined) where.escuela = filters.escuela;
+            if (filters.visitas !== undefined) where.visitas = filters.visitas;
 
             const familias = await prisma.familia.findMany({
                 where,
@@ -38,6 +40,7 @@ export class FamiliaService {
                 enfoque: familia.enfoque,
                 escuela: familia.escuela,
                 clase: familia.clase,
+                visitas: familia.visitas,
                 createdAt: familia.createdAt,
                 updatedAt: familia.updatedAt,
                 empresaNombre: familia.Empresa.nomEmpresa,
@@ -68,6 +71,8 @@ export class FamiliaService {
                 nombre: familia.nombre.trim(),
                 idEmpresa: familia.idEmpresa,
                 enfoque: familia.enfoque,
+                escuela: familia.escuela,
+                clase: familia.clase,
                 createdAt: familia.createdAt,
                 updatedAt: familia.updatedAt,
                 empresaNombre: familia.Empresa.nomEmpresa,

@@ -12,6 +12,8 @@ export class ConsumoMuestrasRoutes {
 
         router.get('/', controller.getConsumoMuestras);
         router.get('/all', controller.getAllConsumoMuestras);
+        router.get('/total', controller.getConsumoTotal);
+        router.get('/stats', controller.getStatisticsConsolidated);
         router.get('/:id', controller.getConsumoMuestrasById);
         router.post('/', controller.createConsumoMuestras);
         router.put('/:id', controller.updateConsumoMuestras);

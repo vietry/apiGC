@@ -1,9 +1,13 @@
-import { prisma } from "../../data/sqlserver";
-import { CreateFundoDto, UpdateFundoDto, CustomError, PaginationDto } from "../../domain";
+import { prisma } from '../../data/sqlserver';
+import {
+    CreateFundoDto,
+    UpdateFundoDto,
+    CustomError,
+    PaginationDto,
+    FundoFilters, // <-- importar FundoFilters
+} from '../../domain';
 
 export class FundoService {
-    constructor() {}
-
     async createFundo(createFundoDto: CreateFundoDto) {
         try {
             const currentDate = new Date();
@@ -38,8 +42,13 @@ export class FundoService {
     }
 
     async updateFundo(updateFundoDto: UpdateFundoDto) {
-        const fundoExists = await prisma.fundo.findFirst({ where: { id: updateFundoDto.id } });
-        if (!fundoExists) throw CustomError.badRequest(`Fundo with id ${updateFundoDto.id} does not exist`);
+        const fundoExists = await prisma.fundo.findFirst({
+            where: { id: updateFundoDto.id },
+        });
+        if (!fundoExists)
+            throw CustomError.badRequest(
+                `Fundo with id ${updateFundoDto.id} does not exist`
+            );
 
         try {
             const updatedFundo = await prisma.fundo.update({
@@ -56,27 +65,106 @@ export class FundoService {
         }
     }
 
-    async getFundos(paginationDto: PaginationDto) {
+    async getFundos(paginationDto: PaginationDto, filters: FundoFilters = {}) {
         const { page, limit } = paginationDto;
+
+        // const {
+        //     nombre,
+        //     idPuntoContacto,
+        //     idContactoPunto,
+        //     departamento,
+        //     provincia,
+        //     distrito,
+        // } = filters;
+
+        // Construir el objeto where dinámicamente según los filtros recibidos
+        const where: any = {};
+        if (filters) {
+            if (filters.nombre)
+                where.nombre = {
+                    contains: filters.nombre,
+                };
+            if (filters.idPuntoContacto)
+                where.idPuntoContacto = filters.idPuntoContacto;
+            if (filters.idContactoPunto)
+                where.idContactoPunto = filters.idContactoPunto;
+            if (filters.distrito)
+                where.Distrito = {
+                    nombre: { contains: filters.distrito },
+                };
+            if (filters.provincia)
+                where.Distrito = {
+                    ...(where.Distrito || {}),
+                    Provincia: {
+                        nombre: {
+                            contains: filters.provincia,
+                        },
+                    },
+                };
+            if (filters.departamento)
+                where.Distrito = {
+                    ...(where.Distrito || {}),
+                    Provincia: {
+                        ...(where.Distrito?.Provincia || {}),
+                        Departamento: {
+                            nombre: {
+                                contains: filters.departamento,
+                            },
+                        },
+                    },
+                };
+            // Puedes agregar más filtros según sea necesario
+        }
 
         try {
             const [total, fundos] = await Promise.all([
-                prisma.fundo.count(),
+                prisma.fundo.count({ where }),
                 prisma.fundo.findMany({
+                    where,
                     skip: (page - 1) * limit,
                     take: limit,
-                })
+                    include: {
+                        Distrito: {
+                            select: {
+                                id: true,
+                                nombre: true,
+                                idProvincia: true,
+                                Provincia: {
+                                    select: {
+                                        nombre: true,
+                                        Departamento: true,
+                                    },
+                                },
+                            },
+                        },
+                        PuntoContacto: true,
+                    },
+                }),
             ]);
 
             return {
                 page: page,
+                pages: Math.ceil(total / limit),
                 limit: limit,
                 total: total,
-                next: `/api/fundos?page=${page + 1}&limit=${limit}`,
-                prev: (page - 1 > 0) ? `/api/fundos?page=${page - 1}&limit=${limit}` : null,
-                fundos,
+                fundos: fundos.map((fundo) => ({
+                    id: fundo.id,
+                    nombre: fundo.nombre,
+                    centroPoblado: fundo.centroPoblado,
+                    idClienteUbigeo: fundo.idClienteUbigeo,
+                    idPuntoUbigeo: fundo.idPuntoUbigeo,
+                    idPuntoContacto: fundo.idPuntoContacto,
+                    idContactoPunto: fundo.idContactoPunto,
+                    idDistrito: fundo.idDistrito,
+                    distrito: fundo.Distrito?.nombre,
+                    idProvincia: fundo.Distrito?.idProvincia,
+                    provincia: fundo.Distrito?.Provincia?.nombre,
+                    departamento: fundo.Distrito?.Provincia.Departamento.nombre,
+                    punto: fundo.PuntoContacto?.nombre,
+                    createdAt: fundo.createdAt,
+                    updatedAt: fundo.updatedAt,
+                })),
             };
-
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -92,32 +180,29 @@ export class FundoService {
                             Distrito: {
                                 select: {
                                     id: true,
-                                    nombre: true
-                                }
+                                    nombre: true,
+                                },
                             },
-                            
-                        }
+                        },
                     },
                     PuntoContacto: {
                         select: {
                             id: true,
                             nombre: true,
-                            
-                        }
+                        },
                     },
                     ContactoPunto: {
                         select: {
                             id: true,
                             nombre: true,
-                            
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             });
 
             //if (fundos.length === 0) throw CustomError.badRequest(`No Fundos found with PuntoUbigeo id ${idPuntoUbigeo}`);
 
-            return fundos.map(fundo => ({
+            return fundos.map((fundo) => ({
                 id: fundo.id,
                 nombre: fundo.nombre,
                 idClienteUbigeo: fundo.idClienteUbigeo,
@@ -127,7 +212,7 @@ export class FundoService {
                 idDistrito: fundo.PuntoUbigeo?.Distrito.id,
                 distrito: fundo.PuntoUbigeo?.Distrito.nombre,
                 createdAt: fundo.createdAt,
-                updatedAt: fundo.updatedAt
+                updatedAt: fundo.updatedAt,
             }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -143,8 +228,7 @@ export class FundoService {
                         select: {
                             id: true,
                             nombre: true,
-                            
-                        }
+                        },
                     },
                     Distrito: {
                         select: {
@@ -153,17 +237,17 @@ export class FundoService {
                             idProvincia: true,
                             Provincia: {
                                 select: {
-                                    Departamento: true
-                                }
-                            }
-                        }
-                    }
-                }
+                                    Departamento: true,
+                                },
+                            },
+                        },
+                    },
+                },
             });
 
             //if (fundos.length === 0) throw CustomError.badRequest(`No Fundos found with PuntoUbigeo id ${idPuntoUbigeo}`);
 
-            return fundos.map(fundo => ({
+            return fundos.map((fundo) => ({
                 id: fundo.id,
                 nombre: fundo.nombre,
                 idClienteUbigeo: fundo.idClienteUbigeo,
@@ -175,7 +259,7 @@ export class FundoService {
                 idProvincia: fundo.Distrito?.idProvincia,
                 departamento: fundo.Distrito?.Provincia.Departamento.nombre,
                 createdAt: fundo.createdAt,
-                updatedAt: fundo.updatedAt
+                updatedAt: fundo.updatedAt,
             }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -185,10 +269,13 @@ export class FundoService {
     async getFundoById(id: number) {
         try {
             const fundo = await prisma.fundo.findUnique({
-                where: { id }
+                where: { id },
             });
 
-            if (!fundo) throw CustomError.badRequest(`Fundo with id ${id} does not exist`);
+            if (!fundo)
+                throw CustomError.badRequest(
+                    `Fundo with id ${id} does not exist`
+                );
 
             return fundo;
         } catch (error) {

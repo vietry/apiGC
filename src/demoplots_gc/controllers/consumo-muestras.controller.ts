@@ -102,11 +102,13 @@ export class ConsumoMuestrasController {
 
     updateConsumoMuestras = async (req: Request, res: Response) => {
         const id = parseInt(req.params.id);
+
         const [error, updateConsumoMuestrasDto] =
             await UpdateConsumoMuestrasDto.create({
                 ...req.body,
                 id,
             });
+
         if (error) return res.status(400).json({ error });
 
         this.consumoMuestrasService
@@ -123,5 +125,46 @@ export class ConsumoMuestrasController {
             .getConsumoMuestrasById(id)
             .then((consumo) => res.status(200).json(consumo))
             .catch((error) => this.handleError(res, error));
+    };
+
+    getConsumoTotal = async (req: Request, res: Response) => {
+        const { idGte, idFamilia, year, month } = req.query;
+
+        try {
+            const result =
+                await this.consumoMuestrasService.getConsumoTotalByFilters(
+                    idGte ? +idGte : undefined,
+                    idFamilia ? +idFamilia : undefined,
+                    year ? +year : undefined,
+                    month ? +month : undefined
+                );
+            return res.status(200).json(result);
+        } catch (error) {
+            return this.handleError(res, error);
+        }
+    };
+
+    getStatisticsConsolidated = async (req: Request, res: Response) => {
+        const { idGte, idFamilia, year, month, presentacion } = req.query;
+
+        const filters = {
+            idGte: idGte ? +idGte : undefined,
+            idFamilia: idFamilia ? +idFamilia : undefined,
+            year: year ? +year : undefined,
+            month: month ? +month : undefined,
+            presentacion:
+                typeof presentacion === 'string' ? presentacion : undefined,
+        };
+
+        try {
+            const result =
+                await this.consumoMuestrasService.getStatisticsConsolidated(
+                    filters
+                );
+
+            return res.status(200).json(result);
+        } catch (error) {
+            return this.handleError(res, error);
+        }
     };
 }

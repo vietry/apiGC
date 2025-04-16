@@ -30,6 +30,7 @@ export interface DemoplotFilters {
     idPunto?: number;
     numDocPunto?: string;
     tipoFecha?: string;
+    blancoComun?: string;
 }
 
 export class DemoplotService {
@@ -85,7 +86,14 @@ export class DemoplotService {
         const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
         const demoplotExists = await prisma.demoPlot.findFirst({
             where: { id: updateDemoplotDto.id },
+            include: {
+                ConsumoMuestras: true,
+            },
         });
+        const consumoExists = await prisma.consumoMuestras.findFirst({
+            where: { idDemoplot: updateDemoplotDto.id },
+        });
+
         if (!demoplotExists)
             throw CustomError.badRequest(
                 `Demoplot with id ${updateDemoplotDto.id} does not exist`
@@ -101,7 +109,13 @@ export class DemoplotService {
                 },
             });
 
-            return updatedDemoplot;
+            return {
+                ...updatedDemoplot,
+                idConsumoMuestra: consumoExists?.id,
+                fechaConsumo: consumoExists?.fechaConsumo,
+                consumo: consumoExists?.consumo,
+                complemento: consumoExists?.complemento,
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -1377,6 +1391,7 @@ export class DemoplotService {
 
             idPunto,
             numDocPunto,
+            blancoComun,
         } = filters;
 
         const where: any = {};
@@ -1413,6 +1428,12 @@ export class DemoplotService {
         }
         if (clase) {
             where.Familia = { clase: { contains: clase } };
+        }
+
+        if (blancoComun) {
+            where.BlancoBiologico = {
+                estandarizado: { contains: blancoComun },
+            };
         }
 
         if (infestacion) {
@@ -1680,6 +1701,23 @@ export class DemoplotService {
         }
     }
 
+    getFamilyClasses(gteType: string): string[] {
+        switch (gteType.toUpperCase()) {
+            case 'TQC':
+                return ['BIOGEN', 'TQC', 'SUMITOMO'];
+            case 'SYNGENTA':
+                return ['SYNGENTA'];
+            case 'BIOGEN':
+                return ['BIOGEN'];
+            case 'TALEX':
+                return ['TALEX'];
+            case 'UPL':
+                return ['UPL'];
+            default:
+                return [];
+        }
+    }
+
     async getDemoplotStatsByGteWithRankVariable(
         idGte: number,
         mes: number,
@@ -1689,6 +1727,7 @@ export class DemoplotService {
             const gtes = await prisma.gte.findMany({
                 select: {
                     id: true,
+                    tipo: true, // agregado para obtener Gte.tipo
                     Usuario: {
                         select: {
                             nombres: true,
@@ -1745,6 +1784,7 @@ export class DemoplotService {
 
             const gteStats = gtes.map((gte) => ({
                 idGte: gte.id,
+                tipo: gte.tipo, // se agrega para usar en la validación de clase
                 nombreGte: `${gte.Usuario!.nombres} ${gte.Usuario!.apellidos}`,
                 todos: 0,
                 programados: 0,
@@ -1757,6 +1797,8 @@ export class DemoplotService {
                 cumplimiento: 0,
                 cumpDiaCampo: 0,
                 rank: 0,
+                demoplotsClase: 0,
+                cumpimientoClase: 0,
             }));
 
             const gteStatsMap = Object.fromEntries(
@@ -1795,6 +1837,7 @@ export class DemoplotService {
 
             const objetivo = 60;
             const objDiaCampo = 4;
+            const objClase = 30;
 
             gteStats.forEach((gte) => {
                 gte.cumpDiaCampo = gte.diaCampo / objDiaCampo;
@@ -1820,6 +1863,34 @@ export class DemoplotService {
             }
 
             const gteData = gteStatsMap[idGte];
+
+            // Nueva lógica para demoplotsClase y cumplimientoClase:
+            const demoplotsClase = await prisma.demoPlot.count({
+                where: {
+                    idGte: gteData.idGte,
+                    estado: { in: ['Completado', 'Día campo'] },
+                    OR: [
+                        {
+                            updatedAt: {
+                                gte: currentMonthStart,
+                                lt: currentMonthEnd,
+                            },
+                        },
+                        {
+                            updatedAt: {
+                                gte: previousMonthStart,
+                                lt: previousMonthEnd,
+                            },
+                        },
+                    ],
+                    Familia: {
+                        clase: { in: this.getFamilyClasses(gteData.tipo!) },
+                    },
+                },
+            });
+            gteData.demoplotsClase = demoplotsClase;
+            gteData.cumpimientoClase = demoplotsClase / objClase;
+
             return gteData;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

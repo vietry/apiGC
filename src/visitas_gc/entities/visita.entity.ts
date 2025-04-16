@@ -20,10 +20,10 @@ export class VisitaEntity {
         public idColaborador: number,
         public idContacto: number | null,
         public idCultivo: number | null,
-        public idRepresentada: number | null
-    ) //public createdAt: Date | null,
-    //public updatedAt: Date | null
-    {}
+        public idRepresentada: number | null,
+        public empGrupo: string | null,
+        public programada: boolean | null //public createdAt: Date | null, //public updatedAt: Date | null
+    ) {}
 
     public static fromObject(object: { [key: string]: any }): VisitaEntity {
         const {
@@ -46,6 +46,8 @@ export class VisitaEntity {
             idContacto,
             idCultivo,
             idRepresentada,
+            empGrupo,
+            programada,
             //createdAt,
             //updatedAt,
         } = object;
@@ -72,7 +74,9 @@ export class VisitaEntity {
             idColaborador,
             idContacto,
             idCultivo,
-            idRepresentada
+            idRepresentada,
+            empGrupo,
+            programada
             //createdAt,
             //updatedAt
         );

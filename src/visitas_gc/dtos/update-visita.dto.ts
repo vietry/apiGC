@@ -18,9 +18,10 @@ export class UpdateVisitaDto {
         public readonly idColaborador?: number,
         public readonly idContacto?: number | null,
         public readonly idCultivo?: number | null,
-        public readonly idRepresentada?: number | null
-    ) //public readonly updatedBy?: number | null
-    {}
+        public readonly idRepresentada?: number | null,
+        public readonly empGrupo?: string | null,
+        public readonly programada?: boolean | null //public readonly updatedBy?: number | null
+    ) {}
 
     get values(): { [key: string]: any } {
         const returnObj: { [key: string]: any } = {};
@@ -47,6 +48,9 @@ export class UpdateVisitaDto {
         if (this.idCultivo !== undefined) returnObj.idCultivo = this.idCultivo;
         if (this.idRepresentada !== undefined)
             returnObj.idRepresentada = this.idRepresentada;
+        if (this.empGrupo !== undefined) returnObj.empGrupo = this.empGrupo;
+        if (this.programada !== undefined)
+            returnObj.programada = this.programada;
         //if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
         return returnObj;
     }
@@ -74,6 +78,8 @@ export class UpdateVisitaDto {
             idContacto,
             idCultivo,
             idRepresentada,
+            empGrupo,
+            programada,
             //updatedBy,
         } = object;
 
@@ -81,10 +87,10 @@ export class UpdateVisitaDto {
             return ['id is required and must be a valid number'];
         }
 
-        const parseNumber = (value: any): number | null => {
-            if (value === null || value === undefined) return null;
+        const parseNumber = (value: any): number | undefined => {
+            if (value === null || value === undefined) return undefined;
             const num = Number(value);
-            return isNaN(num) ? null : num;
+            return isNaN(num) ? undefined : num;
         };
 
         return [
@@ -103,13 +109,17 @@ export class UpdateVisitaDto {
                 resultado ?? undefined,
                 aFuturo ?? undefined,
                 detalle ?? undefined,
-                parseFloat(latitud),
-                parseFloat(longitud),
+                latitud !== undefined ? parseFloat(latitud) : undefined,
+                longitud !== undefined ? parseFloat(longitud) : undefined,
                 idColaborador !== undefined ? Number(idColaborador) : undefined,
-                idContacto !== undefined ? Number(idContacto) : null,
-                idCultivo !== undefined ? Number(idCultivo) : null,
-                idRepresentada !== undefined ? Number(idRepresentada) : null
-                //updatedBy !== undefined ? Number(updatedBy) : null
+                idContacto !== undefined ? Number(idContacto) : undefined,
+                idCultivo !== undefined ? Number(idCultivo) : undefined,
+                idRepresentada !== undefined
+                    ? Number(idRepresentada)
+                    : undefined,
+                empGrupo ?? undefined,
+                programada !== undefined ? Boolean(programada) : undefined
+                //updatedBy !== undefined ? Number(updatedBy) : undefined
             ),
         ];
     }

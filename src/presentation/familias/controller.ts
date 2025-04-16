@@ -6,7 +6,7 @@ import { FamiliaService } from '../services';
 export class FamiliaController {
     constructor(private readonly familiaService: FamiliaService) {}
 
-    private handleError = (res: Response, error: unknown) => {
+    private readonly handleError = (res: Response, error: unknown) => {
         if (error instanceof CustomError) {
             return res.status(error.statusCode).json({ error: error.message });
         }
@@ -17,11 +17,14 @@ export class FamiliaController {
     };
 
     getFamilias = async (req: Request, res: Response) => {
-        const { idEmpresa, enfoque, escuela, clase } = req.query;
+        const { idEmpresa, enfoque, escuela, clase, visitas } = req.query;
 
         const filters = {
             idEmpresa: idEmpresa ? +idEmpresa : undefined,
-            clase: clase?.toString(),
+            clase: typeof clase === 'string' ? clase : undefined,
+            //typeof clase === 'object'
+            //? JSON.stringify(clase)
+            //: clase?.toString(),
             enfoque:
                 enfoque !== undefined
                     ? !!(enfoque === 'true' || enfoque === '1')
@@ -29,6 +32,10 @@ export class FamiliaController {
             escuela:
                 escuela !== undefined
                     ? !!(escuela === 'true' || escuela === '1')
+                    : undefined,
+            visitas:
+                visitas !== undefined
+                    ? !!(visitas === 'true' || visitas === '1')
                     : undefined,
         };
 

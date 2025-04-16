@@ -49,8 +49,8 @@ export class Server {
     async start() {
         //* Middlewares
 
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true })); //x-www-form-urlencoded
+        this.app.use(express.json({ limit: '50mb' })); // Se aumenta el límite del request
+        this.app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Se aumenta el límite para urlencoded
         this.app.use(compression());
         this.app.use(
             fileUpload({

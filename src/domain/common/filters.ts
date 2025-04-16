@@ -6,6 +6,7 @@ export interface DemoplotFilters {
     cultivo?: string;
     estado?: string;
     idFamilia?: number;
+    clase?: string;
     infestacion?: string;
     departamento?: string;
     provincia?: string;
@@ -18,6 +19,10 @@ export interface DemoplotFilters {
     macrozona?: number;
     idColaborador?: number;
     gdactivo?: boolean;
+    idPunto?: number;
+    numDocPunto?: string;
+    tipoFecha?: string;
+    blancoComun?: string;
 }
 
 export interface GteRankingFilters {
@@ -77,7 +82,9 @@ export interface VisitaFilters {
     idPuntoContacto?: number;
     idContacto?: number;
     idRepresentada?: number;
-    idSubLabor?: number;
+    idSubLabor1?: number;
+    idSubLabor2?: number;
+    programada?: boolean;
 }
 
 export interface ConsumoFilters {
@@ -119,4 +126,22 @@ export interface PuntoFilters {
     idSubzona?: number;
     codZona?: string;
     nomZona?: string;
+}
+
+export interface FundoFilters {
+    nombre?: string;
+    idPuntoContacto?: number;
+    idContactoPunto?: number;
+    departamento?: string;
+    provincia?: string;
+    distrito?: string;
+}
+
+export interface CultivoFilters {
+    centroPoblado?: string;
+    idCultivo?: number;
+    idFundo?: number;
+    idVegetacion?: number;
+    idContactoPunto?: number;
+    idPuntoContacto?: number;
 }

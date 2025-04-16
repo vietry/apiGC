@@ -3,7 +3,7 @@ import { CustomError } from '../../domain';
 export class ConsumoMuestrasEntity {
     constructor(
         public id: number,
-        public idEntrega: number,
+        public idEntrega: number | null,
         public idDemoplot: number,
         public consumo: number,
         public complemento: number | null,
@@ -32,7 +32,6 @@ export class ConsumoMuestrasEntity {
             updatedBy,
         } = object;
 
-        if (!idEntrega) throw CustomError.badRequest('idEntrega is required');
         if (!idDemoplot) throw CustomError.badRequest('idDemoplot is required');
         if (!consumo) throw CustomError.badRequest('consumo is required');
 

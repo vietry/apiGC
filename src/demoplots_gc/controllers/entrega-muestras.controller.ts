@@ -3,6 +3,7 @@ import { CustomError, EntregaFilters, PaginationDto } from '../../domain';
 import { EntregaMuestrasService } from '../services/entrega-muestras.service';
 import { CreateEntregaMuestrasDto } from '../dtos/create-entrega-muestras.dto';
 import { UpdateEntregaMuestrasDto } from '../dtos/update-entrega-muestras.dto';
+import { CreateMultipleEntregaMuestrasDto } from '../dtos/create-multiple-entrega-muestras.dto';
 
 export class EntregaMuestrasController {
     constructor(
@@ -27,6 +28,18 @@ export class EntregaMuestrasController {
         this.entregaMuestrasService
             .createEntregaMuestras(createEntregaMuestrasDto!)
             .then((entrega) => res.status(201).json(entrega))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    // Definimos explícitamente el método createMultipleEntregaMuestras
+    createMultipleEntregaMuestras = async (req: Request, res: Response) => {
+        const [error, createMultipleEntregaMuestrasDto] =
+            await CreateMultipleEntregaMuestrasDto.create(req.body);
+        if (error) return res.status(400).json({ error });
+
+        this.entregaMuestrasService
+            .createMultipleEntregaMuestras(createMultipleEntregaMuestrasDto!)
+            .then((entregas) => res.status(201).json(entregas))
             .catch((error) => this.handleError(res, error));
     };
 
@@ -138,6 +151,24 @@ export class EntregaMuestrasController {
         this.entregaMuestrasService
             .getEntregaMuestrasById(id)
             .then((entrega) => res.status(200).json(entrega))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    calculateStats = async (req: Request, res: Response) => {
+        const { idGte, idFamilia, year, month, presentacion } = req.query;
+
+        const filters = {
+            idGte: idGte ? +idGte : undefined,
+            idFamilia: idFamilia ? +idFamilia : undefined,
+            year: year ? +year : undefined,
+            month: month ? +month : undefined,
+            presentacion:
+                typeof presentacion === 'string' ? presentacion : undefined,
+        };
+
+        this.entregaMuestrasService
+            .calculateStats(filters)
+            .then((stats) => res.status(200).json(stats))
             .catch((error) => this.handleError(res, error));
     };
 }

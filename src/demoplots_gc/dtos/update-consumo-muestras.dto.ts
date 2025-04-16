@@ -58,7 +58,7 @@ export class UpdateConsumoMuestrasDto {
                 Number(id),
                 idEntrega !== undefined ? Number(idEntrega) : undefined,
                 idDemoplot !== undefined ? Number(idDemoplot) : undefined,
-                consumo !== undefined ? Number(consumo) : undefined,
+                consumo !== undefined ? Number(consumo) : 0, // <-- Se asigna 0 cuando consumo es undefined
                 parseNumber(complemento),
                 fechaConsumo ? new Date(fechaConsumo) : undefined,
                 comentarios ?? undefined,

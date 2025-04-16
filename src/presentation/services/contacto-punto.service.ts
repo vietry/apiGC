@@ -176,48 +176,32 @@ export class ContactoPuntoService {
         }
     }
 
-    /*async getContactoByPuntoId(idPunto: number, paginationDto: PaginationDto) {
-        const { page, limit } = paginationDto;
-
-        try {
-            const [total, contactos] = await Promise.all([
-                await prisma.contactoPunto.count({ where: { idPunto: idPunto } }),
-                await prisma.contactoPunto.findMany({
-                    where: { idPunto: idPunto },
-                    skip: ((page - 1) * limit),
-                    take: limit,
-                    include: {
-                        PuntoContacto: {
-                            select: {
-                                id: true,
-                                nombre: true,
-                                numDoc: true
-                            }
-                        }
-                    },
-                })
-            ]);
-
-            if (!contactos || contactos.length === 0) throw CustomError.badRequest(`No ContactoPunto found with PuntoContacto id ${idPunto}`);
-
-            return {
-                page: page,
-                limit: limit,
-                total: total,
-                next: `/api/contactospunto?idPunto=${idPunto}&page=${(page + 1)}&limit=${limit}`,
-                prev: (page - 1 > 0) ? `/api/contactospunto?idPunto=${idPunto}&page=${(page - 1)}&limit=${limit}` : null,
-                colaboradores: contactos,
-            };
-
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
+    async getContactoByPuntoId(
+        idPunto: number,
+        filters?: {
+            nombre?: string;
+            apellido?: string;
+            cargo?: string;
+            tipo?: string;
+            celularA?: string;
+            activo?: boolean;
         }
-    }*/
-
-    async getContactoByPuntoId(idPunto: number) {
+    ) {
         try {
+            const where: any = { idPunto };
+            if (filters) {
+                if (filters.nombre) where.nombre = { contains: filters.nombre };
+                if (filters.apellido)
+                    where.apellido = { contains: filters.apellido };
+                if (filters.cargo) where.cargo = { contains: filters.cargo };
+                if (filters.tipo) where.tipo = { contains: filters.tipo };
+                if (filters.celularA)
+                    where.celularA = { contains: filters.celularA };
+                if (filters.activo !== undefined) where.activo = filters.activo;
+            }
+
             const contactos = await prisma.contactoPunto.findMany({
-                where: { idPunto: idPunto },
+                where,
                 include: {
                     PuntoContacto: {
                         select: {
@@ -235,10 +219,10 @@ export class ContactoPuntoService {
                 },
             });
 
-            if (contactos.length === 0)
+            /*if (contactos.length === 0)
                 throw CustomError.badRequest(
                     `No ContactoPunto found with PuntoContacto id ${idPunto}`
-                );
+                );*/
 
             return {
                 contactos: contactos.map((contacto) => ({
@@ -252,7 +236,6 @@ export class ContactoPuntoService {
                     activo: contacto.activo,
                     email: contacto.email,
                     idPunto: contacto.idPunto,
-                    //idPuntoContacto: contacto.idPunto,
                     tipoDoc: contacto.PuntoContacto.tipoDoc,
                     numDocPunto: contacto.PuntoContacto.numDoc,
                     idGte: contacto.idGte,

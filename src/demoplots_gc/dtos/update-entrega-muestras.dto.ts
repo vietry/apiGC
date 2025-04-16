@@ -7,6 +7,8 @@ export class UpdateEntregaMuestrasDto {
         public readonly unidades?: number | null,
         public readonly total?: number | null,
         public readonly agotado?: boolean | null,
+        public readonly precio?: number | null,
+        public readonly perdida?: number | null,
         public readonly facturacion?: Date | null,
         public readonly recepcion?: Date | null,
         public readonly updatedBy?: number | null
@@ -22,6 +24,8 @@ export class UpdateEntregaMuestrasDto {
         if (this.unidades !== undefined) returnObj.unidades = this.unidades;
         if (this.total !== undefined) returnObj.total = this.total;
         if (this.agotado !== undefined) returnObj.agotado = this.agotado;
+        if (this.precio !== undefined) returnObj.precio = this.precio;
+        if (this.perdida !== undefined) returnObj.perdida = this.perdida;
         if (this.facturacion !== undefined)
             returnObj.facturacion = this.facturacion;
         if (this.recepcion !== undefined) returnObj.recepcion = this.recepcion;
@@ -41,6 +45,8 @@ export class UpdateEntregaMuestrasDto {
             unidades,
             total,
             agotado,
+            precio,
+            perdida,
             facturacion,
             recepcion,
             updatedBy,
@@ -66,6 +72,8 @@ export class UpdateEntregaMuestrasDto {
                 parseNumber(unidades),
                 parseNumber(total),
                 agotado !== undefined ? Boolean(agotado) : undefined,
+                parseNumber(precio),
+                parseNumber(perdida),
                 facturacion ? new Date(facturacion) : undefined,
                 recepcion ? new Date(recepcion) : undefined,
                 updatedBy !== undefined ? Number(updatedBy) : undefined

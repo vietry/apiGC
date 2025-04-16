@@ -1,8 +1,8 @@
 export class CreateConsumoMuestrasDto {
     private constructor(
-        public readonly idEntrega: number | null,
         public readonly idDemoplot: number,
         public readonly consumo: number,
+        public readonly idEntrega: number | null,
         public readonly complemento: number | null,
         public readonly fechaConsumo: Date | null,
         public readonly comentarios: string | null,
@@ -14,19 +14,15 @@ export class CreateConsumoMuestrasDto {
         [key: string]: any;
     }): Promise<[string?, CreateConsumoMuestrasDto?]> {
         const {
-            idEntrega,
             idDemoplot,
             consumo,
+            idEntrega,
             complemento,
             fechaConsumo,
             comentarios,
             createdBy,
             updatedBy,
         } = object;
-
-        if (!idEntrega || isNaN(Number(idEntrega))) {
-            return ['idEntrega is required and must be a valid number'];
-        }
 
         if (!idDemoplot || isNaN(Number(idDemoplot))) {
             return ['idDemoplot is required and must be a valid number'];
@@ -45,9 +41,9 @@ export class CreateConsumoMuestrasDto {
         return [
             undefined,
             new CreateConsumoMuestrasDto(
-                Number(idEntrega),
                 Number(idDemoplot),
                 Number(consumo),
+                Number(idEntrega),
                 parseNumber(complemento),
                 fechaConsumo ? new Date(fechaConsumo) : null,
                 comentarios ?? null,

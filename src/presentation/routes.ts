@@ -39,6 +39,7 @@ import { FotoUsuarioRoutes } from '../common/routes/foto_usuario.routes';
 import { VisitaGteTiendaRoutes } from '../demoplots_gc/routes/visita-gte-tienda.routes';
 import { FotoRoutes } from '../common/routes/foto.routes';
 import { LaborVisitaRoutes } from '../visitas_gc/routes/labor-visita.routes';
+import { VisitaProductoRoutes } from '../visitas_gc/routes/visita-producto.routes';
 
 export class AppRoutes {
     static get routes(): Router {
@@ -82,6 +83,7 @@ export class AppRoutes {
         router.use('/api/visitas-gte-tienda', VisitaGteTiendaRoutes.routes);
         router.use('/api/fotos', FotoRoutes.routes);
         router.use('/api/labores-visita', LaborVisitaRoutes.routes);
+        router.use('/api/visita-productos', VisitaProductoRoutes.routes);
 
         return router;
     }

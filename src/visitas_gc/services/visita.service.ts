@@ -37,6 +37,8 @@ export class VisitaService {
                     idContacto: createVisitaDto.idContacto,
                     idCultivo: createVisitaDto.idCultivo,
                     idRepresentada: createVisitaDto.idRepresentada,
+                    empGrupo: createVisitaDto.empGrupo,
+                    programada: createVisitaDto.programada,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -90,7 +92,9 @@ export class VisitaService {
             idPuntoContacto,
             idContacto,
             idRepresentada,
-            idSubLabor,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
         } = filters;
 
         const where: any = {};
@@ -108,6 +112,8 @@ export class VisitaService {
         if (idRepresentada) {
             where.idRepresentada = idRepresentada;
         }
+
+        if (programada !== undefined) where.programada = filters.programada;
 
         // Filtro por vegetación (a través de cultivo)
         if (idVegetacion) {
@@ -147,17 +153,25 @@ export class VisitaService {
         }
 
         // Filtro por subLabor
-        if (idSubLabor) {
+        if (idSubLabor1) {
             where.LaborVisita = {
                 some: {
-                    idSubLabor: idSubLabor,
+                    idSubLabor1: idSubLabor1,
+                },
+            };
+        }
+
+        if (idSubLabor2) {
+            where.LaborVisita = {
+                some: {
+                    idSubLabor2: idSubLabor2,
                 },
             };
         }
 
         // Filtros de fecha
         if (year) {
-            where.updatedAt = {
+            where.createdAt = {
                 gte: new Date(year, 0, 1),
                 lt: new Date(year + 1, 0, 1),
             };
@@ -177,7 +191,7 @@ export class VisitaService {
                     where,
                     skip: (page - 1) * limit,
                     take: limit,
-                    orderBy: { updatedAt: 'desc' },
+                    orderBy: { programacion: 'desc' },
                     include: {
                         Colaborador: {
                             include: {
@@ -224,12 +238,12 @@ export class VisitaService {
                 limit,
                 total,
                 visitas: visitas.map((visita) => {
-                    // Organizar las labores y sublabores
+                    // Organizar las labores y sublabores con validación null-safe
                     const laborVisitas = visita.LaborVisita || [];
-                    const labor1 = laborVisitas[0]?.SubLabor?.Labor || null;
-                    const subLabor1 = laborVisitas[0]?.SubLabor || null;
-                    const labor2 = laborVisitas[1]?.SubLabor?.Labor || null;
-                    const subLabor2 = laborVisitas[1]?.SubLabor || null;
+                    const labor1 = laborVisitas[0]?.SubLabor?.Labor;
+                    const subLabor1 = laborVisitas[0]?.SubLabor;
+                    const labor2 = laborVisitas[1]?.SubLabor?.Labor;
+                    const subLabor2 = laborVisitas[1]?.SubLabor;
 
                     return {
                         id: visita.id,
@@ -247,37 +261,37 @@ export class VisitaService {
                         detalle: visita.detalle,
                         latitud: visita.latitud,
                         longitud: visita.longitud,
+                        empGrupo: visita.empGrupo,
+                        programada: visita.programada,
                         idColaborador: visita.idColaborador,
-                        colaborador: visita.Colaborador,
-                        nombreColaborador: visita.Colaborador
+                        colaborador: visita.Colaborador
                             ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
                                   visita.Colaborador.Usuario?.apellidos ?? ''
                               }`.trim()
                             : '',
                         idContacto: visita.idContacto,
-                        contacto: visita.Contacto,
-                        nombreContacto: visita.Contacto
+                        contacto: visita.Contacto
                             ? `${visita.Contacto.nombre || ''} ${
                                   visita.Contacto.apellido || ''
                               }`.trim()
                             : '',
+                        cargo: visita.Contacto?.cargo,
                         idPuntoContacto: visita.Contacto?.idPunto,
-                        puntoContacto: visita.Contacto?.PuntoContacto,
+                        puntoContacto: visita.Contacto?.PuntoContacto?.nombre,
                         idCultivo: visita.idCultivo,
-                        cultivo: visita.Cultivo,
                         idVegetacion: visita.Cultivo?.Variedad?.Vegetacion?.id,
-                        vegetacion:
-                            visita.Cultivo?.Variedad?.Vegetacion?.nombre,
+                        cultivo: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
+                        variedad: visita.Cultivo?.Variedad?.nombre,
                         idRepresentada: visita.idRepresentada,
-                        representada: visita.Representada,
-                        labor1: labor1,
-                        nombreLabor1: labor1?.nombre,
-                        subLabor1: subLabor1,
-                        nombreSubLabor1: subLabor1?.nombre,
-                        labor2: labor2,
-                        nombreLabor2: labor2?.nombre,
-                        subLabor2: subLabor2,
-                        nombreSubLabor2: subLabor2?.nombre,
+                        representada: visita.Representada?.nombre,
+                        idLabor1: labor1?.id,
+                        labor1: labor1?.nombre,
+                        idSubLabor1: subLabor1?.id,
+                        subLabor1: subLabor1?.nombre,
+                        idLabor2: labor2?.id,
+                        labor2: labor2?.nombre,
+                        idSubLabor2: subLabor2?.id,
+                        subLabor2: subLabor2?.nombre,
                         createdAt: visita.createdAt,
                         updatedAt: visita.updatedAt,
                     };
@@ -293,15 +307,104 @@ export class VisitaService {
             const visita = await prisma.visita.findUnique({
                 where: { id },
                 include: {
-                    Colaborador: true,
-                    Contacto: true,
-                    Cultivo: true,
+                    Colaborador: {
+                        include: {
+                            Usuario: {
+                                select: {
+                                    id: true,
+                                    nombres: true,
+                                    apellidos: true,
+                                },
+                            },
+                        },
+                    },
+                    Contacto: {
+                        include: {
+                            PuntoContacto: true,
+                        },
+                    },
+                    Cultivo: {
+                        include: {
+                            Variedad: {
+                                include: {
+                                    Vegetacion: true,
+                                },
+                            },
+                        },
+                    },
                     Representada: true,
+                    LaborVisita: {
+                        include: {
+                            SubLabor: {
+                                include: {
+                                    Labor: true,
+                                },
+                            },
+                        },
+                    },
                 },
             });
+
             if (!visita)
                 throw CustomError.badRequest(`Visita con id ${id} no existe`);
-            return visita;
+
+            // Organizar las labores y sublabores con validación null-safe
+            const laborVisitas = visita.LaborVisita || [];
+            const labor1 = laborVisitas[0]?.SubLabor?.Labor;
+            const subLabor1 = laborVisitas[0]?.SubLabor;
+            const labor2 = laborVisitas[1]?.SubLabor?.Labor;
+            const subLabor2 = laborVisitas[1]?.SubLabor;
+
+            return {
+                id: visita.id,
+                programacion: visita.programacion,
+                duracionP: visita.duracionP,
+                objetivo: visita.objetivo,
+                semana: visita.semana,
+                estado: visita.estado,
+                numReprog: visita.numReprog,
+                inicio: visita.inicio,
+                finalizacion: visita.finalizacion,
+                duracionV: visita.duracionV,
+                resultado: visita.resultado,
+                aFuturo: visita.aFuturo,
+                detalle: visita.detalle,
+                latitud: visita.latitud,
+                longitud: visita.longitud,
+                empGrupo: visita.empGrupo,
+                programada: visita.programada,
+                idColaborador: visita.idColaborador,
+                colaborador: visita.Colaborador
+                    ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
+                          visita.Colaborador.Usuario?.apellidos ?? ''
+                      }`.trim()
+                    : '',
+                idContacto: visita.idContacto,
+                contacto: visita.Contacto
+                    ? `${visita.Contacto.nombre || ''} ${
+                          visita.Contacto.apellido || ''
+                      }`.trim()
+                    : '',
+                cargo: visita.Contacto?.cargo,
+                idPuntoContacto: visita.Contacto?.idPunto,
+                puntoContacto: visita.Contacto?.PuntoContacto?.nombre,
+                idCultivo: visita.idCultivo,
+                idVegetacion: visita.Cultivo?.Variedad?.Vegetacion?.id,
+                cultivo: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
+                variedad: visita.Cultivo?.Variedad?.nombre,
+                idRepresentada: visita.idRepresentada,
+                representada: visita.Representada?.nombre,
+                idLabor1: labor1?.id,
+                labor1: labor1?.nombre,
+                idSubLabor1: subLabor1?.id,
+                subLabor1: subLabor1?.nombre,
+                idLabor2: labor2?.id,
+                labor2: labor2?.nombre,
+                idSubLabor2: subLabor2?.id,
+                subLabor2: subLabor2?.nombre,
+                createdAt: visita.createdAt,
+                updatedAt: visita.updatedAt,
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -319,7 +422,9 @@ export class VisitaService {
             idPuntoContacto,
             idContacto,
             idRepresentada,
-            idSubLabor,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
         } = filters;
 
         const where: any = {};
@@ -337,6 +442,8 @@ export class VisitaService {
         if (idRepresentada) {
             where.idRepresentada = idRepresentada;
         }
+
+        if (programada !== undefined) where.programada = filters.programada;
 
         // Filtro por vegetación (a través de cultivo)
         if (idVegetacion) {
@@ -376,10 +483,18 @@ export class VisitaService {
         }
 
         // Filtro por subLabor
-        if (idSubLabor) {
+        if (idSubLabor1) {
             where.LaborVisita = {
                 some: {
-                    idSubLabor: idSubLabor,
+                    idSubLabor1: idSubLabor1,
+                },
+            };
+        }
+
+        if (idSubLabor2) {
+            where.LaborVisita = {
+                some: {
+                    idSubLabor2: idSubLabor2,
                 },
             };
         }
@@ -465,36 +580,37 @@ export class VisitaService {
                     detalle: visita.detalle,
                     latitud: visita.latitud,
                     longitud: visita.longitud,
+                    empGrupo: visita.empGrupo,
+                    programada: visita.programada,
                     idColaborador: visita.idColaborador,
-                    colaborador: visita.Colaborador,
-                    nombreColaborador: visita.Colaborador
+                    colaborador: visita.Colaborador
                         ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
                               visita.Colaborador.Usuario?.apellidos ?? ''
                           }`.trim()
                         : '',
                     idContacto: visita.idContacto,
-                    contacto: visita.Contacto,
-                    nombreContacto: visita.Contacto
+                    contacto: visita.Contacto
                         ? `${visita.Contacto.nombre || ''} ${
                               visita.Contacto.apellido || ''
                           }`.trim()
                         : '',
+                    cargo: visita.Contacto?.cargo,
                     idPuntoContacto: visita.Contacto?.idPunto,
-                    puntoContacto: visita.Contacto?.PuntoContacto,
+                    puntoContacto: visita.Contacto?.PuntoContacto?.nombre,
                     idCultivo: visita.idCultivo,
-                    cultivo: visita.Cultivo,
                     idVegetacion: visita.Cultivo?.Variedad?.Vegetacion?.id,
-                    vegetacion: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
+                    cultivo: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
+                    variedad: visita.Cultivo?.Variedad?.nombre,
                     idRepresentada: visita.idRepresentada,
-                    representada: visita.Representada,
-                    labor1: labor1,
-                    nombreLabor1: labor1?.nombre,
-                    subLabor1: subLabor1,
-                    nombreSubLabor1: subLabor1?.nombre,
-                    labor2: labor2,
-                    nombreLabor2: labor2?.nombre,
-                    subLabor2: subLabor2,
-                    nombreSubLabor2: subLabor2?.nombre,
+                    representada: visita.Representada?.nombre,
+                    idLabor1: labor1?.id,
+                    labor1: labor1?.nombre,
+                    idSubLabor1: subLabor1?.id,
+                    subLabor1: subLabor1?.nombre,
+                    idLabor2: labor2?.id,
+                    labor2: labor2?.nombre,
+                    idSubLabor2: subLabor2?.id,
+                    subLabor2: subLabor2?.nombre,
                     createdAt: visita.createdAt,
                     updatedAt: visita.updatedAt,
                 };

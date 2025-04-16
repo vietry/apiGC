@@ -17,7 +17,9 @@ export class CreateVisitaDto {
         public readonly idColaborador: number,
         public readonly idContacto: number | null,
         public readonly idCultivo: number | null,
-        public readonly idRepresentada: number | null
+        public readonly idRepresentada: number | null,
+        public readonly empGrupo: string | null,
+        public readonly programada: boolean | null
     ) {}
 
     static async create(object: {
@@ -42,6 +44,8 @@ export class CreateVisitaDto {
             idContacto,
             idCultivo,
             idRepresentada,
+            empGrupo,
+            programada,
         } = object;
 
         if (!idColaborador || isNaN(Number(idColaborador))) {
@@ -74,7 +78,9 @@ export class CreateVisitaDto {
                 Number(idColaborador),
                 idContacto !== undefined ? Number(idContacto) : null,
                 idCultivo !== undefined ? Number(idCultivo) : null,
-                idRepresentada !== undefined ? Number(idRepresentada) : null
+                idRepresentada !== undefined ? Number(idRepresentada) : null,
+                empGrupo ?? null,
+                programada !== undefined ? Boolean(programada) : null
             ),
         ];
     }

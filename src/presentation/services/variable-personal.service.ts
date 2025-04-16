@@ -451,6 +451,23 @@ export class VariablePersonalService {
         }
     }
 
+    getFamilyClasses(gteType: string): string[] {
+        switch (gteType.toUpperCase()) {
+            case 'TQC':
+                return ['BIOGEN', 'TQC', 'SUMITOMO'];
+            case 'SYNGENTA':
+                return ['SYNGENTA'];
+            case 'BIOGEN':
+                return ['BIOGEN'];
+            case 'TALEX':
+                return ['TALEX', 'SYNGENTA'];
+            case 'UPL':
+                return ['UPL'];
+            default:
+                return [];
+        }
+    }
+
     async generateVariablePersonal(
         idUsuario: number,
         year?: number,
@@ -460,7 +477,7 @@ export class VariablePersonalService {
             // Obtener GTEs activos
             const gtes = await prisma.gte.findMany({
                 where: { activo: true },
-                select: { id: true },
+                select: { id: true, tipo: true },
             });
 
             // Obtener fecha actual
@@ -492,6 +509,17 @@ export class VariablePersonalService {
             const createdVariables = [];
 
             for (const gte of gtes) {
+                // Construir condición adicional por tipo de gte
+                const familyCondition =
+                    gte.tipo && this.getFamilyClasses(gte.tipo).length > 0
+                        ? {
+                              Familia: {
+                                  clase: {
+                                      in: this.getFamilyClasses(gte.tipo),
+                                  },
+                              },
+                          }
+                        : {};
                 // Contar demoplots por estado
                 const demoplots = await prisma.demoPlot.groupBy({
                     by: ['estado'],
@@ -523,10 +551,42 @@ export class VariablePersonalService {
                     _count: true,
                 });
 
+                const tipoDemoplots = await prisma.demoPlot.groupBy({
+                    by: ['estado'],
+                    where: {
+                        idGte: gte.id,
+                        ...familyCondition,
+                        NOT: {
+                            AND: [
+                                { updatedAt: { gte: new Date('2024-01-01') } },
+                                { updatedAt: { lt: new Date('2025-01-01') } },
+                            ],
+                        },
+                        OR: [
+                            {
+                                updatedAt: {
+                                    gte: currentMonthStart,
+                                    lt: currentMonthEnd,
+                                },
+                                estado: { in: ['Completado', 'Día campo'] },
+                            },
+                            {
+                                updatedAt: {
+                                    gte: previousMonthStart,
+                                    lt: previousMonthEnd,
+                                },
+                                estado: { in: ['Completado', 'Día campo'] },
+                            },
+                        ],
+                    },
+                    _count: true,
+                });
+
                 const demoplotsCampo = await prisma.demoPlot.groupBy({
                     by: ['estado'],
                     where: {
                         idGte: gte.id,
+
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -559,6 +619,12 @@ export class VariablePersonalService {
                     0
                 );
                 const totalC = demoplotsCampo.reduce(
+                    (acc, curr) => acc + curr._count,
+                    0
+                );
+
+                // Calcular total con tipo gte y clase familia
+                const tipoTotal = tipoDemoplots.reduce(
                     (acc, curr) => acc + curr._count,
                     0
                 );
@@ -604,7 +670,7 @@ export class VariablePersonalService {
                 // Calcular variable según reglas
                 let variableCompletado = 0;
                 let variableCampo = 0;
-                if (total >= 30) {
+                if (tipoTotal >= 30) {
                     if (total <= 40) {
                         variableCompletado = total * conteo1;
                     } else {

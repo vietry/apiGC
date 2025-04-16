@@ -32,8 +32,45 @@ export class VisitaController {
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
 
+        // Extraer todos los posibles filtros del query
+        const {
+            idColaborador,
+            estado,
+            semana,
+            year,
+            month,
+            idVegetacion,
+            idFamilia,
+            idPuntoContacto,
+            idContacto,
+            idRepresentada,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
+        } = req.query;
+
+        // Construir objeto de filtros
+        const filters: VisitaFilters = {
+            idColaborador: idColaborador ? +idColaborador : undefined,
+            estado: typeof estado === 'string' ? estado : undefined,
+            semana: semana ? +semana : undefined,
+            year: year ? +year : undefined,
+            month: month ? +month : undefined,
+            idVegetacion: idVegetacion ? +idVegetacion : undefined,
+            idFamilia: idFamilia ? +idFamilia : undefined,
+            idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+            idContacto: idContacto ? +idContacto : undefined,
+            idRepresentada: idRepresentada ? +idRepresentada : undefined,
+            idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
+            idSubLabor2: idSubLabor2 ? +idSubLabor2 : undefined,
+            programada:
+                programada !== undefined
+                    ? !!(programada === 'true' || programada === '1')
+                    : undefined,
+        };
+
         this.visitaService
-            .getVisitas(paginationDto!)
+            .getVisitas(paginationDto!, filters)
             .then((visitas) => res.status(200).json(visitas))
             .catch((error) => this.handleError(res, error));
     };
@@ -75,7 +112,9 @@ export class VisitaController {
             idPuntoContacto,
             idContacto,
             idRepresentada,
-            idSubLabor,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
         } = req.query;
 
         // Construir objeto de filtros
@@ -90,7 +129,12 @@ export class VisitaController {
             idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
             idContacto: idContacto ? +idContacto : undefined,
             idRepresentada: idRepresentada ? +idRepresentada : undefined,
-            idSubLabor: idSubLabor ? +idSubLabor : undefined,
+            idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
+            idSubLabor2: idSubLabor2 ? +idSubLabor2 : undefined,
+            programada:
+                programada !== undefined
+                    ? !!(programada === 'true' || programada === '1')
+                    : undefined,
         };
 
         this.visitaService
