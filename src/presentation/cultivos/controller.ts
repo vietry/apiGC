@@ -13,7 +13,7 @@ export class CultivoController {
     // DI
     constructor(private readonly cultivoService: CultivoService) {}
 
-    private handleError = (res: Response, error: unknown) => {
+    private readonly handleError = (res: Response, error: unknown) => {
         if (error instanceof CustomError) {
             return res.status(error.statusCode).json({ error: error.message });
         }
@@ -58,11 +58,45 @@ export class CultivoController {
             idCultivo,
             idFundo,
             idVegetacion,
+            vegetacion,
             idContactoPunto,
             idPuntoContacto,
         } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
+
+        // Construir filtros desde query params
+        const filters: CultivoFilters = {
+            centroPoblado: centroPoblado
+                ? (centroPoblado as string)
+                : undefined,
+            idCultivo: idCultivo ? Number(idCultivo) : undefined,
+            idFundo: idFundo ? Number(idFundo) : undefined,
+            idVegetacion: idVegetacion ? Number(idVegetacion) : undefined,
+            vegetacion: vegetacion ? String(vegetacion) : undefined,
+            idContactoPunto: idContactoPunto
+                ? Number(idContactoPunto)
+                : undefined,
+            idPuntoContacto: idPuntoContacto
+                ? Number(idPuntoContacto)
+                : undefined,
+        };
+
+        this.cultivoService
+            .getCultivos(paginationDto!, filters)
+            .then((cultivos) => res.status(200).json(cultivos))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    getAllCultivos = async (req: Request, res: Response) => {
+        const {
+            centroPoblado,
+            idCultivo,
+            idFundo,
+            idVegetacion,
+            idContactoPunto,
+            idPuntoContacto,
+        } = req.query;
 
         // Construir filtros desde query params
         const filters: CultivoFilters = {
@@ -81,7 +115,7 @@ export class CultivoController {
         };
 
         this.cultivoService
-            .getCultivos(paginationDto!, filters)
+            .getAllCultivos(filters)
             .then((cultivos) => res.status(200).json(cultivos))
             .catch((error) => this.handleError(res, error));
     };

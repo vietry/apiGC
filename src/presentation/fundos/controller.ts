@@ -114,4 +114,34 @@ export class FundoController {
             .then((result) => res.status(200).json(result))
             .catch((error) => this.handleError(res, error));
     };
+
+    // Nueva función para obtener todos los fundos con filtros (sin paginación)
+    getAllFundos = async (req: Request, res: Response) => {
+        const {
+            nombre,
+            idPuntoContacto,
+            idContactoPunto,
+            distrito,
+            provincia,
+            departamento,
+        } = req.query;
+
+        const filters: FundoFilters = {
+            nombre: nombre ? (nombre as string) : undefined,
+            idPuntoContacto: idPuntoContacto
+                ? Number(idPuntoContacto)
+                : undefined,
+            idContactoPunto: idContactoPunto
+                ? Number(idContactoPunto)
+                : undefined,
+            distrito: distrito ? (distrito as string) : undefined,
+            provincia: provincia ? (provincia as string) : undefined,
+            departamento: departamento ? (departamento as string) : undefined,
+        };
+
+        this.fundoService
+            .getAllFundos(filters)
+            .then((result) => res.status(200).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
 }

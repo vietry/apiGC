@@ -78,24 +78,127 @@ export class CultivoService {
         if (filters) {
             if (filters.centroPoblado)
                 where.Fundo = {
-                    ...(where.Fundo || {}),
+                    ...(where.Fundo ?? {}),
                     centroPoblado: { contains: filters.centroPoblado },
                 };
             if (filters.idCultivo) where.id = filters.idCultivo;
             if (filters.idFundo) where.idFundo = filters.idFundo;
             if (filters.idVegetacion)
                 where.Variedad = {
-                    ...(where.Variedad || {}),
+                    ...(where.Variedad ?? {}),
                     idVegetacion: filters.idVegetacion,
+                };
+            if (filters.vegetacion)
+                where.Variedad = {
+                    ...(where.Variedad ?? {}),
+                    Vegetacion: {
+                        nombre: {
+                            contains: filters.vegetacion,
+                        },
+                    },
                 };
             if (filters.idContactoPunto)
                 where.Fundo = {
-                    ...(where.Fundo || {}),
+                    ...(where.Fundo ?? {}),
                     idContactoPunto: filters.idContactoPunto,
                 };
             if (filters.idPuntoContacto)
                 where.Fundo = {
-                    ...(where.Fundo || {}),
+                    ...(where.Fundo ?? {}),
+                    idPuntoContacto: filters.idPuntoContacto,
+                };
+            // Puedes agregar más filtros según sea necesario
+        }
+
+        try {
+            const [total, cultivos] = await Promise.all([
+                prisma.cultivo.count({ where }),
+                prisma.cultivo.findMany({
+                    where,
+                    skip: (page - 1) * limit,
+                    take: limit,
+                    include: {
+                        Fundo: {
+                            select: {
+                                nombre: true,
+                                centroPoblado: true,
+                                idDistrito: true,
+                                PuntoContacto: {
+                                    select: {
+                                        idDistrito: true,
+                                        id: true,
+                                        nombre: true,
+                                    },
+                                },
+                                ContactoPunto: true,
+                            },
+                        },
+                        Variedad: {
+                            select: {
+                                nombre: true,
+                                Vegetacion: true,
+                            },
+                        },
+                    },
+                }),
+            ]);
+
+            return {
+                page,
+                pages: Math.ceil(total / limit),
+                limit,
+                total,
+                cultivos: cultivos.map((cultivo) => {
+                    return {
+                        id: cultivo.id,
+                        certificacion: cultivo.certificacion,
+                        hectareas: cultivo.hectareas,
+                        mesInicio: cultivo.mesInicio,
+                        mesFinal: cultivo.mesFinal,
+                        observacion: cultivo.observacion,
+                        idFundo: cultivo.idFundo,
+                        fundo: cultivo.Fundo.nombre,
+                        centroPoblado: cultivo.Fundo.centroPoblado,
+                        idVariedad: cultivo.idVariedad,
+                        variedad: cultivo.Variedad.nombre,
+                        vegetacion: cultivo.Variedad.Vegetacion.nombre,
+                        idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
+                        idVegetacion: cultivo.Variedad.Vegetacion.id,
+                        idPunto: cultivo.Fundo.PuntoContacto?.id,
+                        idDistrito: cultivo.Fundo.idDistrito,
+                        punto: cultivo.Fundo.PuntoContacto?.nombre,
+                    };
+                }),
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getAllCultivos(filters: CultivoFilters = {}) {
+        // Construir el objeto where dinámicamente según los filtros recibidos
+        const where: any = {};
+        if (filters) {
+            if (filters.centroPoblado)
+                where.Fundo = {
+                    ...(where.Fundo ?? {}),
+                    centroPoblado: { contains: filters.centroPoblado },
+                };
+            if (filters.idCultivo) where.id = filters.idCultivo;
+            if (filters.idFundo) where.idFundo = filters.idFundo;
+            if (filters.idVegetacion)
+                where.Variedad = {
+                    ...(where.Variedad ?? {}),
+                    idVegetacion: filters.idVegetacion,
+                };
+            if (filters.idContactoPunto)
+                where.Fundo = {
+                    ...(where.Fundo ?? {}),
+                    idContactoPunto: filters.idContactoPunto,
+                };
+            if (filters.idPuntoContacto)
+                where.Fundo = {
+                    ...(where.Fundo ?? {}),
                     idPuntoContacto: filters.idPuntoContacto,
                 };
             // Puedes agregar más filtros según sea necesario
@@ -104,8 +207,6 @@ export class CultivoService {
         try {
             const cultivos = await prisma.cultivo.findMany({
                 where,
-                skip: (page - 1) * limit,
-                take: limit,
                 include: {
                     Fundo: {
                         select: {
@@ -162,8 +263,16 @@ export class CultivoService {
             const cultivo = await prisma.cultivo.findUnique({
                 where: { id },
                 include: {
-                    Fundo: true,
-                    Variedad: true,
+                    Fundo: {
+                        include: {
+                            PuntoContacto: true,
+                        },
+                    },
+                    Variedad: {
+                        include: {
+                            Vegetacion: true,
+                        },
+                    },
                 },
             });
 
@@ -172,7 +281,24 @@ export class CultivoService {
                     `Cultivo with id ${id} does not exist`
                 );
 
-            return cultivo;
+            return {
+                id: cultivo.id,
+                certificacion: cultivo.certificacion,
+                hectareas: cultivo.hectareas,
+                mesInicio: cultivo.mesInicio,
+                mesFinal: cultivo.mesFinal,
+                observacion: cultivo.observacion,
+                idFundo: cultivo.idFundo,
+                fundo: cultivo.Fundo.nombre,
+                centroPoblado: cultivo.Fundo.centroPoblado,
+                idVariedad: cultivo.idVariedad,
+                variedad: cultivo.Variedad.nombre,
+                idVegetacion: cultivo.Variedad.idVegetacion,
+                vegetacion: cultivo.Variedad.Vegetacion.nombre,
+                idDistrito: cultivo.Fundo.idDistrito,
+                idPunto: cultivo.Fundo.PuntoContacto?.id,
+                punto: cultivo.Fundo.PuntoContacto?.nombre,
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
@@ -269,6 +395,7 @@ export class CultivoService {
                         select: {
                             nombre: true,
                             centroPoblado: true,
+                            idDistrito: true,
                             PuntoContacto: {
                                 select: {
                                     id: true,
@@ -310,7 +437,7 @@ export class CultivoService {
                         idVegetacion: cultivo.Variedad.Vegetacion.id,
                         idPunto: cultivo.Fundo.PuntoContacto?.id,
                         idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
-                        idDistrito: cultivo.Fundo.PuntoContacto?.idDistrito,
+                        idDistrito: cultivo.Fundo?.idDistrito,
                     };
                 }),
             };

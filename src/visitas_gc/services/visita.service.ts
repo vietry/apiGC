@@ -342,6 +342,15 @@ export class VisitaService {
                             },
                         },
                     },
+                    VisitaProducto: {
+                        include: {
+                            Familia: {
+                                include: {
+                                    Empresa: true,
+                                },
+                            },
+                        },
+                    },
                 },
             });
 
@@ -404,6 +413,14 @@ export class VisitaService {
                 subLabor2: subLabor2?.nombre,
                 createdAt: visita.createdAt,
                 updatedAt: visita.updatedAt,
+                productos: visita.VisitaProducto.map((producto) => ({
+                    id: producto.id,
+                    idFamilia: producto.idFamilia,
+                    codigo: producto.Familia.codigo.trim(),
+                    nombre: producto.Familia.nombre.trim(),
+                    idEmpresa: producto.Familia.idEmpresa,
+                    empresa: producto.Familia.Empresa.nomEmpresa,
+                })),
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -618,5 +635,124 @@ export class VisitaService {
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
+    }
+
+    async getPuntoContactoRanking(filters: VisitaFilters = {}): Promise<any> {
+        // Construir objeto where basado en los filtros
+        const {
+            idColaborador,
+            estado,
+            semana,
+            year,
+            month,
+            idVegetacion,
+            idFamilia,
+            idPuntoContacto,
+            idContacto,
+            idRepresentada,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
+        } = filters;
+        const where: any = {};
+        if (idColaborador) where.idColaborador = idColaborador;
+        if (estado) where.estado = estado;
+        if (semana) where.semana = semana;
+        if (idRepresentada) where.idRepresentada = idRepresentada;
+        if (programada !== undefined) where.programada = programada;
+        if (idVegetacion) {
+            where.Cultivo = { Variedad: { Vegetacion: { id: idVegetacion } } };
+        }
+        if (idFamilia) {
+            where.Cultivo = {
+                ...where.Cultivo,
+                Variedad: {
+                    ...where.Cultivo?.Variedad,
+                    Vegetacion: {
+                        ...where.Cultivo?.Variedad?.Vegetacion,
+                        idFamilia: idFamilia,
+                    },
+                },
+            };
+        }
+        if (idPuntoContacto) {
+            where.Contacto = { idPuntoContacto: idPuntoContacto };
+        }
+        if (idContacto) where.idContacto = idContacto;
+        if (idSubLabor1) {
+            where.LaborVisita = { some: { idSubLabor1: idSubLabor1 } };
+        }
+        if (idSubLabor2) {
+            where.LaborVisita = { some: { idSubLabor2: idSubLabor2 } };
+        }
+        if (year) {
+            where.updatedAt = {
+                gte: new Date(year, 0, 1),
+                lt: new Date(year + 1, 0, 1),
+            };
+        }
+        if (month && year) {
+            where.updatedAt = {
+                gte: new Date(year, month - 1, 1),
+                lt: new Date(year, month, 1),
+            };
+        }
+
+        // Obtener todas las visitas junto con Contacto y PuntoContacto
+        const visitas = await prisma.visita.findMany({
+            where,
+            include: {
+                Contacto: {
+                    include: {
+                        PuntoContacto: true,
+                    },
+                },
+            },
+        });
+
+        const total = visitas.length;
+        if (total === 0) return [];
+
+        // Agrupar visitas por PuntoContacto
+        const counts: {
+            [key: string]: {
+                id: number;
+                nombre: string;
+                numDoc: string;
+                count: number;
+            };
+        } = {};
+        visitas.forEach((visita) => {
+            const punto = visita.Contacto?.PuntoContacto;
+            if (punto?.nombre) {
+                const key = punto.nombre;
+                if (!counts[key]) {
+                    counts[key] = {
+                        id: punto.id,
+                        nombre: punto.nombre,
+                        numDoc: punto.numDoc!,
+                        count: 0,
+                    };
+                }
+                counts[key].count++;
+            }
+        });
+
+        // Convertir a array, calcular porcentaje y ordenar descendientemente
+        const ranking = Object.values(counts)
+            .map((item) => ({
+                idPunto: item.id,
+                nombre: item.nombre,
+                numDoc: item.numDoc,
+                visitas: item.count,
+                porcentaje: Number(((item.count / total) * 100).toFixed(2)),
+            }))
+            .sort((a, b) => b.porcentaje - a.porcentaje)
+            .map((item, index) => ({
+                posicion: index + 1,
+                ...item,
+            }));
+
+        return ranking;
     }
 }

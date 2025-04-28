@@ -142,6 +142,7 @@ export interface CultivoFilters {
     idCultivo?: number;
     idFundo?: number;
     idVegetacion?: number;
+    vegetacion?: string;
     idContactoPunto?: number;
     idPuntoContacto?: number;
 }

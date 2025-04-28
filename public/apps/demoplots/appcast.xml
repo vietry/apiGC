@@ -3,14 +3,15 @@
     <channel>
         <title>Demoplots Updates</title>
         <item>
-            <title>Version 1.5.2</title>
+            <title>Version 1.5.4</title>
             <description>
                 Actualización menor con correccion de errores:
-                - Se agrego el indicador de demoplots completados por producto foco.
-                - Se mejoro la logica de registro de demoplots y consumo de muestra.
+                - Se corrigió un error que causaba que no se puediera registrar demoplots.
+                - Se mejoró la lógica del filtro de cultivos por agricultor para que sea más rápida.
+                - Otras mejoras menores.
             
             </description>
-            <pubDate>Fri, 11 Apr 2025 12:20:00 +0000</pubDate>
+            <pubDate>Fri, 21 Apr 2025 15:20:00 +0000</pubDate>
             <enclosure 
                 url="http://localhost/v1/apps/demoplots/apk/AppDemoplot.apk" 
                 sparkle:version="1.5.0"

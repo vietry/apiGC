@@ -81,6 +81,8 @@ export class VisitaController {
             ...req.body,
             id,
         });
+        console.log(`updateVisitaDto`, updateVisitaDto);
+
         if (error) return res.status(400).json({ error });
 
         this.visitaService
@@ -140,6 +142,48 @@ export class VisitaController {
         this.visitaService
             .getAllVisitas(filters)
             .then((visitas) => res.status(200).json(visitas))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    getPuntoContactoRanking = async (req: Request, res: Response) => {
+        // Extraer filtros del query
+        const {
+            idColaborador,
+            estado,
+            semana,
+            year,
+            month,
+            idVegetacion,
+            idFamilia,
+            idPuntoContacto,
+            idContacto,
+            idRepresentada,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
+        } = req.query;
+        const filters: any = {
+            idColaborador: idColaborador ? +idColaborador : undefined,
+            estado: typeof estado === 'string' ? estado : undefined,
+            semana: semana ? +semana : undefined,
+            year: year ? +year : undefined,
+            month: month ? +month : undefined,
+            idVegetacion: idVegetacion ? +idVegetacion : undefined,
+            idFamilia: idFamilia ? +idFamilia : undefined,
+            idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+            idContacto: idContacto ? +idContacto : undefined,
+            idRepresentada: idRepresentada ? +idRepresentada : undefined,
+            idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
+            idSubLabor2: idSubLabor2 ? +idSubLabor2 : undefined,
+            programada:
+                programada !== undefined
+                    ? !!(programada === 'true' || programada === '1')
+                    : undefined,
+        };
+
+        this.visitaService
+            .getPuntoContactoRanking(filters)
+            .then((ranking) => res.status(200).json(ranking))
             .catch((error) => this.handleError(res, error));
     };
 }

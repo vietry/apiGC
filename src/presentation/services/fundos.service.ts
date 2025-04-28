@@ -68,15 +68,6 @@ export class FundoService {
     async getFundos(paginationDto: PaginationDto, filters: FundoFilters = {}) {
         const { page, limit } = paginationDto;
 
-        // const {
-        //     nombre,
-        //     idPuntoContacto,
-        //     idContactoPunto,
-        //     departamento,
-        //     provincia,
-        //     distrito,
-        // } = filters;
-
         // Construir el objeto where dinámicamente según los filtros recibidos
         const where: any = {};
         if (filters) {
@@ -94,7 +85,7 @@ export class FundoService {
                 };
             if (filters.provincia)
                 where.Distrito = {
-                    ...(where.Distrito || {}),
+                    ...(where.Distrito ?? {}),
                     Provincia: {
                         nombre: {
                             contains: filters.provincia,
@@ -103,9 +94,9 @@ export class FundoService {
                 };
             if (filters.departamento)
                 where.Distrito = {
-                    ...(where.Distrito || {}),
+                    ...(where.Distrito ?? {}),
                     Provincia: {
-                        ...(where.Distrito?.Provincia || {}),
+                        ...(where.Distrito?.Provincia ?? {}),
                         Departamento: {
                             nombre: {
                                 contains: filters.departamento,
@@ -170,6 +161,89 @@ export class FundoService {
         }
     }
 
+    async getAllFundos(filters: FundoFilters = {}) {
+        // Construir el objeto where dinámicamente según los filtros recibidos
+        const where: any = {};
+        if (filters) {
+            if (filters.nombre)
+                where.nombre = {
+                    contains: filters.nombre,
+                };
+            if (filters.idPuntoContacto)
+                where.idPuntoContacto = filters.idPuntoContacto;
+            if (filters.idContactoPunto)
+                where.idContactoPunto = filters.idContactoPunto;
+            if (filters.distrito)
+                where.Distrito = {
+                    nombre: { contains: filters.distrito },
+                };
+            if (filters.provincia)
+                where.Distrito = {
+                    ...(where.Distrito ?? {}),
+                    Provincia: {
+                        nombre: {
+                            contains: filters.provincia,
+                        },
+                    },
+                };
+            if (filters.departamento)
+                where.Distrito = {
+                    ...(where.Distrito ?? {}),
+                    Provincia: {
+                        ...(where.Distrito?.Provincia ?? {}),
+                        Departamento: {
+                            nombre: {
+                                contains: filters.departamento,
+                            },
+                        },
+                    },
+                };
+            // Puedes agregar más filtros según sea necesario
+        }
+
+        try {
+            const fundos = await prisma.fundo.findMany({
+                where,
+                include: {
+                    Distrito: {
+                        select: {
+                            id: true,
+                            nombre: true,
+                            idProvincia: true,
+                            Provincia: {
+                                select: {
+                                    nombre: true,
+                                    Departamento: true,
+                                },
+                            },
+                        },
+                    },
+                    PuntoContacto: true,
+                },
+            });
+
+            return fundos.map((fundo) => ({
+                id: fundo.id,
+                nombre: fundo.nombre,
+                centroPoblado: fundo.centroPoblado,
+                idClienteUbigeo: fundo.idClienteUbigeo,
+                idPuntoUbigeo: fundo.idPuntoUbigeo,
+                idPuntoContacto: fundo.idPuntoContacto,
+                idContactoPunto: fundo.idContactoPunto,
+                idDistrito: fundo.idDistrito,
+                distrito: fundo.Distrito?.nombre,
+                idProvincia: fundo.Distrito?.idProvincia,
+                provincia: fundo.Distrito?.Provincia?.nombre,
+                departamento: fundo.Distrito?.Provincia.Departamento.nombre,
+                punto: fundo.PuntoContacto?.nombre,
+                createdAt: fundo.createdAt,
+                updatedAt: fundo.updatedAt,
+            }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getFundosByPuntoContactoId(idPuntoContacto: number) {
         try {
             const fundos = await prisma.fundo.findMany({
@@ -199,8 +273,6 @@ export class FundoService {
                     },
                 },
             });
-
-            //if (fundos.length === 0) throw CustomError.badRequest(`No Fundos found with PuntoUbigeo id ${idPuntoUbigeo}`);
 
             return fundos.map((fundo) => ({
                 id: fundo.id,

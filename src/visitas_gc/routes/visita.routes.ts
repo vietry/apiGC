@@ -10,6 +10,7 @@ export class VisitaRoutes {
 
         router.get('/', controller.getVisitas);
         router.get('/all', controller.getAllVisitas);
+        router.get('/ranking-clientes', controller.getPuntoContactoRanking); // NUEVA RUTA para ranking
         router.get('/:id', controller.getVisitaById);
         router.post('/', controller.createVisita);
         router.put('/:id', controller.updateVisita);

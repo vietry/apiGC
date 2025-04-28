@@ -93,6 +93,12 @@ export class UpdateVisitaDto {
             return isNaN(num) ? undefined : num;
         };
 
+        // Si idCultivo o idRepresentada son 0, asignar undefined
+        const parseFk = (value: any): number | undefined => {
+            const num = Number(value);
+            return !num ? undefined : num;
+        };
+
         return [
             undefined,
             new UpdateVisitaDto(
@@ -113,10 +119,8 @@ export class UpdateVisitaDto {
                 longitud !== undefined ? parseFloat(longitud) : undefined,
                 idColaborador !== undefined ? Number(idColaborador) : undefined,
                 idContacto !== undefined ? Number(idContacto) : undefined,
-                idCultivo !== undefined ? Number(idCultivo) : undefined,
-                idRepresentada !== undefined
-                    ? Number(idRepresentada)
-                    : undefined,
+                parseFk(idCultivo),
+                parseFk(idRepresentada),
                 empGrupo ?? undefined,
                 programada !== undefined ? Boolean(programada) : undefined
                 //updatedBy !== undefined ? Number(updatedBy) : undefined

@@ -96,14 +96,4 @@ export class ContactoPuntoController {
             .then((contactoPunto) => res.status(200).json(contactoPunto))
             .catch((error) => this.handleError(res, error));
     };
-    /*getContactoByPuntoId = async (req: Request, res: Response) => {
-        const idPunto = +req.params.idPunto;
-        const { page = 1, limit = 10 } = req.query;
-        const [error, paginationDto] = PaginationDto.create(+page, +limit);
-        if (error) return res.status(400).json({ error });
-
-        this.contactoPuntoService.getContactoByPuntoId(idPunto, paginationDto!)
-            .then(contactoPunto => res.status(200).json(contactoPunto))
-            .catch(error => this.handleError(res, error));
-    }*/
 }

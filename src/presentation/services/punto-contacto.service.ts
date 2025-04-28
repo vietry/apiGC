@@ -22,7 +22,7 @@ export class PuntoContactoService {
         });
         if (puntoContactoExists)
             throw CustomError.badRequest(
-                `Ya existe un PuntoContacto con el número de documento ${createPuntoContactoDto.numDoc} y el idGte ${createPuntoContactoDto.idGte}.`
+                `Ya existe un Cliente/Tienda con el número de documento ${createPuntoContactoDto.numDoc}.`
             );
 
         try {
@@ -221,6 +221,7 @@ export class PuntoContactoService {
                     where,
                     skip: (page - 1) * limit,
                     take: limit,
+                    orderBy: { nombre: 'asc' },
                     include: {
                         Gte: {
                             select: {

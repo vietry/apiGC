@@ -120,9 +120,6 @@ export class ContactoPuntoService {
                 //page: page,
                 //limit: limit,
                 total: total,
-                //next: `/api/contactospuntos?page${(page + 1)}&limit=${limit}`,
-                //prev: (page - 1 > 0)  ? `/api/contactospuntos?page${(page - 1)}&limit=${limit}`: null ,
-
                 contactos:
                     //contactos,
 
@@ -236,6 +233,7 @@ export class ContactoPuntoService {
                     activo: contacto.activo,
                     email: contacto.email,
                     idPunto: contacto.idPunto,
+                    punto: contacto.PuntoContacto.nombre,
                     tipoDoc: contacto.PuntoContacto.tipoDoc,
                     numDocPunto: contacto.PuntoContacto.numDoc,
                     idGte: contacto.idGte,
