@@ -18,7 +18,7 @@ export class CreateVisitaDto {
         public readonly idContacto: number | null,
         public readonly idCultivo: number | null,
         public readonly idRepresentada: number | null,
-        public readonly empGrupo: string | null,
+        public readonly motivo: string | null,
         public readonly programada: boolean | null
     ) {}
 
@@ -44,7 +44,7 @@ export class CreateVisitaDto {
             idContacto,
             idCultivo,
             idRepresentada,
-            empGrupo,
+            motivo,
             programada,
         } = object;
 
@@ -79,7 +79,7 @@ export class CreateVisitaDto {
                 idContacto !== undefined ? Number(idContacto) : null,
                 idCultivo !== undefined ? Number(idCultivo) : null,
                 idRepresentada !== undefined ? Number(idRepresentada) : null,
-                empGrupo ?? null,
+                motivo ?? null,
                 programada !== undefined ? Boolean(programada) : null
             ),
         ];

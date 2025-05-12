@@ -13,6 +13,7 @@ export class PuntoContactoRoutes {
         router.get('/:id', controller.getPuntoContactoById);
         router.get('/gte/:idGte', controller.getPuntosContactoByGteId);
         router.post('/', controller.createPuntoContacto);
+        router.post('/bulk', controller.createMultiplePuntosContacto);
         router.put('/:id', controller.updatePuntoContacto);
 
         // Nueva ruta para buscar por codZona e idGte

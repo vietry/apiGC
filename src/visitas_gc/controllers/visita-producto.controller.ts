@@ -30,6 +30,23 @@ export class VisitaProductoController {
             .catch((error) => this.handleError(res, error));
     };
 
+    createMultipleVisitaProductos = async (req: Request, res: Response) => {
+        if (!Array.isArray(req.body)) {
+            return res
+                .status(400)
+                .json({
+                    error: 'El cuerpo debe ser un array de visitaProductos',
+                });
+        }
+        // Aquí podrías validar cada DTO si lo deseas
+        const dtos: any[] = req.body;
+
+        this.visitaProductoService
+            .createMultipleVisitaProductos(dtos)
+            .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
     updateVisitaProducto = async (req: Request, res: Response) => {
         const id = parseInt(req.params.id);
         const [error, updateDto] = await UpdateVisitaProductoDto.create({

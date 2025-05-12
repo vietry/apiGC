@@ -27,6 +27,21 @@ export class VisitaController {
             .catch((error) => this.handleError(res, error));
     };
 
+    createMultipleVisitas = async (req: Request, res: Response) => {
+        if (!Array.isArray(req.body)) {
+            return res
+                .status(400)
+                .json({ error: 'El cuerpo debe ser un array de visitas' });
+        }
+        // Aquí podrías validar cada DTO si lo deseas
+        const dtos: any[] = req.body;
+
+        this.visitaService
+            .createMultipleVisitas(dtos)
+            .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
     getVisitas = async (req: Request, res: Response) => {
         const { page = 1, limit = 10 } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
@@ -185,5 +200,84 @@ export class VisitaController {
             .getPuntoContactoRanking(filters)
             .then((ranking) => res.status(200).json(ranking))
             .catch((error) => this.handleError(res, error));
+    };
+
+    getVisitasEstadisticas = async (req: Request, res: Response) => {
+        try {
+            // Periodo actual
+            const {
+                periodoActualTipo,
+                periodoActualDesde,
+                periodoActualHasta,
+            } = req.query;
+            // Periodo comparativo
+            const {
+                periodoComparativoTipo,
+                periodoComparativoDesde,
+                periodoComparativoHasta,
+            } = req.query;
+
+            // Filtros
+            const {
+                idColaborador,
+                estado,
+                semana,
+                idVegetacion,
+                idFamilia,
+                idPuntoContacto,
+                idContacto,
+                idRepresentada,
+                idSubLabor1,
+                idSubLabor2,
+                programada,
+            } = req.query;
+
+            const filters: VisitaFilters = {
+                idColaborador: idColaborador ? +idColaborador : undefined,
+                estado: typeof estado === 'string' ? estado : undefined,
+                semana: semana ? +semana : undefined,
+                idVegetacion: idVegetacion ? +idVegetacion : undefined,
+                idFamilia: idFamilia ? +idFamilia : undefined,
+                idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+                idContacto: idContacto ? +idContacto : undefined,
+                idRepresentada: idRepresentada ? +idRepresentada : undefined,
+                idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
+                idSubLabor2: idSubLabor2 ? +idSubLabor2 : undefined,
+                programada:
+                    programada !== undefined
+                        ? !!(programada === 'true' || programada === '1')
+                        : undefined,
+            };
+
+            // Construir objetos de periodo
+            const periodoActual = {
+                tipo: periodoActualTipo as string,
+                desde: periodoActualDesde
+                    ? new Date(periodoActualDesde as string)
+                    : undefined,
+                hasta: periodoActualHasta
+                    ? new Date(periodoActualHasta as string)
+                    : undefined,
+            };
+            const periodoComparativo = {
+                tipo: periodoComparativoTipo as string,
+                desde: periodoComparativoDesde
+                    ? new Date(periodoComparativoDesde as string)
+                    : undefined,
+                hasta: periodoComparativoHasta
+                    ? new Date(periodoComparativoHasta as string)
+                    : undefined,
+            };
+
+            const estadisticas =
+                await this.visitaService.getVisitasEstadisticas(
+                    periodoActual,
+                    periodoComparativo,
+                    filters
+                );
+            return res.status(200).json(estadisticas);
+        } catch (error) {
+            this.handleError(res, error);
+        }
     };
 }

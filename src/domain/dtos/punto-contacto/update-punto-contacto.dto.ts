@@ -12,6 +12,9 @@ export class UpdatePuntoContactoDto {
         public readonly idGte?: number,
         public readonly idDistrito?: string,
         public readonly idEmpresa?: number | null,
+        public readonly idColaborador?: number | null,
+        public readonly gestion?: boolean | null,
+        public readonly sede?: string | null,
         public readonly codZona?: string | null,
         public readonly subTipo?: string | null,
         public readonly cantR0?: number | null,
@@ -34,6 +37,9 @@ export class UpdatePuntoContactoDto {
         if (this.idGte) returnObj.idGte = this.idGte;
         if (this.idDistrito) returnObj.idDistrito = this.idDistrito;
         if (this.idEmpresa) returnObj.idEmpresa = this.idEmpresa;
+        if (this.idColaborador) returnObj.idColaborador = this.idColaborador;
+        if (this.gestion) returnObj.gestion = this.gestion;
+        if (this.sede) returnObj.sede = this.sede;
         if (this.codZona) returnObj.codZona = this.codZona;
         if (this.subTipo) returnObj.subTipo = this.subTipo;
         if (this.cantR0) returnObj.cantR0 = this.cantR0;
@@ -61,6 +67,9 @@ export class UpdatePuntoContactoDto {
             idGte,
             idDistrito,
             idEmpresa,
+            idColaborador,
+            gestion,
+            sede,
             codZona,
             subTipo,
             cantR0,
@@ -78,6 +87,8 @@ export class UpdatePuntoContactoDto {
         let idGteNumber = idGte;
         let idEmpresaNumber = idEmpresa;
         let activoBoolean = activo;
+
+        let gestionBoolean = gestion;
         let liderBoolean = lider;
 
         if (numDoc !== undefined && typeof numDoc !== 'number') {
@@ -98,6 +109,10 @@ export class UpdatePuntoContactoDto {
 
         if (typeof lider !== 'boolean') {
             liderBoolean = Boolean(lider);
+        }
+
+        if (typeof gestion !== 'boolean') {
+            gestionBoolean = Boolean(gestion);
         }
 
         // Validación y conversión de la fecha de aniversario
@@ -124,6 +139,9 @@ export class UpdatePuntoContactoDto {
                 idGteNumber,
                 idDistrito,
                 idEmpresaNumber,
+                idColaborador,
+                gestionBoolean,
+                sede,
                 codZona,
                 subTipo,
                 cantR0,

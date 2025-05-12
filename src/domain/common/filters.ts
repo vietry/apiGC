@@ -126,6 +126,7 @@ export interface PuntoFilters {
     idSubzona?: number;
     codZona?: string;
     nomZona?: string;
+    gestion?: boolean;
 }
 
 export interface FundoFilters {

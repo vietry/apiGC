@@ -4,6 +4,320 @@ import { CustomError, PaginationDto, VisitaFilters } from '../../domain';
 import { CreateVisitaDto } from '../dtos/create-visita.dto';
 import { UpdateVisitaDto } from '../dtos/update-visita.dto';
 
+type EstadisticasVisitaPeriodo = {
+    total: number;
+    porEstado: Record<string, number>;
+    porColaborador: {
+        nombre: string;
+        cargo: string | null;
+        cantidad: number;
+        completadas: number;
+        porcentajeCompletadas: number;
+        //colaborador: { nombre: string; cargo: string | null };
+    }[];
+    porPuntoContacto: { nombre: string; cantidad: number }[];
+    totalCompra: number;
+};
+
+type PeriodoEstadistica = {
+    desde: Date;
+    hasta: Date;
+};
+
+function calcularPeriodo(
+    tipo: string,
+    desde?: Date,
+    hasta?: Date
+): PeriodoEstadistica {
+    const now = new Date();
+    let inicio: Date, fin: Date;
+    switch (tipo) {
+        case 'dia':
+            inicio = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            fin = new Date(inicio);
+            fin.setDate(fin.getDate() + 1);
+            break;
+        case 'semana':
+            const day = now.getDay();
+            inicio = new Date(now);
+            inicio.setDate(now.getDate() - day);
+            inicio.setHours(0, 0, 0, 0);
+            fin = new Date(inicio);
+            fin.setDate(fin.getDate() + 7);
+            break;
+        case 'mes':
+            inicio = new Date(now.getFullYear(), now.getMonth(), 1);
+            fin = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            break;
+        case 'año':
+            inicio = new Date(now.getFullYear(), 0, 1);
+            fin = new Date(now.getFullYear() + 1, 0, 1);
+            break;
+        case 'personalizado':
+            if (!desde || !hasta)
+                throw new Error(
+                    'Debe especificar fechas para periodo personalizado'
+                );
+            inicio = desde;
+            fin = hasta;
+            break;
+        default:
+            throw new Error('Tipo de periodo no soportado');
+    }
+    return { desde: inicio, hasta: fin };
+}
+
+function calcularPeriodoComparativo(
+    tipo: string,
+    periodoActual: PeriodoEstadistica,
+    desde?: Date,
+    hasta?: Date
+): PeriodoEstadistica {
+    switch (tipo) {
+        case 'anterior':
+            // Periodo inmediatamente anterior al actual
+            const diff =
+                periodoActual.hasta.getTime() - periodoActual.desde.getTime();
+            return {
+                desde: new Date(periodoActual.desde.getTime() - diff),
+                hasta: new Date(periodoActual.hasta.getTime() - diff),
+            };
+        case 'anioAnterior':
+            // Mismo periodo pero un año antes
+            return {
+                desde: new Date(
+                    periodoActual.desde.getFullYear() - 1,
+                    periodoActual.desde.getMonth(),
+                    periodoActual.desde.getDate()
+                ),
+                hasta: new Date(
+                    periodoActual.hasta.getFullYear() - 1,
+                    periodoActual.hasta.getMonth(),
+                    periodoActual.hasta.getDate()
+                ),
+            };
+        case 'ultimoTrimestre':
+            // Últimos 3 meses desde hoy
+            const ahora = new Date();
+            const desdeTrim = new Date(
+                ahora.getFullYear(),
+                ahora.getMonth() - 3,
+                ahora.getDate()
+            );
+            return { desde: desdeTrim, hasta: ahora };
+        case 'personalizado':
+            if (!desde || !hasta)
+                throw new Error(
+                    'Debe especificar fechas para periodo comparativo personalizado'
+                );
+            return { desde, hasta };
+        default:
+            throw new Error('Tipo de periodo comparativo no soportado');
+    }
+}
+
+async function calcularEstadisticasVisitas(
+    where: any
+): Promise<EstadisticasVisitaPeriodo & { porUbigeo: any[] }> {
+    const visitas = await prisma.visita.findMany({
+        where,
+        include: {
+            Colaborador: {
+                include: {
+                    Usuario: { select: { nombres: true, apellidos: true } },
+                },
+            },
+            Contacto: {
+                include: {
+                    PuntoContacto: {
+                        include: {
+                            Distrito: {
+                                include: {
+                                    Provincia: {
+                                        include: {
+                                            Departamento: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+    const total = visitas.length;
+    const porEstado: Record<string, number> = {};
+    // Guardar datos de colaborador (nombre y cargo)
+    const porColaborador: Record<
+        string,
+        {
+            cantidad: number;
+            completadas: number;
+            colaborador: { nombre: string; cargo: string | null };
+            cargo: string | null;
+        }
+    > = {};
+    const porPuntoContacto: Record<string, number> = {};
+    let totalCompra = 0;
+
+    visitas.forEach((v) => {
+        // Estado
+        if (v.estado) porEstado[v.estado] = (porEstado[v.estado] || 0) + 1;
+        // Colaborador
+        const nombreColab = v.Colaborador
+            ? `${v.Colaborador.Usuario?.nombres ?? ''} ${
+                  v.Colaborador.Usuario?.apellidos ?? ''
+              }`.trim()
+            : 'Sin colaborador';
+        const cargoColab = v.Colaborador?.cargo ?? null;
+        if (!porColaborador[nombreColab])
+            porColaborador[nombreColab] = {
+                cantidad: 0,
+                completadas: 0,
+                colaborador: { nombre: nombreColab, cargo: cargoColab },
+                cargo: cargoColab,
+            };
+        porColaborador[nombreColab].cantidad += 1;
+        if ((v.estado ?? '').toLowerCase() === 'completado')
+            porColaborador[nombreColab].completadas += 1;
+        // Si el cargo es null y ya existe, intenta actualizarlo si lo encuentra
+        if (!porColaborador[nombreColab].colaborador.cargo && cargoColab) {
+            porColaborador[nombreColab].colaborador.cargo = cargoColab;
+        }
+        // Punto de contacto
+        const punto = v.Contacto?.PuntoContacto?.nombre ?? 'Sin punto';
+        porPuntoContacto[punto] = (porPuntoContacto[punto] || 0) + 1;
+        // Resultado compra
+        if ((v.resultado ?? '').toLowerCase() === 'compra') totalCompra++;
+    });
+
+    // Ordenar por cantidad de visitas de forma decreciente y devolver como array
+    const porColaboradorOrdenado = Object.entries(porColaborador)
+        .map(([_, data]) => ({
+            nombre: data.colaborador.nombre,
+            cantidad: data.cantidad,
+            completadas: data.completadas,
+            porcentajeCompletadas:
+                data.cantidad > 0
+                    ? Number(
+                          ((data.completadas / data.cantidad) * 100).toFixed(2)
+                      )
+                    : 0,
+            //colaborador: data.colaborador,
+            cargo: data.cargo,
+        }))
+        .sort((a, b) => b.cantidad - a.cantidad);
+
+    const porPuntoContactoOrdenado = Object.entries(porPuntoContacto)
+        .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+        .sort((a, b) => b.cantidad - a.cantidad);
+
+    // Agrupación por Departamento > Provincia > Distrito
+    const ubigeoMap = new Map<
+        number, // idDepartamento
+        {
+            id: number;
+            nombre: string;
+            cantidad: number;
+            provincias: Map<
+                number,
+                {
+                    id: number;
+                    nombre: string;
+                    cantidad: number;
+                    distritos: Map<
+                        number,
+                        {
+                            id: number;
+                            nombre: string;
+                            cantidad: number;
+                        }
+                    >;
+                }
+            >;
+        }
+    >();
+
+    visitas.forEach((v) => {
+        const punto = v.Contacto?.PuntoContacto;
+        const distrito = punto?.Distrito;
+        const provincia = distrito?.Provincia;
+        const departamento = provincia?.Departamento;
+        if (!departamento || !provincia || !distrito) return;
+
+        // Departamento
+        const departamentoId = Number(departamento.id);
+        if (!ubigeoMap.has(departamentoId)) {
+            ubigeoMap.set(departamentoId, {
+                id: departamentoId,
+                nombre: departamento.nombre,
+                cantidad: 0,
+                provincias: new Map(),
+            });
+        }
+        const dep = ubigeoMap.get(departamentoId)!;
+        dep.cantidad++;
+
+        // Provincia
+        const provinciaId = Number(provincia.id);
+        if (!dep.provincias.has(provinciaId)) {
+            dep.provincias.set(provinciaId, {
+                id: provinciaId,
+                nombre: provincia.nombre,
+                cantidad: 0,
+                distritos: new Map(),
+            });
+        }
+        const prov = dep.provincias.get(provinciaId)!;
+        prov.cantidad++;
+
+        // Distrito
+        const distritoId = Number(distrito.id);
+        if (!prov.distritos.has(distritoId)) {
+            prov.distritos.set(distritoId, {
+                id: distritoId,
+                nombre: distrito.nombre,
+                cantidad: 0,
+            });
+        }
+        const dist = prov.distritos.get(distritoId)!;
+        dist.cantidad++;
+    });
+
+    // Convertir a array y ordenar descendente por cantidad
+    const porUbigeo = Array.from(ubigeoMap.values())
+        .map((dep) => ({
+            id: dep.id,
+            nombre: dep.nombre,
+            cantidad: dep.cantidad,
+            provincias: Array.from(dep.provincias.values())
+                .map((prov) => ({
+                    id: prov.id,
+                    nombre: prov.nombre,
+                    cantidad: prov.cantidad,
+                    distritos: Array.from(prov.distritos.values())
+                        .map((dist) => ({
+                            id: dist.id,
+                            nombre: dist.nombre,
+                            cantidad: dist.cantidad,
+                        }))
+                        .sort((a, b) => b.cantidad - a.cantidad),
+                }))
+                .sort((a, b) => b.cantidad - a.cantidad),
+        }))
+        .sort((a, b) => b.cantidad - a.cantidad);
+
+    return {
+        total,
+        porEstado,
+        porColaborador: porColaboradorOrdenado,
+        porPuntoContacto: porPuntoContactoOrdenado,
+        totalCompra,
+        porUbigeo,
+    };
+}
+
 export class VisitaService {
     async createVisita(createVisitaDto: CreateVisitaDto) {
         // Verificar que el colaborador exista
@@ -37,7 +351,7 @@ export class VisitaService {
                     idContacto: createVisitaDto.idContacto,
                     idCultivo: createVisitaDto.idCultivo,
                     idRepresentada: createVisitaDto.idRepresentada,
-                    empGrupo: createVisitaDto.empGrupo,
+                    motivo: createVisitaDto.motivo,
                     programada: createVisitaDto.programada,
                     createdAt: currentDate,
                     updatedAt: currentDate,
@@ -261,7 +575,7 @@ export class VisitaService {
                         detalle: visita.detalle,
                         latitud: visita.latitud,
                         longitud: visita.longitud,
-                        empGrupo: visita.empGrupo,
+                        motivo: visita.motivo,
                         programada: visita.programada,
                         idColaborador: visita.idColaborador,
                         colaborador: visita.Colaborador
@@ -380,7 +694,7 @@ export class VisitaService {
                 detalle: visita.detalle,
                 latitud: visita.latitud,
                 longitud: visita.longitud,
-                empGrupo: visita.empGrupo,
+                motivo: visita.motivo,
                 programada: visita.programada,
                 idColaborador: visita.idColaborador,
                 colaborador: visita.Colaborador
@@ -597,7 +911,7 @@ export class VisitaService {
                     detalle: visita.detalle,
                     latitud: visita.latitud,
                     longitud: visita.longitud,
-                    empGrupo: visita.empGrupo,
+                    empGrupo: visita.motivo,
                     programada: visita.programada,
                     idColaborador: visita.idColaborador,
                     colaborador: visita.Colaborador
@@ -754,5 +1068,156 @@ export class VisitaService {
             }));
 
         return ranking;
+    }
+
+    async createMultipleVisitas(visitasDtos: CreateVisitaDto[]) {
+        try {
+            const BATCH_SIZE = 50;
+            const allResults = [];
+
+            for (let i = 0; i < visitasDtos.length; i += BATCH_SIZE) {
+                const batch = visitasDtos.slice(i, i + BATCH_SIZE);
+
+                const batchResults = await prisma.$transaction(
+                    async (prismaClient) => {
+                        const results = [];
+                        for (const dto of batch) {
+                            const currentDate = getCurrentDate();
+                            const visita = await prismaClient.visita.create({
+                                data: {
+                                    programacion: dto.programacion,
+                                    duracionP: dto.duracionP,
+                                    objetivo: dto.objetivo,
+                                    semana: dto.semana,
+                                    estado: dto.estado,
+                                    numReprog: dto.numReprog,
+                                    inicio: dto.inicio,
+                                    finalizacion: dto.finalizacion,
+                                    duracionV: dto.duracionV,
+                                    resultado: dto.resultado,
+                                    aFuturo: dto.aFuturo,
+                                    detalle: dto.detalle,
+                                    latitud: dto.latitud,
+                                    longitud: dto.longitud,
+                                    idColaborador: dto.idColaborador,
+                                    idContacto: dto.idContacto,
+                                    idCultivo: dto.idCultivo,
+                                    //idRepresentada: dto.idRepresentada,
+                                    motivo: dto.motivo,
+                                    programada: dto.programada,
+                                    createdAt: currentDate,
+                                    updatedAt: currentDate,
+                                },
+                            });
+                            results.push(visita);
+                        }
+                        return results;
+                    },
+                    {
+                        timeout: 20000,
+                        maxWait: 25000,
+                    }
+                );
+                allResults.push(...batchResults);
+            }
+            return allResults;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    /**
+     * Obtiene estadísticas de visitas para un periodo y un periodo comparativo.
+     * @param filters Filtros de visitas (sin fechas)
+     * @param periodoActual { tipo: 'dia'|'semana'|'mes'|'año'|'personalizado', desde?: Date, hasta?: Date }
+     * @param periodoComparativo { tipo: 'anterior'|'anioAnterior'|'ultimoTrimestre'|'personalizado', desde?: Date, hasta?: Date }
+     */
+    async getVisitasEstadisticas(
+        periodoActual: { tipo: string; desde?: Date; hasta?: Date },
+        periodoComparativo: { tipo: string; desde?: Date; hasta?: Date },
+        filters: VisitaFilters = {}
+    ) {
+        // Construir where base sin fechas
+        const {
+            idColaborador,
+            estado,
+            semana,
+            idVegetacion,
+            idFamilia,
+            idPuntoContacto,
+            idContacto,
+            idRepresentada,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
+        } = filters;
+        const whereBase: any = {};
+        if (idColaborador) whereBase.idColaborador = idColaborador;
+        if (estado) whereBase.estado = estado;
+        if (semana) whereBase.semana = semana;
+        if (idRepresentada) whereBase.idRepresentada = idRepresentada;
+        if (programada !== undefined) whereBase.programada = programada;
+        if (idVegetacion) {
+            whereBase.Cultivo = {
+                Variedad: { Vegetacion: { id: idVegetacion } },
+            };
+        }
+        if (idFamilia) {
+            whereBase.Cultivo = {
+                ...whereBase.Cultivo,
+                Variedad: {
+                    ...whereBase.Cultivo?.Variedad,
+                    Vegetacion: {
+                        ...whereBase.Cultivo?.Variedad?.Vegetacion,
+                        idFamilia: idFamilia,
+                    },
+                },
+            };
+        }
+        if (idPuntoContacto)
+            whereBase.Contacto = { idPuntoContacto: idPuntoContacto };
+        if (idContacto) whereBase.idContacto = idContacto;
+        if (idSubLabor1)
+            whereBase.LaborVisita = { some: { idSubLabor1: idSubLabor1 } };
+        if (idSubLabor2)
+            whereBase.LaborVisita = { some: { idSubLabor2: idSubLabor2 } };
+
+        // Calcular periodos
+        const periodo1 = calcularPeriodo(
+            periodoActual.tipo,
+            periodoActual.desde,
+            periodoActual.hasta
+        );
+        const periodo2 = calcularPeriodoComparativo(
+            periodoComparativo.tipo,
+            periodo1,
+            periodoComparativo.desde,
+            periodoComparativo.hasta
+        );
+
+        // Consultar estadísticas para ambos periodos
+        const [statsActual, statsComparativo] = await Promise.all([
+            calcularEstadisticasVisitas({
+                ...whereBase,
+                programacion: { gte: periodo1.desde, lt: periodo1.hasta },
+            }),
+            calcularEstadisticasVisitas({
+                ...whereBase,
+                programacion: { gte: periodo2.desde, lt: periodo2.hasta },
+            }),
+        ]);
+
+        return {
+            periodoActual: {
+                desde: periodo1.desde,
+                hasta: periodo1.hasta,
+                ...statsActual,
+            },
+            periodoComparativo: {
+                desde: periodo2.desde,
+                hasta: periodo2.hasta,
+                ...statsComparativo,
+            },
+        };
     }
 }

@@ -9,6 +9,7 @@ export class LaborVisitaRoutes {
         const controller = new LaborVisitaController(laborVisitaService);
 
         router.post('/', controller.createLaborVisita);
+        router.post('/bulk', controller.createMultipleLaborVisita);
         router.put('/:id', controller.updateLaborVisita);
         router.get('/sublabores', controller.getSubLaboresVisita);
         router.get('/:id', controller.getLaborVisitaById);

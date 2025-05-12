@@ -32,6 +32,47 @@ export class VisitaProductoService {
         }
     }
 
+    async createMultipleVisitaProductos(
+        visitaProductosDtos: CreateVisitaProductoDto[]
+    ) {
+        try {
+            const BATCH_SIZE = 50;
+            const allResults = [];
+
+            for (let i = 0; i < visitaProductosDtos.length; i += BATCH_SIZE) {
+                const batch = visitaProductosDtos.slice(i, i + BATCH_SIZE);
+
+                const batchResults = await prisma.$transaction(
+                    async (prismaClient) => {
+                        const results = [];
+                        for (const dto of batch) {
+                            const currentDate = getCurrentDate();
+                            const visitaProducto =
+                                await prismaClient.visitaProducto.create({
+                                    data: {
+                                        idVisita: dto.idVisita,
+                                        idFamilia: dto.idFamilia,
+                                        createdAt: currentDate,
+                                        updatedAt: currentDate,
+                                    },
+                                });
+                            results.push(visitaProducto);
+                        }
+                        return results;
+                    },
+                    {
+                        timeout: 20000,
+                        maxWait: 25000,
+                    }
+                );
+                allResults.push(...batchResults);
+            }
+            return allResults;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async updateVisitaProducto(updateDto: UpdateVisitaProductoDto) {
         const exists = await prisma.visitaProducto.findUnique({
             where: { id: updateDto.id },

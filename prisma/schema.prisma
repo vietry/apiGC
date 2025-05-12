@@ -158,6 +158,7 @@ model Colaborador {
   ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador ColaboradorJefe[] @relation("ColaboradorJefe_idColaboradorToColaborador")
   ColaboradorJefe_ColaboradorJefe_idJefeToColaborador        ColaboradorJefe[] @relation("ColaboradorJefe_idJefeToColaborador")
   Gte                                                        Gte[]
+  PuntoContacto                                              PuntoContacto[]
   Visita                                                     Visita[]
 }
 
@@ -389,7 +390,7 @@ model Visita {
   idRepresentada Int?
   createdAt      DateTime?        @db.DateTime
   updatedAt      DateTime?        @db.DateTime
-  empGrupo       String?          @db.VarChar(10)
+  motivo         String?          @db.VarChar(255)
   programada     Boolean?
   FotoVisita     FotoVisita[]
   LaborVisita    LaborVisita[]
@@ -541,9 +542,13 @@ model PuntoContacto {
   cantR1                                          Int?
   cantR2                                          Int?
   aniversario                                     DateTime?         @db.Date
+  gestion                                         Boolean?
+  idColaborador                                   Int?
+  sede                                            String?           @db.VarChar(30)
   Charla                                          Charla[]
   ContactoPunto                                   ContactoPunto[]
   Fundo                                           Fundo[]
+  Colaborador                                     Colaborador?      @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Colaborador")
   Distrito                                        Distrito?         @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Distrito")
   Empresa                                         Empresa?          @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Empresa1")
   Gte                                             Gte?              @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Gte")

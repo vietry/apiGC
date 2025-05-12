@@ -33,6 +33,23 @@ export class ContactoPuntoController {
             .catch((error) => this.handleError(res, error));
     };
 
+    createMultipleContactosPunto = async (req: Request, res: Response) => {
+        // Se espera un array de objetos en req.body
+        if (!Array.isArray(req.body)) {
+            return res
+                .status(400)
+                .json({ error: 'El cuerpo debe ser un array de contactos' });
+        }
+        // Validación básica, puedes mejorarla si tienes un DTO batch
+        const dtos: any[] = req.body;
+        // Opcional: podrías validar cada DTO aquí
+
+        this.contactoPuntoService
+            .createMultipleContactosPunto(dtos)
+            .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
     updateContactoPunto = async (req: Request, res: Response) => {
         const id = +req.params.id;
         const [error, updateContactoPuntoDto] =

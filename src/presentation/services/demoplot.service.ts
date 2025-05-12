@@ -1566,6 +1566,8 @@ export class DemoplotService {
                         },
                         Gte: {
                             select: {
+                                tipo: true,
+                                SubZona: true,
                                 Usuario: {
                                     select: {
                                         nombres: true,
@@ -1671,6 +1673,8 @@ export class DemoplotService {
                         variedad: demoplot.Cultivo.Variedad.nombre,
                         //FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: `${demoplot.Gte.Usuario?.nombres} ${demoplot.Gte.Usuario?.apellidos}`,
+                        subzona: demoplot.Gte.SubZona?.nombre,
+                        tipo: demoplot.Gte.tipo,
                         departamento:
                             demoplot.Distrito.Provincia.Departamento.nombre,
                         provincia: demoplot.Distrito.Provincia.nombre.trim(),

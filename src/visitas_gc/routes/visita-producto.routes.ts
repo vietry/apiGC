@@ -10,6 +10,8 @@ export class VisitaProductoRoutes {
 
         // Endpoint para crear una nueva VisitaProducto
         router.post('/', controller.createVisitaProducto);
+        // Endpoint para la carga masiva de visitaProductos
+        router.post('/bulk', controller.createMultipleVisitaProductos);
         // Endpoint para actualizar una VisitaProducto
         router.put('/:id', controller.updateVisitaProducto);
         // Endpoint para obtener una VisitaProducto por id

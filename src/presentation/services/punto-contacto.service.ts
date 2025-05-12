@@ -7,10 +7,9 @@ import {
     PuntoFilters,
     UpdatePuntoContactoDto,
 } from '../../domain';
+import { getCurrentDate } from '../../config/time';
 
 export class PuntoContactoService {
-    constructor() {}
-
     async createPuntoContacto(createPuntoContactoDto: CreatePuntoContactoDto) {
         const puntoContactoExists = await prisma.puntoContacto.findFirst({
             where: {
@@ -26,7 +25,7 @@ export class PuntoContactoService {
             );
 
         try {
-            const currentDate = new Date();
+            const currentDate = getCurrentDate();
 
             const puntoContacto = await prisma.puntoContacto.create({
                 data: {
@@ -42,6 +41,9 @@ export class PuntoContactoService {
                     idGte: createPuntoContactoDto.idGte,
                     idDistrito: createPuntoContactoDto.idDistrito,
                     idEmpresa: createPuntoContactoDto.idEmpresa,
+                    idColaborador: createPuntoContactoDto.idColaborador,
+                    gestion: createPuntoContactoDto.gestion,
+                    sede: createPuntoContactoDto.sede,
                     codZona: createPuntoContactoDto.codZona,
                     subTipo: createPuntoContactoDto.subTipo,
                     cantR0: createPuntoContactoDto.cantR0,
@@ -64,6 +66,8 @@ export class PuntoContactoService {
                 activo: puntoContacto.activo,
                 idGte: puntoContacto.idGte,
                 idDistrito: puntoContacto.idDistrito,
+                idColaborador: puntoContacto.idColaborador,
+                gestion: puntoContacto.gestion,
                 idEmpresa: puntoContacto.idEmpresa,
                 codZona: puntoContacto.codZona,
                 hectareas: puntoContacto.hectareas,
@@ -78,6 +82,7 @@ export class PuntoContactoService {
     }
 
     async updatePuntoContacto(updatePuntoContactoDto: UpdatePuntoContactoDto) {
+        const currentDate = getCurrentDate();
         const puntoContactoExists = await prisma.puntoContacto.findFirst({
             where: { id: updatePuntoContactoDto.id },
         });
@@ -91,7 +96,7 @@ export class PuntoContactoService {
                 where: { id: updatePuntoContactoDto.id },
                 data: {
                     ...updatePuntoContactoDto.values, // Usar valores directamente del DTO
-                    updatedAt: new Date(),
+                    updatedAt: currentDate,
                 },
             });
 
@@ -120,6 +125,7 @@ export class PuntoContactoService {
             idSubzona,
             codZona,
             nomZona,
+            gestion, // Nuevo filtro
         } = filters;
 
         // Construir el objeto where para los filtros
@@ -143,6 +149,12 @@ export class PuntoContactoService {
         }
         if (codZona) {
             where.codZona = codZona;
+        }
+        if (idColaborador) {
+            where.idColaborador = idColaborador;
+        }
+        if (gestion !== undefined) {
+            where.gestion = gestion;
         }
 
         // Filtro por distrito
@@ -170,15 +182,10 @@ export class PuntoContactoService {
         }
 
         // Filtros relacionados con Gte y Colaborador
-        if (idColaborador || idMacrozona || nomZona) {
+        // idColaborador ya no se filtra aquí
+        if (idMacrozona || idSubzona || nomZona) {
             where.Gte = {
                 AND: [
-                    // Condición idColaborador
-                    idColaborador
-                        ? {
-                              Colaborador: { id: idColaborador },
-                          }
-                        : {},
                     // Condición idMacrozona
                     idMacrozona
                         ? {
@@ -297,7 +304,7 @@ export class PuntoContactoService {
                         idGte: puntoContacto.idGte,
                         hectareas: puntoContacto.hectareas,
                         idUsuario: puntoContacto.Gte?.Usuario?.id,
-                        idColaborador: puntoContacto.Gte?.Colaborador?.id,
+                        idColaborador: puntoContacto.idColaborador, // Cambiado: directo de PuntoContacto
                         idDistrito: puntoContacto.Distrito?.id,
                         distrito: puntoContacto.Distrito?.nombre,
                         idProvincia: puntoContacto.Distrito?.idProvincia,
@@ -321,6 +328,8 @@ export class PuntoContactoService {
                         cantR1: puntoContacto.cantR1,
                         cantR2: puntoContacto.cantR2,
                         aniversario: puntoContacto.aniversario,
+                        gestion: puntoContacto.gestion,
+                        sede: puntoContacto.sede,
                     };
                 }),
             };
@@ -531,6 +540,8 @@ export class PuntoContactoService {
                     cantR1: puntoContacto.cantR1,
                     cantR2: puntoContacto.cantR2,
                     aniversario: puntoContacto.aniversario,
+                    gestion: puntoContacto.gestion,
+                    sede: puntoContacto.sede,
                 };
             });
         } catch (error) {
@@ -783,6 +794,77 @@ export class PuntoContactoService {
                 cantR2: puntoContacto.cantR2,
                 aniversario: puntoContacto.aniversario,
             }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async createMultiplePuntosContacto(
+        puntosContactoDtos: CreatePuntoContactoDto[]
+    ) {
+        try {
+            const BATCH_SIZE = 50;
+            const allResults = [];
+
+            for (let i = 0; i < puntosContactoDtos.length; i += BATCH_SIZE) {
+                const batch = puntosContactoDtos.slice(i, i + BATCH_SIZE);
+
+                const batchResults = await prisma.$transaction(
+                    async (prismaClient) => {
+                        const results = [];
+                        for (const dto of batch) {
+                            // Validación de unicidad por numDoc + idGte
+                            // const exists =
+                            //     await prismaClient.puntoContacto.findFirst({
+                            //         where: {
+                            //             AND: [
+                            //                 { numDoc: dto.numDoc },
+                            //                 { idGte: dto.idGte },
+                            //             ],
+                            //         },
+                            //     });
+                            // if (exists) {
+                            //     throw CustomError.badRequest(
+                            //         `Ya existe un Cliente/Tienda con el número de documento ${dto.numDoc} para el GTE ${dto.idGte}.`
+                            //     );
+                            // }
+                            const currentDate = getCurrentDate();
+                            const puntoContacto =
+                                await prismaClient.puntoContacto.create({
+                                    data: {
+                                        nombre: dto.nombre,
+                                        tipoDoc: dto.tipoDoc,
+                                        numDoc: dto.numDoc,
+                                        hectareas: dto.hectareas,
+                                        tipo: dto.tipo,
+                                        dirReferencia: dto.dirReferencia,
+                                        lider: dto.lider,
+                                        activo: dto.activo,
+                                        idGte: dto.idGte,
+                                        idDistrito: dto.idDistrito,
+                                        idEmpresa: dto.idEmpresa,
+                                        codZona: dto.codZona,
+                                        subTipo: dto.subTipo,
+                                        cantR0: dto.cantR0,
+                                        cantR1: dto.cantR1,
+                                        cantR2: dto.cantR2,
+                                        aniversario: dto.aniversario,
+                                        createdAt: currentDate,
+                                        updatedAt: currentDate,
+                                    },
+                                });
+                            results.push(puntoContacto);
+                        }
+                        return results;
+                    },
+                    {
+                        timeout: 20000,
+                        maxWait: 25000,
+                    }
+                );
+                allResults.push(...batchResults);
+            }
+            return allResults;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

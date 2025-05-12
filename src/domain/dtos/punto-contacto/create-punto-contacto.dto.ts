@@ -9,8 +9,11 @@ export class CreatePuntoContactoDto {
         public readonly lider: boolean | null,
         public readonly activo: boolean,
         public readonly idGte: number | null,
-        public readonly idDistrito: string,
+        public readonly idDistrito: string | null,
         public readonly idEmpresa: number | null,
+        public readonly idColaborador: number | null,
+        public readonly gestion: boolean | null,
+        public readonly sede: string | null,
         public readonly codZona: string | null,
         public readonly subTipo: string | null,
         public readonly cantR0: number | null,
@@ -34,6 +37,9 @@ export class CreatePuntoContactoDto {
             idGte,
             idDistrito,
             idEmpresa,
+            idColaborador,
+            gestion,
+            sede,
             codZona,
             subTipo,
             cantR0,
@@ -45,18 +51,23 @@ export class CreatePuntoContactoDto {
         if (!nombre) return ['Nombre is required'];
         if (!activo) return ['Activo is required'];
         //if (!idGte) return ['idGte is required'];
-        if (!idDistrito) return ['idDistrito is required'];
+        //if (!idDistrito) return ['idDistrito is required'];
         if (!tipo) return ['Tipo is required'];
 
         let hectareasNumber = hectareas;
         let idGteNumber = idGte;
         let idEmpresaNumber = idEmpresa;
+        let idColaboradorNumber = idColaborador;
 
         if (typeof hectareas !== 'number') {
             hectareasNumber = parseFloat(hectareas);
         }
         if (typeof idEmpresa !== 'number') {
             idEmpresaNumber = parseInt(idEmpresa);
+        }
+
+        if (typeof idColaborador !== 'number') {
+            idColaboradorNumber = parseInt(idEmpresa);
         }
 
         return [
@@ -73,6 +84,9 @@ export class CreatePuntoContactoDto {
                 idGteNumber,
                 idDistrito,
                 idEmpresaNumber,
+                idColaboradorNumber,
+                gestion,
+                sede,
                 codZona,
                 subTipo,
                 cantR0,

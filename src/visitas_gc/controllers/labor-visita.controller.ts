@@ -29,6 +29,23 @@ export class LaborVisitaController {
             .catch((error) => this.handleError(res, error));
     };
 
+    createMultipleLaborVisita = async (req: Request, res: Response) => {
+        if (!Array.isArray(req.body)) {
+            return res
+                .status(400)
+                .json({
+                    error: 'El cuerpo debe ser un array de laboresVisita',
+                });
+        }
+        // Aquí podrías validar cada DTO si lo deseas
+        const dtos: any[] = req.body;
+
+        this.laborVisitaService
+            .createMultipleLaborVisita(dtos)
+            .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
     updateLaborVisita = async (req: Request, res: Response) => {
         const id = parseInt(req.params.id);
         const [error, updateLaborVisitaDto] = await UpdateLaborVisitaDto.create(

@@ -195,4 +195,44 @@ export class LaborVisitaService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async createMultipleLaborVisita(laboresVisitaDtos: CreateLaborVisitaDto[]) {
+        try {
+            const BATCH_SIZE = 50;
+            const allResults = [];
+
+            for (let i = 0; i < laboresVisitaDtos.length; i += BATCH_SIZE) {
+                const batch = laboresVisitaDtos.slice(i, i + BATCH_SIZE);
+
+                const batchResults = await prisma.$transaction(
+                    async (prismaClient) => {
+                        const results = [];
+                        for (const dto of batch) {
+                            const currentDate = getCurrentDate();
+                            const laborVisita =
+                                await prismaClient.laborVisita.create({
+                                    data: {
+                                        idVisita: dto.idVisita,
+                                        idSubLabor: dto.idSubLabor,
+                                        idRepresentada: dto.idRepresentada,
+                                        createdAt: currentDate,
+                                        updatedAt: currentDate,
+                                    },
+                                });
+                            results.push(laborVisita);
+                        }
+                        return results;
+                    },
+                    {
+                        timeout: 20000,
+                        maxWait: 25000,
+                    }
+                );
+                allResults.push(...batchResults);
+            }
+            return allResults;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 }

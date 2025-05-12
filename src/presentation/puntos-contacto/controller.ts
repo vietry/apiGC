@@ -37,12 +37,34 @@ export class PuntoContactoController {
             .catch((error) => this.handleError(res, error));
     };
 
+    createMultiplePuntosContacto = async (req: Request, res: Response) => {
+        if (!Array.isArray(req.body)) {
+            return res.status(400).json({
+                error: 'El cuerpo debe ser un arreglo de puntos de contacto',
+            });
+        }
+        const dtos: CreatePuntoContactoDto[] = [];
+        for (const item of req.body) {
+            const [error, dto] = CreatePuntoContactoDto.create(item);
+            if (error)
+                return res
+                    .status(400)
+                    .json({ error: `Error en una de las filas: ${error}` });
+            dtos.push(dto!);
+        }
+        this.puntoContactoService
+            .createMultiplePuntosContacto(dtos)
+            .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
     updatePuntoContacto = async (req: Request, res: Response) => {
         const id = +req.params.id;
         const [error, updatePuntoContactoDto] = UpdatePuntoContactoDto.create({
             ...req.body,
             id,
         });
+
         if (error) return res.status(400).json({ error });
 
         this.puntoContactoService
@@ -71,6 +93,7 @@ export class PuntoContactoController {
             idSubzona,
             codZona,
             nomZona,
+            gestion, // Nuevo filtro
         } = req.query;
 
         // Construir objeto de filtros
@@ -91,6 +114,10 @@ export class PuntoContactoController {
             idSubzona: idSubzona ? +idSubzona : undefined,
             codZona: typeof codZona === 'string' ? codZona : undefined,
             nomZona: typeof nomZona === 'string' ? nomZona : undefined,
+            gestion:
+                gestion !== undefined
+                    ? !!(gestion === 'true' || gestion === '1')
+                    : undefined,
         };
 
         this.puntoContactoService

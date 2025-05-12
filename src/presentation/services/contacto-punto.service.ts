@@ -1,3 +1,4 @@
+import { getCurrentDate } from '../../config/time';
 import { prisma } from '../../data/sqlserver';
 import {
     CreateContactoPuntoDto,
@@ -8,7 +9,7 @@ import {
 
 export class ContactoPuntoService {
     //DI
-    constructor() {}
+    //constructor() {}
 
     async createContactoPunto(createContactoPuntoDto: CreateContactoPuntoDto) {
         const nombreApellido = `${createContactoPuntoDto.nombre} ${createContactoPuntoDto.apellido}`;
@@ -59,6 +60,55 @@ export class ContactoPuntoService {
                 celularB: contacto.celularB,
                 idPunto: contacto.idPunto,
             }*/
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async createMultipleContactosPunto(
+        contactosPuntoDtos: CreateContactoPuntoDto[]
+    ) {
+        try {
+            const BATCH_SIZE = 50;
+            const allResults = [];
+
+            for (let i = 0; i < contactosPuntoDtos.length; i += BATCH_SIZE) {
+                const batch = contactosPuntoDtos.slice(i, i + BATCH_SIZE);
+
+                const batchResults = await prisma.$transaction(
+                    async (prismaClient) => {
+                        const results = [];
+                        for (const dto of batch) {
+                            const currentDate = getCurrentDate();
+                            const contacto =
+                                await prismaClient.contactoPunto.create({
+                                    data: {
+                                        nombre: dto.nombre,
+                                        apellido: dto.apellido,
+                                        cargo: dto.cargo,
+                                        tipo: dto.tipo,
+                                        email: dto.email,
+                                        celularA: dto.celularA,
+                                        celularB: dto.celularB,
+                                        activo: dto.activo,
+                                        idPunto: dto.idPunto,
+                                        idGte: dto.idGte,
+                                        createdAt: currentDate,
+                                        updatedAt: currentDate,
+                                    },
+                                });
+                            results.push(contacto);
+                        }
+                        return results;
+                    },
+                    {
+                        timeout: 20000,
+                        maxWait: 25000,
+                    }
+                );
+                allResults.push(...batchResults);
+            }
+            return allResults;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
