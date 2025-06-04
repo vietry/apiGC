@@ -6,14 +6,14 @@
             <title>Version 1.5.4</title>
             <description>
                 Actualización menor con correccion de errores:
-                - Se corrigió un error que causaba que no se puediera registrar demoplots.
-                - Se mejoró la lógica del filtro de cultivos por agricultor para que sea más rápida.
+                - Se corrigió un error que no permitia iniciar sesión.
+                - Se agregó la opción para recordar usuario.
                 - Otras mejoras menores.
             
             </description>
             <pubDate>Fri, 21 Apr 2025 15:20:00 +0000</pubDate>
             <enclosure 
-                url="http://localhost/v1/apps/demoplots/apk/AppDemoplot.apk" 
+                url="https://181.224.237.186/v1/apps/demoplots/apk/AppDemoplot.apk" 
                 sparkle:version="1.5.0"
                 sparkle:os="android" 
             />

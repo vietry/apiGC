@@ -93,14 +93,9 @@ export class Server {
                 this.showMemoryUsage();
             }, 5 * 60 * 1000);
         });
-
-        // Inicia ngrok y expone el servidor local a la web
-        /*await ngrok.connect({ addr: this.port, authtoken: envs.NGROK_TOKEN})
-        .then(listener => console.log(`Ingress established at: ${listener.url()}`))*/
     }
 
     public close() {
         this.serverListener?.close();
-        //ngrok.disconnect();
     }
 }

@@ -1402,6 +1402,7 @@ export class DemoplotService {
         if (idGte) {
             where.idGte = idGte;
         }
+
         if (idVegetacion) {
             where.Cultivo = {
                 Variedad: { Vegetacion: { id: idVegetacion } },
@@ -1515,6 +1516,17 @@ export class DemoplotService {
             };
         }
 
+        // Excluir Gte.tipo == 'VETSAN'
+        if (where.Gte) {
+            if (where.Gte.AND) {
+                where.Gte.AND.push({ tipo: { not: 'VETSAN' } });
+            } else {
+                where.Gte.tipo = { not: 'VETSAN' };
+            }
+        } else {
+            where.Gte = { tipo: { not: 'VETSAN' } };
+        }
+
         try {
             const [total, demoplots] = await Promise.all([
                 prisma.demoPlot.count({ where }),
@@ -1523,6 +1535,9 @@ export class DemoplotService {
                     skip: (page - 1) * limit,
                     take: limit,
                     orderBy: { updatedAt: 'desc' },
+                    //exclude: {
+                    // excluir TIPO VETSAN
+                    //},
                     include: {
                         Familia: {
                             select: {
@@ -1537,18 +1552,18 @@ export class DemoplotService {
                             },
                         },
                         ContactoDelPunto: {
-                            select: {
-                                nombre: true,
-                                cargo: true,
-                                apellido: true,
-                                email: true,
-                                celularA: true,
-                                tipo: true,
+                            include: {
+                                //nombre: true,
+                                // cargo: true,
+                                // apellido: true,
+                                // email: true,
+                                // celularA: true,
+                                // tipo: true,
                                 PuntoContacto: true,
                             },
                         },
                         Cultivo: {
-                            select: {
+                            include: {
                                 Variedad: {
                                     select: {
                                         nombre: true,
@@ -1565,8 +1580,8 @@ export class DemoplotService {
                             },
                         },
                         Gte: {
-                            select: {
-                                tipo: true,
+                            include: {
+                                //tipo: true,
                                 SubZona: true,
                                 Usuario: {
                                     select: {
@@ -1639,7 +1654,8 @@ export class DemoplotService {
                         id: demoplot.id,
                         titulo: demoplot.titulo,
                         objetivo: demoplot.objetivo,
-                        hasCultivo: demoplot.hasCultivo,
+                        //hasCultivo: demoplot.hasCultivo,
+                        hasCultivo: Number(demoplot.hasCultivo),
                         instalacion: demoplot.instalacion,
                         seguimiento: demoplot.seguimiento,
                         finalizacion: demoplot.finalizacion,
@@ -1657,6 +1673,10 @@ export class DemoplotService {
                         idDistrito: demoplot.idDistrito,
                         idFamilia: demoplot.idFamilia,
                         idGte: demoplot.idGte,
+                        //nuevos
+                        focoGte: demoplot.Gte.tipo,
+                        estadoGte: demoplot.Gte.activo,
+                        //
                         familia: demoplot.Familia?.nombre.trim(),
                         clase: demoplot.Familia?.clase,
                         blancoCientifico: demoplot.BlancoBiologico.cientifico,
@@ -1666,8 +1686,11 @@ export class DemoplotService {
                         tipoContacto: demoplot.ContactoDelPunto.tipo,
                         emailContacto: demoplot.ContactoDelPunto.email,
                         celularContacto: demoplot.ContactoDelPunto.celularA,
+                        hectareas: demoplot.Cultivo.hectareas,
                         idPunto: demoplot.ContactoDelPunto.PuntoContacto.id,
                         punto: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                        numDocPunto:
+                            demoplot.ContactoDelPunto.PuntoContacto.numDoc,
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
