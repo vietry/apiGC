@@ -15,6 +15,7 @@ export class DemoPlotEntity {
         public gradoInfestacion: string | null,
         public dosis: number | null,
         public validacion: boolean | null,
+        public checkJefe: boolean | null,
         public resultado: string | null,
         public diaCampo: boolean | null,
         public idCultivo: number,
@@ -29,9 +30,8 @@ export class DemoPlotEntity {
         public cantidad: number | null,
         public importe: number | null,
         public createdBy: number | null,
-        public updatedBy: number | null
-    ) // public createdAt: Date | null,
-    // public updatedAt: Date | null
+        public updatedBy: number | null // public createdAt: Date | null,
+    ) // public updatedAt: Date | null
     {}
 
     public static fromObject(object: { [key: string]: any }): DemoPlotEntity {
@@ -49,6 +49,7 @@ export class DemoPlotEntity {
             gradoInfestacion,
             dosis,
             validacion,
+            checkJefe,
             resultado,
             diaCampo,
             idCultivo,
@@ -94,6 +95,7 @@ export class DemoPlotEntity {
             gradoInfestacion,
             dosis,
             validacion,
+            checkJefe,
             resultado,
             diaCampo,
             idCultivo,

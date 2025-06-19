@@ -177,6 +177,38 @@ export class AuthService {
         return true;
     };
 
+    // Nuevo método para validar sesión por email (sin JWT)
+    public async checkUserFromEmail(email: string) {
+        if (!email) {
+            throw CustomError.badRequest('Email is required');
+        }
+        const user = await prisma.usuario.findFirst({
+            where: { email: email },
+            include: {
+                Foto: true,
+            },
+        });
+        if (!user) {
+            throw CustomError.notFound('Usuario no encontrado');
+        }
+        const { password, ...userEntity } = UsuarioEntity.fromObject(user);
+        const tipoUser = await Validators.getTipoUsuario(user.id);
+        return {
+            user: {
+                ...userEntity,
+                foto: user.Foto?.nombre,
+                idTipo: tipoUser.idTipo,
+                tipo: tipoUser.tipo,
+                area: tipoUser.area,
+                cargo: tipoUser.cargo,
+                zona: tipoUser.zona,
+                idMacrozona: tipoUser.idMacrozona,
+                idEmpresa: tipoUser.idEmpresa,
+                empresa: tipoUser.empresa,
+            },
+        };
+    }
+
     /*public async getTipoUsuario(idUsuario: number): Promise<{ idTipo: number; tipo: string }> {
       const colaborador = await prisma.colaborador.findFirst({ where: { idUsuario } });
       if (colaborador) {

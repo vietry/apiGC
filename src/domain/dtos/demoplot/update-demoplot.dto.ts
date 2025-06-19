@@ -14,6 +14,7 @@ export class UpdateDemoplotDto {
         public readonly gradoInfestacion?: string | null,
         public readonly dosis?: number | null,
         public readonly validacion?: boolean | null,
+        public readonly checkJefe?: boolean | null,
         public readonly resultado?: string | null,
         public readonly idCultivo?: number,
         public readonly idContactoP?: number,
@@ -47,7 +48,9 @@ export class UpdateDemoplotDto {
         if (this.gradoInfestacion)
             returnObj.gradoInfestacion = this.gradoInfestacion;
         if (this.dosis) returnObj.dosis = this.dosis;
-        if (this.validacion) returnObj.validacion = this.validacion;
+        if (this.validacion !== undefined)
+            returnObj.validacion = this.validacion;
+        if (this.checkJefe !== undefined) returnObj.checkJefe = this.checkJefe;
         if (this.resultado) returnObj.resultado = this.resultado;
         if (this.idCultivo) returnObj.idCultivo = this.idCultivo;
         if (this.idContactoP) returnObj.idContactoP = this.idContactoP;
@@ -84,6 +87,7 @@ export class UpdateDemoplotDto {
             gradoInfestacion,
             dosis,
             validacion,
+            checkJefe,
             resultado,
             idCultivo,
             idContactoP,
@@ -180,6 +184,7 @@ export class UpdateDemoplotDto {
                 gradoInfestacion,
                 dosisNumber,
                 validacion,
+                checkJefe,
                 resultado,
                 idCultivoNumber,
                 idContactoPNumber,

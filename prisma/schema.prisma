@@ -27,7 +27,7 @@ model Usuario {
   email                                                  String              @db.VarChar(40)
   emailValidado                                          Boolean?
   password                                               String              @db.VarChar(255)
-  rol                                                    String?             @db.VarChar(10)
+  rol                                                    String?             @db.VarChar(20)
   celular                                                String?             @db.VarChar(15)
   idFoto                                                 Int?
   createdAt                                              DateTime?           @db.DateTime
@@ -466,6 +466,7 @@ model DemoPlot {
   updatedBy                           Int?
   fecVenta                            DateTime?         @db.DateTime
   idCharla                            Int?
+  checkJefe                           Boolean?
   ConsumoMuestras                     ConsumoMuestras[]
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
@@ -834,7 +835,7 @@ model VariablePersonal {
   Usuario_VariablePersonal_createdByToUsuario Usuario?  @relation("VariablePersonal_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalCreated")
   Gte                                         Gte       @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VariablePersonalGenerador")
   Usuario_VariablePersonal_updatedByToUsuario Usuario?  @relation("VariablePersonal_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalUpdated")
-  @@unique([idGte, year, month], name: "idGte_year_month")
+ @@unique([idGte, year, month], name: "idGte_year_month")
 }
 
 model RegistroLaboralGD {

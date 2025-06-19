@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import sql from 'mssql';
 
 interface Options {
@@ -8,6 +9,8 @@ interface Options {
 }
 
 export class SqlServerDatabase {
+    private static readonly prisma = new PrismaClient();
+
     static async connect(options: Options) {
         const { user, password, server, database } = options;
 
@@ -19,16 +22,26 @@ export class SqlServerDatabase {
                 database: database,
                 options: {
                     encrypt: false,
-                    trustServerCertificate: true
-                }
+                    trustServerCertificate: true,
+                },
             });
 
             console.log('SQL Server connected');
             return true;
-
         } catch (error) {
             console.log('SQL Server connection error');
             throw error;
+        }
+    }
+
+    // Método para verificar la salud de la base de datos
+    static async healthCheck(): Promise<boolean> {
+        try {
+            await this.prisma.$queryRaw`SELECT 1`;
+            return true;
+        } catch (error) {
+            console.error('❌ Health check falló:', error);
+            return false;
         }
     }
 }

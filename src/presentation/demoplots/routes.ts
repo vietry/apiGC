@@ -38,7 +38,9 @@ export class DemoplotRoutes {
             controller.getGteRankingsAnioMes
         );
         router.post('/', controller.createDemoplot);
+
         router.put('/:id', controller.updateDemoplot);
+        router.patch('/:id', controller.patchDemoplot);
 
         return router;
     }

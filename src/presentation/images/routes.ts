@@ -15,6 +15,9 @@ export class ImageRoutes {
 
         router.delete('/delete/:type/:img', controller1.deleteFile);
         router.get('/:type/:idCharla/:img', controller.getImageCharla);
+        router.get('/:type/by-email/:email/:img', (req, res) =>
+            controller.getImageCharlaByEmail(req, res)
+        );
         router.get('/:type/:img', controller.getImage);
 
         router.delete(

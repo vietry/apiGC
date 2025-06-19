@@ -34,6 +34,45 @@ export interface DemoplotFilters {
 }
 
 export class DemoplotService {
+    async patchDemoplot(updateDemoplotDto: UpdateDemoplotDto) {
+        // Igual que updateDemoplot pero no requiere todos los campos, solo los enviados
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
+        const demoplotExists = await prisma.demoPlot.findFirst({
+            where: { id: updateDemoplotDto.id },
+            include: {
+                ConsumoMuestras: true,
+            },
+        });
+        const consumoExists = await prisma.consumoMuestras.findFirst({
+            where: { idDemoplot: updateDemoplotDto.id },
+        });
+
+        if (!demoplotExists)
+            throw CustomError.badRequest(
+                `Demoplot with id ${updateDemoplotDto.id} does not exist`
+            );
+
+        try {
+            const updatedDemoplot = await prisma.demoPlot.update({
+                where: { id: updateDemoplotDto.id },
+                data: {
+                    ...updateDemoplotDto.values,
+                    updatedAt: updateDemoplotDto.updatedAt ?? currentDate,
+                },
+            });
+
+            return {
+                ...updatedDemoplot,
+                idConsumoMuestra: consumoExists?.id,
+                fechaConsumo: consumoExists?.fechaConsumo,
+                consumo: consumoExists?.consumo,
+                complemento: consumoExists?.complemento,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
     // DI
     //constructor() {}
 
@@ -54,6 +93,7 @@ export class DemoplotService {
                     gradoInfestacion: createDemoplotDto.gradoInfestacion,
                     dosis: createDemoplotDto.dosis,
                     validacion: createDemoplotDto.validacion,
+                    checkJefe: createDemoplotDto.checkJefe,
                     resultado: createDemoplotDto.resultado,
                     programacion: createDemoplotDto.programacion,
                     diaCampo: createDemoplotDto.diaCampo,
@@ -698,6 +738,7 @@ export class DemoplotService {
                 gradoInfestacion: demoplot.gradoInfestacion,
                 dosis: demoplot.dosis,
                 validacion: demoplot.validacion,
+                checkJefe: demoplot.checkJefe,
                 resultado: demoplot.resultado,
                 programacion: demoplot.programacion,
                 diaCampo: demoplot.diaCampo,
@@ -1664,6 +1705,7 @@ export class DemoplotService {
                         gradoInfestacion: demoplot.gradoInfestacion,
                         dosis: demoplot.dosis,
                         validacion: demoplot.validacion,
+                        checkJefe: demoplot.checkJefe,
                         resultado: demoplot.resultado,
                         programacion: demoplot.programacion,
                         diaCampo: demoplot.diaCampo,

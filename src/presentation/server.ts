@@ -3,6 +3,7 @@ import fileUpload from 'express-fileupload';
 import path from 'path';
 import compression from 'compression';
 import os from 'os';
+import { SqlServerDatabase } from '../data';
 let cors = require('cors');
 
 interface Options {
@@ -78,6 +79,30 @@ export class Server {
             //const indexPath = path.join(__dirname, '../../../', this.publicPath, 'index.html');
             res.sendFile(indexPath);
         });*/
+
+        // Health check mejorado
+        this.app.get('/api/health', async (req, res) => {
+            const dbHealth = await SqlServerDatabase.healthCheck();
+
+            console.log(
+                `[${new Date().toISOString()}] Health check accessed from: ${
+                    req.ip
+                }`
+            );
+
+            res.status(200).json({
+                status: 'ok',
+                timestamp: new Date(),
+                uptime: process.uptime(),
+                //memory: process.memoryUsage(),
+                database: dbHealth ? 'connected' : 'disconnected',
+                version: '2.0.0',
+                //port: this.port,
+                //env: process.env.NODE_ENV ?? "development",
+                //requestIP: req.ip,
+                forwardedFor: req.headers['x-forwarded-for'],
+            });
+        });
 
         //* SPA Route - Debe ir después de todas las rutas API
         this.app.get('*', (req, res) => {

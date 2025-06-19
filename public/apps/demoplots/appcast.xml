@@ -3,18 +3,17 @@
     <channel>
         <title>Demoplots Updates</title>
         <item>
-            <title>Version 1.5.4</title>
+            <title>Version 1.6.1</title>
             <description>
                 Actualización menor con correccion de errores:
-                - Se corrigió un error que no permitia iniciar sesión.
-                - Se agregó la opción para recordar usuario.
+                - Se corrigió el problema que impedia ver correctamente el stock.
                 - Otras mejoras menores.
             
             </description>
-            <pubDate>Fri, 21 Apr 2025 15:20:00 +0000</pubDate>
+            <pubDate>Fri, 18 Jun 2025 09:00:00 +0000</pubDate>
             <enclosure 
                 url="https://181.224.237.186/v1/apps/demoplots/apk/AppDemoplot.apk" 
-                sparkle:version="1.5.0"
+                sparkle:version="1.6.1"
                 sparkle:os="android" 
             />
             <sparkle:criticalUpdate>true</sparkle:criticalUpdate>

@@ -250,6 +250,22 @@ export class UsuariosService {
         }
     }
 
+    async getUsuarioByEmail(email: string) {
+        try {
+            const usuario = await prisma.usuario.findFirst({
+                where: { email },
+            });
+            if (!usuario) {
+                throw CustomError.badRequest(
+                    `Usuario con email ${email} no existe`
+                );
+            }
+            return usuario;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async deleteUsuario(id: number) {
         // Verificamos si existe el usuario
         const usuario = await prisma.usuario.findUnique({

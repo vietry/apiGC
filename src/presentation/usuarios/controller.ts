@@ -53,9 +53,21 @@ export class UsuariosController {
 
     getUsuarioById = async (req: Request, res: Response) => {
         const id = +req.params.id;
-
         this.usuariosService
             .getUsuarioById(id)
+            .then((usuario) => res.status(200).json(usuario))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    getUsuarioByEmail = async (req: Request, res: Response) => {
+        const email = req.params.email;
+        if (!email) {
+            return res
+                .status(400)
+                .json({ error: 'El parámetro :email es requerido' });
+        }
+        this.usuariosService
+            .getUsuarioByEmail(email)
             .then((usuario) => res.status(200).json(usuario))
             .catch((error) => this.handleError(res, error));
     };

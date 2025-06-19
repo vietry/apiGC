@@ -8,6 +8,22 @@ import {
 import { DemoplotService } from '../services/demoplot.service';
 
 export class DemoplotController {
+    patchDemoplot = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
+        // Solo los campos enviados en el body serán actualizados
+        const [error, updateDemoplotDto] = await UpdateDemoplotDto.create({
+            ...req.body,
+            id,
+        });
+        if (error) return res.status(400).json({ error });
+
+        this.demoplotService
+            .patchDemoplot(updateDemoplotDto!)
+            .then((demoplot) => res.status(200).json(demoplot))
+            .catch((error) => this.handleError(res, error));
+    };
     // DI
     constructor(private readonly demoplotService: DemoplotService) {}
 

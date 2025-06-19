@@ -1,5 +1,3 @@
-import { parse } from 'path';
-
 export class CreateEntregaMuestrasDto {
     private constructor(
         public readonly idFamilia: number,

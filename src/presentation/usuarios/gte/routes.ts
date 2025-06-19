@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { GteController } from './controller';
 import { GteService } from '../../services/gte.service';
 import { AuthMiddleware } from '../../middlewares/auth.middleware';
+//import { validateSessionMiddleware } from '../../middlewares/validate-session.middleware';
 
 export class GteRoutes {
     static get routes(): Router {
@@ -20,7 +21,7 @@ export class GteRoutes {
         router.post('/', [AuthMiddleware.validateJWT], controller.createGte);
         router.post(
             '/admin',
-            [AuthMiddleware.validateJWT],
+            //[validateSessionMiddleware],
             controller.createGteAdmin
         );
         router.put(

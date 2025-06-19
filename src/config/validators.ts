@@ -93,7 +93,7 @@ export class Validators {
         }
 
         if (colaborador) {
-            const idMacrozona =
+            let idMacrozona =
                 colaborador
                     .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
                     ?.SuperZona?.id ?? null;
@@ -103,13 +103,29 @@ export class Validators {
                     .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
                     ?.Empresa?.id ?? null;
 
+            // Si es jefe y el cargo es "GERENTE COMERCIAL CORP.", idMacrozona debe ser null
+            if (isJefe && colaborador.cargo === 'GERENTE COMERCIAL CORP.') {
+                idMacrozona = null;
+            }
+
+            let finalIdMacrozona: number | undefined;
+            if (isJefe) {
+                finalIdMacrozona =
+                    isJefe.idMacroZona &&
+                    colaborador.cargo === 'GERENTE COMERCIAL CORP.'
+                        ? undefined
+                        : isJefe.idMacroZona!;
+            } else {
+                finalIdMacrozona = idMacrozona ?? 0;
+            }
+
             return {
                 idTipo: colaborador.id,
                 tipo: 'colaborador',
                 area: colaborador.Area?.nombre ?? '',
                 cargo: colaborador.cargo ?? '',
                 zona: colaborador.ZonaAnterior?.codigo!,
-                idMacrozona: isJefe ? isJefe.idMacroZona! : idMacrozona ?? 0,
+                idMacrozona: finalIdMacrozona,
                 idEmpresa: isJefe
                     ? isJefe.idEmpresa ?? idEmpresa
                     : idEmpresa ?? idEmpresaJefe,
