@@ -37,11 +37,9 @@ export const validateSessionMiddleware = async (
         next();
     } catch (error: any) {
         // Si la validación falla, denegar acceso
-        return res
-            .status(401)
-            .json({
-                error: 'Session validation failed',
-                details: error?.response?.data || error.message,
-            });
+        return res.status(401).json({
+            error: 'Session validation failed',
+            details: error?.response?.data ?? error.message,
+        });
     }
 };

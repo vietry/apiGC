@@ -7,6 +7,7 @@ import {
 } from '../../domain';
 
 export interface DemoplotFilters {
+    id?: number;
     objetivo?: string;
     descripcion?: string;
     idGte?: number;
@@ -23,6 +24,7 @@ export interface DemoplotFilters {
     month?: number;
     venta?: boolean;
     validacion?: boolean;
+    checkJefe?: boolean;
     empresa?: string;
     macrozona?: number;
     idColaborador?: number;
@@ -1414,6 +1416,7 @@ export class DemoplotService {
     ) {
         const { page, limit } = paginationDto;
         const {
+            id,
             objetivo,
             idGte,
             idVegetacion,
@@ -1429,7 +1432,7 @@ export class DemoplotService {
             month,
             venta,
             validacion,
-
+            checkJefe,
             idPunto,
             numDocPunto,
             blancoComun,
@@ -1437,6 +1440,9 @@ export class DemoplotService {
 
         const where: any = {};
 
+        if (id) {
+            where.id = id;
+        }
         if (objetivo) {
             where.objetivo = { contains: objetivo };
         }
@@ -1543,6 +1549,10 @@ export class DemoplotService {
         }
         if (validacion !== undefined) {
             where.validacion = validacion;
+        }
+
+        if (checkJefe !== undefined) {
+            where.checkJefe = checkJefe;
         }
         if (year) {
             where.updatedAt = {

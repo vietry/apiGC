@@ -1,4 +1,5 @@
 export interface DemoplotFilters {
+    id?: number;
     objetivo?: string;
     descripcion?: string;
     idGte?: number;
@@ -15,6 +16,7 @@ export interface DemoplotFilters {
     month?: number;
     venta?: boolean;
     validacion?: boolean;
+    checkJefe?: boolean;
     empresa?: string;
     macrozona?: number;
     idColaborador?: number;
@@ -146,4 +148,14 @@ export interface CultivoFilters {
     vegetacion?: string;
     idContactoPunto?: number;
     idPuntoContacto?: number;
+}
+
+export interface GestionVisitasFilters {
+    idColaborador?: number;
+    idMacrozona?: number;
+    idEmpresa?: number;
+    year?: number;
+    month?: number;
+    idLabor?: number;
+    idSubLabor?: number;
 }

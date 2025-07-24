@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 import { CustomError } from '../../domain';
 
 export class ImageController {
-    constructor() {}
+    //constructor() {}
 
     getImage = (req: Request, res: Response) => {
         const { type = '', img = '' } = req.params;

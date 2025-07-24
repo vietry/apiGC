@@ -8,6 +8,20 @@ import {
 import { DemoplotService } from '../services/demoplot.service';
 
 export class DemoplotController {
+    // DI
+    constructor(private readonly demoplotService: DemoplotService) {}
+
+    private readonly handleError = (res: Response, error: unknown) => {
+        if (error instanceof CustomError) {
+            return res.status(error.statusCode).json({ error: error.message });
+        }
+        //grabar logs
+        console.log(`${error}`);
+        return res
+            .status(500)
+            .json({ error: 'Internal server error - check logs' });
+    };
+
     patchDemoplot = async (req: Request, res: Response) => {
         const id = +req.params.id;
         if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
@@ -23,19 +37,6 @@ export class DemoplotController {
             .patchDemoplot(updateDemoplotDto!)
             .then((demoplot) => res.status(200).json(demoplot))
             .catch((error) => this.handleError(res, error));
-    };
-    // DI
-    constructor(private readonly demoplotService: DemoplotService) {}
-
-    private handleError = (res: Response, error: unknown) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message });
-        }
-        //grabar logs
-        console.log(`${error}`);
-        return res
-            .status(500)
-            .json({ error: 'Internal server error - check logs' });
     };
 
     createDemoplot = async (req: Request, res: Response) => {
@@ -214,6 +215,7 @@ export class DemoplotController {
         const {
             page = 1,
             limit = 10,
+            id,
             objetivo,
 
             idGte,
@@ -230,6 +232,7 @@ export class DemoplotController {
             month,
             venta,
             validacion,
+            checkJefe,
             empresa,
             macrozona,
             idColaborador,
@@ -242,6 +245,7 @@ export class DemoplotController {
         if (error) return res.status(400).json({ error });
 
         const filters = {
+            id: id ? +id : undefined,
             objetivo:
                 typeof objetivo === 'object'
                     ? JSON.stringify(objetivo)
@@ -251,11 +255,11 @@ export class DemoplotController {
             cultivo: cultivo?.toString(),
             estado: estado?.toString(),
             idFamilia: idFamilia ? +idFamilia : undefined,
-            clase: clase?.toString(),
+            clase: clase as string,
             infestacion: infestacion?.toString(),
-            departamento: departamento?.toString(),
-            provincia: provincia?.toString(),
-            distrito: distrito?.toString(),
+            departamento: departamento as string,
+            provincia: provincia as string,
+            distrito: distrito as string,
             year: year ? +year : undefined,
             month: month ? +month : undefined,
             venta:
@@ -265,6 +269,10 @@ export class DemoplotController {
             validacion:
                 validacion !== undefined
                     ? !!(validacion === 'true' || validacion === '1')
+                    : undefined,
+            checkJefe:
+                checkJefe !== undefined
+                    ? !!(checkJefe === 'true' || checkJefe === '1')
                     : undefined,
             empresa: empresa?.toString(),
             //macrozona: macrozona?.toString(),
