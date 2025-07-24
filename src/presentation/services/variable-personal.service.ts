@@ -374,6 +374,8 @@ export class VariablePersonalService {
                     by: ['idGte'],
                     where: {
                         ...demoplotWhere,
+                        validacion: true,
+                        checkJefe: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -388,6 +390,8 @@ export class VariablePersonalService {
                     by: ['idGte'],
                     where: {
                         ...demoplotWhere,
+                        validacion: true,
+                        checkJefe: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -520,11 +524,13 @@ export class VariablePersonalService {
                               },
                           }
                         : {};
-                // Contar demoplots por estado
-                const demoplots = await prisma.demoPlot.groupBy({
-                    by: ['estado'],
+
+                // Contar demoplots (total)
+                const total = await prisma.demoPlot.count({
                     where: {
                         idGte: gte.id,
+                        validacion: true,
+                        checkJefe: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -548,14 +554,15 @@ export class VariablePersonalService {
                             },
                         ],
                     },
-                    _count: true,
                 });
 
-                const tipoDemoplots = await prisma.demoPlot.groupBy({
-                    by: ['estado'],
+                // Contar demoplots con tipo gte y clase familia
+                const tipoTotal = await prisma.demoPlot.count({
                     where: {
                         idGte: gte.id,
                         ...familyCondition,
+                        validacion: true,
+                        checkJefe: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -579,14 +586,14 @@ export class VariablePersonalService {
                             },
                         ],
                     },
-                    _count: true,
                 });
 
-                const demoplotsCampo = await prisma.demoPlot.groupBy({
-                    by: ['estado'],
+                // Contar demoplots solo en estado "Día campo"
+                const totalC = await prisma.demoPlot.count({
                     where: {
                         idGte: gte.id,
-
+                        validacion: true,
+                        checkJefe: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -610,24 +617,33 @@ export class VariablePersonalService {
                             },
                         ],
                     },
-                    _count: true,
                 });
 
-                // Calcular total
-                const total = demoplots.reduce(
-                    (acc, curr) => acc + curr._count,
-                    0
-                );
-                const totalC = demoplotsCampo.reduce(
-                    (acc, curr) => acc + curr._count,
-                    0
-                );
+                const demosCampoMesAct = await prisma.demoPlot.count({
+                    where: {
+                        idGte: gte.id,
+                        estado: 'Día campo',
+                        validacion: true,
+                        checkJefe: true,
+                        NOT: {
+                            AND: [
+                                { updatedAt: { gte: new Date('2024-01-01') } },
+                                { updatedAt: { lt: new Date('2025-01-01') } },
+                            ],
+                        },
+                        finalizacion: {
+                            gte: currentMonthStart,
+                            lt: currentMonthEnd,
+                        },
+                        presentacion: {
+                            gte: currentMonthStart,
+                            lt: currentMonthEnd,
+                        },
+                    },
+                });
 
-                // Calcular total con tipo gte y clase familia
-                const tipoTotal = tipoDemoplots.reduce(
-                    (acc, curr) => acc + curr._count,
-                    0
-                );
+                const totalCMesAnt = totalC - demosCampoMesAct;
+                const totalD = total - totalCMesAnt;
 
                 const costoLaboral = await prisma.costoLaboral.findFirst({
                     where: {
@@ -671,11 +687,11 @@ export class VariablePersonalService {
                 let variableCompletado = 0;
                 let variableCampo = 0;
                 if (tipoTotal >= 30) {
-                    if (total <= 40) {
+                    if (totalD <= 40) {
                         variableCompletado = total * conteo1;
                     } else {
                         variableCompletado =
-                            40 * conteo1 + (total - 40) * conteo2;
+                            40 * conteo1 + (totalD - 40) * conteo2;
                     }
 
                     // Calcular variableCampo solo si total >= 30
