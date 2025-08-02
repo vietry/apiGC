@@ -16,6 +16,10 @@ export class UpdateDemoplotDto {
         public readonly validacion?: boolean | null,
         public readonly checkJefe?: boolean | null,
         public readonly resultado?: string | null,
+        public readonly comentariosRtc?: string | null,
+        public readonly comentariosJefe?: string | null,
+        public readonly validatedAt?: Date | null,
+        public readonly approvedAt?: Date | null,
         public readonly idCultivo?: number,
         public readonly idContactoP?: number,
         public readonly idBlanco?: number,
@@ -52,6 +56,11 @@ export class UpdateDemoplotDto {
             returnObj.validacion = this.validacion;
         if (this.checkJefe !== undefined) returnObj.checkJefe = this.checkJefe;
         if (this.resultado) returnObj.resultado = this.resultado;
+        if (this.comentariosRtc) returnObj.comentariosRtc = this.comentariosRtc;
+        if (this.comentariosJefe)
+            returnObj.comentariosJefe = this.comentariosJefe;
+        if (this.validatedAt) returnObj.validatedAt = this.validatedAt;
+        if (this.approvedAt) returnObj.approvedAt = this.approvedAt;
         if (this.idCultivo) returnObj.idCultivo = this.idCultivo;
         if (this.idContactoP) returnObj.idContactoP = this.idContactoP;
         if (this.idBlanco) returnObj.idBlanco = this.idBlanco;
@@ -89,6 +98,10 @@ export class UpdateDemoplotDto {
             validacion,
             checkJefe,
             resultado,
+            comentariosRtc,
+            comentariosJefe,
+            validatedAt,
+            approvedAt,
             idCultivo,
             idContactoP,
             idBlanco,
@@ -186,6 +199,10 @@ export class UpdateDemoplotDto {
                 validacion,
                 checkJefe,
                 resultado,
+                comentariosRtc,
+                comentariosJefe,
+                validatedAt,
+                approvedAt,
                 idCultivoNumber,
                 idContactoPNumber,
                 idBlancoNumber,

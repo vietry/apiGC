@@ -4,7 +4,7 @@ import path from 'path';
 import compression from 'compression';
 import os from 'os';
 import { SqlServerDatabase } from '../data';
-let cors = require('cors');
+import cors from 'cors';
 
 interface Options {
     port: number;
@@ -66,19 +66,21 @@ export class Server {
         //* Public Folder - Ruta absoluta
         const publicPath = path.resolve(__dirname, '../../public');
         this.app.use(express.static(publicPath));
-        this.app.use(cors());
+
+        //* CORS Configuration
+        this.app.use(
+            cors({
+                origin: [
+                    'https://apps.tqc.com.pe',
+                    'http://localhost:5173',
+                    'http://localhost:5174',
+                ],
+                credentials: true,
+            })
+        );
 
         //* Routes
         this.app.use(this.routes);
-
-        //* SPA
-        /*this.app.get('*', (req, res) => {
-            const indexPath = path.join(
-                __dirname + `../../../${this.publicPath}/index.html`
-            );
-            //const indexPath = path.join(__dirname, '../../../', this.publicPath, 'index.html');
-            res.sendFile(indexPath);
-        });*/
 
         // Health check mejorado
         this.app.get('/api/health', async (req, res) => {

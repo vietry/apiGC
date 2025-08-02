@@ -17,6 +17,10 @@ export class DemoPlotEntity {
         public validacion: boolean | null,
         public checkJefe: boolean | null,
         public resultado: string | null,
+        public comentariosRtc: string | null,
+        public comentariosJefe: string | null,
+        public validatedAt: Date | null,
+        public approvedAt: Date | null,
         public diaCampo: boolean | null,
         public idCultivo: number,
         public idContactoP: number,
@@ -30,9 +34,8 @@ export class DemoPlotEntity {
         public cantidad: number | null,
         public importe: number | null,
         public createdBy: number | null,
-        public updatedBy: number | null // public createdAt: Date | null,
-    ) // public updatedAt: Date | null
-    {}
+        public updatedBy: number | null // public createdAt: Date | null, // public updatedAt: Date | null
+    ) {}
 
     public static fromObject(object: { [key: string]: any }): DemoPlotEntity {
         const {
@@ -51,6 +54,10 @@ export class DemoPlotEntity {
             validacion,
             checkJefe,
             resultado,
+            comentariosRtc,
+            comentariosJefe,
+            validatedAt,
+            approvedAt,
             diaCampo,
             idCultivo,
             idContactoP,
@@ -97,6 +104,10 @@ export class DemoPlotEntity {
             validacion,
             checkJefe,
             resultado,
+            comentariosRtc,
+            comentariosJefe,
+            validatedAt,
+            approvedAt,
             diaCampo,
             idCultivo,
             idContactoP,

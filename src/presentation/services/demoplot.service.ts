@@ -94,8 +94,8 @@ export class DemoplotService {
                     estado: createDemoplotDto.estado,
                     gradoInfestacion: createDemoplotDto.gradoInfestacion,
                     dosis: createDemoplotDto.dosis,
-                    validacion: createDemoplotDto.validacion,
-                    checkJefe: createDemoplotDto.checkJefe,
+                    validacion: null,
+                    checkJefe: null,
                     resultado: createDemoplotDto.resultado,
                     programacion: createDemoplotDto.programacion,
                     diaCampo: createDemoplotDto.diaCampo,
@@ -141,13 +141,63 @@ export class DemoplotService {
                 `Demoplot with id ${updateDemoplotDto.id} does not exist`
             );
 
+        // Lógica para evitar duplicidad de "Día campo" en el rango de fechas
+        const newEstado = updateDemoplotDto.values?.estado;
+        if (newEstado === 'Día campo') {
+            // Obtener año y mes de la fecha actual
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const previousMonth = month === 1 ? 12 : month - 1;
+            const previousYear = month === 1 ? year - 1 : year;
+
+            // Rango 1-19 del mes actual
+            const currentMonthStart = new Date(year, month - 1, 1);
+            const currentMonthEnd = new Date(year, month - 1, 20);
+            // Rango 20-fin del mes anterior
+            const previousMonthStart = new Date(
+                previousYear,
+                previousMonth - 1,
+                20
+            );
+            const previousMonthEnd = new Date(year, month - 1, 1);
+
+            // Buscar si ya existe un demoplot en "Día campo" para el mismo idGte, mismo idContacto y rango de presentacion
+            const existingDiaCampo = await prisma.demoPlot.findFirst({
+                where: {
+                    idGte: demoplotExists.idGte,
+                    estado: 'Día campo',
+                    idContactoP: demoplotExists.idContactoP,
+                    id: { not: demoplotExists.id }, // Excluir el actual
+                    OR: [
+                        {
+                            presentacion: {
+                                gte: currentMonthStart,
+                                lt: currentMonthEnd,
+                            },
+                        },
+                        {
+                            presentacion: {
+                                gte: previousMonthStart,
+                                lt: previousMonthEnd,
+                            },
+                        },
+                    ],
+                },
+            });
+            if (existingDiaCampo) {
+                throw CustomError.badRequest(
+                    'Ya existe un demoplot en estado "Día campo" para este GTE en el rango de fechas definido.'
+                );
+            }
+        }
+
         try {
             const updatedDemoplot = await prisma.demoPlot.update({
                 where: { id: updateDemoplotDto.id },
                 data: {
                     ...updateDemoplotDto.values,
                     updatedAt: updateDemoplotDto.updatedAt ?? currentDate,
-                    //updatedAt:  currentDate
                 },
             });
 
@@ -741,6 +791,10 @@ export class DemoplotService {
                 dosis: demoplot.dosis,
                 validacion: demoplot.validacion,
                 checkJefe: demoplot.checkJefe,
+                comentariosRtc: demoplot.comentariosRtc,
+                comentariosJefe: demoplot.comentariosJefe,
+                validatedAt: demoplot.validatedAt,
+                approvedAt: demoplot.approvedAt,
                 resultado: demoplot.resultado,
                 programacion: demoplot.programacion,
                 diaCampo: demoplot.diaCampo,

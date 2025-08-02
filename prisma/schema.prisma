@@ -429,6 +429,7 @@ model BlancoBiologico {
   idVegetacion   Int
   createdAt      DateTime?        @db.DateTime
   updatedAt      DateTime?        @db.DateTime
+  codi           String?          @db.VarChar(5)
   Vegetacion     Vegetacion       @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Blanco_Vegetacion1")
   Charla         Charla[]
   CharlaProducto CharlaProducto[]
@@ -467,6 +468,10 @@ model DemoPlot {
   fecVenta                            DateTime?         @db.DateTime
   idCharla                            Int?
   checkJefe                           Boolean?
+  comentariosRtc                      String?           @db.VarChar(255)
+  comentariosJefe                     String?           @db.VarChar(255)
+  validatedAt                         DateTime?
+  approvedAt                          DateTime?
   ConsumoMuestras                     ConsumoMuestras[]
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
@@ -587,6 +592,7 @@ model Vegetacion {
   nombre          String            @db.VarChar(45)
   updatedAt       DateTime?         @db.DateTime
   createdAt       DateTime?         @db.DateTime
+  codi            String?           @db.VarChar(4)
   BlancoBiologico BlancoBiologico[]
   Charla          Charla[]
   Variedad        Variedad[]
@@ -835,7 +841,7 @@ model VariablePersonal {
   Usuario_VariablePersonal_createdByToUsuario Usuario?  @relation("VariablePersonal_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalCreated")
   Gte                                         Gte       @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VariablePersonalGenerador")
   Usuario_VariablePersonal_updatedByToUsuario Usuario?  @relation("VariablePersonal_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalUpdated")
- @@unique([idGte, year, month], name: "idGte_year_month")
+  @@unique([idGte, year, month], name: "idGte_year_month")
 }
 
 model RegistroLaboralGD {
