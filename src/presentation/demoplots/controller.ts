@@ -252,14 +252,14 @@ export class DemoplotController {
                     : objetivo?.toString(),
             idGte: idGte ? +idGte : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
-            cultivo: cultivo?.toString(),
-            estado: estado?.toString(),
+            cultivo: cultivo as string,
+            estado: estado ? (estado as string) : undefined,
             idFamilia: idFamilia ? +idFamilia : undefined,
             clase: clase as string,
-            infestacion: infestacion?.toString(),
-            departamento: departamento as string,
-            provincia: provincia as string,
-            distrito: distrito as string,
+            infestacion: infestacion ? (infestacion as string) : undefined,
+            departamento: departamento ? (departamento as string) : undefined,
+            provincia: provincia ? (provincia as string) : undefined,
+            distrito: distrito ? (distrito as string) : undefined,
             year: year ? +year : undefined,
             month: month ? +month : undefined,
             venta:
@@ -274,13 +274,19 @@ export class DemoplotController {
                 checkJefe !== undefined
                     ? !!(checkJefe === 'true' || checkJefe === '1')
                     : undefined,
-            empresa: empresa?.toString(),
+            empresa: empresa ? (empresa as string) : undefined,
             //macrozona: macrozona?.toString(),
-            macrozona: macrozona ? +macrozona : undefined,
+            macrozona: macrozona
+                ? Array.isArray(macrozona)
+                    ? macrozona.map((m) => +m)
+                    : typeof macrozona === 'string' && macrozona.includes(',')
+                    ? macrozona.split(',').map((m) => +m.trim())
+                    : [+macrozona]
+                : undefined,
             idColaborador: idColaborador ? +idColaborador : undefined,
             idPunto: idPunto ? +idPunto : undefined,
-            numDocPunto: numDocPunto?.toString(),
-            blancoComun: blancoComun?.toString(),
+            numDocPunto: numDocPunto ? (numDocPunto as string) : undefined,
+            blancoComun: blancoComun ? (blancoComun as string) : undefined,
         };
 
         this.demoplotService

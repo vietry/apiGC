@@ -26,7 +26,7 @@ export interface DemoplotFilters {
     validacion?: boolean;
     checkJefe?: boolean;
     empresa?: string;
-    macrozona?: number;
+    macrozona?: number | number[];
     idColaborador?: number;
     gdactivo?: boolean;
     idPunto?: number;
@@ -1567,9 +1567,17 @@ export class DemoplotService {
                                   ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
                                       {
                                           some: {
-                                              SuperZona: {
-                                                  id: filters.macrozona,
-                                              },
+                                              SuperZona: Array.isArray(
+                                                  filters.macrozona
+                                              )
+                                                  ? {
+                                                        id: {
+                                                            in: filters.macrozona,
+                                                        },
+                                                    }
+                                                  : {
+                                                        id: filters.macrozona,
+                                                    },
                                           },
                                       },
                               },
