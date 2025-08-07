@@ -12,6 +12,7 @@ interface CreatePlanificacionInput {
     estado: string;
     checkJefe?: boolean;
     comentarios?: string;
+    comentariosJefe?: string;
     createdBy?: number;
     // Relaciones opcionales
     gtes?: number[];
@@ -36,6 +37,7 @@ interface UpdatePlanificacionInput {
     estado?: string;
     checkJefe?: boolean;
     comentarios?: string;
+    comentariosJefe?: string;
     activo?: boolean;
     updatedBy?: number;
     // Relaciones opcionales
@@ -386,8 +388,9 @@ export class PlanificacionService {
                         dosisMoc: data.dosisMoc,
                         muestraTotal: data.muestraTotal,
                         estado: data.estado,
-                        checkJefe: data.checkJefe ?? false,
+                        checkJefe: data.checkJefe,
                         comentarios: data.comentarios,
+                        comentariosJefe: data.comentariosJefe,
                         createdBy: data.createdBy,
                         createdAt: currentDate,
                         updatedAt: currentDate,
@@ -538,6 +541,9 @@ export class PlanificacionService {
                 }),
                 ...(data.comentarios !== undefined && {
                     comentarios: data.comentarios,
+                }),
+                ...(data.comentariosJefe !== undefined && {
+                    comentariosJefe: data.comentariosJefe,
                 }),
                 ...(data.activo !== undefined && { activo: data.activo }),
                 ...(data.updatedBy && { updatedBy: data.updatedBy }),
@@ -725,7 +731,11 @@ export class PlanificacionService {
         }
     }
 
-    async approvePlanificacion(id: number, updatedBy?: number) {
+    async approvePlanificacion(
+        id: number,
+        updatedBy?: number,
+        comentariosJefe?: string
+    ) {
         try {
             const planificacionExistente =
                 await prisma.planificacion.findUnique({
@@ -743,6 +753,7 @@ export class PlanificacionService {
                     approvedAt: getCurrentDate(),
                     updatedBy,
                     updatedAt: getCurrentDate(),
+                    ...(comentariosJefe !== undefined && { comentariosJefe }),
                 },
             });
         } catch (error) {
@@ -754,7 +765,11 @@ export class PlanificacionService {
         }
     }
 
-    async rejectPlanificacion(id: number, updatedBy?: number) {
+    async rejectPlanificacion(
+        id: number,
+        updatedBy?: number,
+        comentariosJefe?: string
+    ) {
         try {
             const planificacionExistente =
                 await prisma.planificacion.findUnique({
@@ -772,6 +787,7 @@ export class PlanificacionService {
                     approvedAt: null,
                     updatedBy,
                     updatedAt: getCurrentDate(),
+                    ...(comentariosJefe !== undefined && { comentariosJefe }),
                 },
             });
         } catch (error) {

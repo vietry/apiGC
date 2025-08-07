@@ -8,6 +8,7 @@ export interface CreatePlanificacionDto {
     estado: string;
     checkJefe?: boolean;
     comentarios?: string;
+    comentariosJefe?: string;
     createdBy?: number;
     // Relaciones opcionales
     gtes?: number[];
@@ -63,6 +64,7 @@ export class CreatePlanificacionDtoValidator {
             estado,
             checkJefe: this.parseBoolean(props.checkJefe),
             comentarios: props.comentarios || undefined,
+            comentariosJefe: props.comentariosJefe || undefined,
             createdBy: this.parseNumber(props.createdBy),
             gtes: arrayValidationResult.gtes,
             tiendas: arrayValidationResult.tiendas,

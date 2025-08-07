@@ -140,13 +140,14 @@ export class PlanificacionController {
         const id = +req.params.id;
         if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-        const { updatedBy } = req.body;
+        const { updatedBy, comentariosJefe } = req.body;
 
         try {
             const planificacion =
                 await this.planificacionService.approvePlanificacion(
                     id,
-                    updatedBy
+                    updatedBy,
+                    comentariosJefe
                 );
             res.json(planificacion);
         } catch (error) {
@@ -158,13 +159,14 @@ export class PlanificacionController {
         const id = +req.params.id;
         if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-        const { updatedBy } = req.body;
+        const { updatedBy, comentariosJefe } = req.body;
 
         try {
             const planificacion =
                 await this.planificacionService.rejectPlanificacion(
                     id,
-                    updatedBy
+                    updatedBy,
+                    comentariosJefe
                 );
             res.json(planificacion);
         } catch (error) {

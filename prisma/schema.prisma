@@ -152,6 +152,7 @@ model Colaborador {
   idUsuario                                                  Int?
   createdAt                                                  DateTime?            @db.DateTime
   updatedAt                                                  DateTime?            @db.DateTime
+  negocio                                                    String?              @db.VarChar(25)
   Usuario                                                    Usuario?             @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Usuario1")
   ZonaAnterior                                               ZonaAnterior?        @relation(fields: [idZonaAnt], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Zona1")
   Area                                                       Area                 @relation(fields: [idArea], references: [id], onUpdate: NoAction, map: "fk_ColaboradorArea")
@@ -179,21 +180,20 @@ model Contacto {
 }
 
 model Cultivo {
-  id            Int            @id(map: "PK__Cultivo__3213E83F4C6DDF3D") @default(autoincrement())
-  certificacion String?        @db.VarChar(20)
-  hectareas     Decimal?       @db.Decimal(6, 2)
-  mesInicio     String?        @db.VarChar(20)
-  mesFinal      String?        @db.VarChar(20)
-  observacion   String?        @db.VarChar(255)
+  id            Int        @id(map: "PK__Cultivo__3213E83F4C6DDF3D") @default(autoincrement())
+  certificacion String?    @db.VarChar(20)
+  hectareas     Decimal?   @db.Decimal(6, 2)
+  mesInicio     String?    @db.VarChar(20)
+  mesFinal      String?    @db.VarChar(20)
+  observacion   String?    @db.VarChar(255)
   idFundo       Int
   idVariedad    Int
-  createdAt     DateTime?      @db.DateTime
-  updatedAt     DateTime?      @db.DateTime
-  centroPoblado String?        @db.VarChar(70)
-  Fundo         Fundo          @relation(fields: [idFundo], references: [id], onUpdate: NoAction, map: "fk_Cultivo_Fundo1")
-  Variedad      Variedad       @relation(fields: [idVariedad], references: [id], onUpdate: NoAction, map: "fk_Cultivo_Variedad1")
+  createdAt     DateTime?  @db.DateTime
+  updatedAt     DateTime?  @db.DateTime
+  centroPoblado String?    @db.VarChar(70)
+  Fundo         Fundo      @relation(fields: [idFundo], references: [id], onUpdate: NoAction, map: "fk_Cultivo_Fundo1")
+  Variedad      Variedad   @relation(fields: [idVariedad], references: [id], onUpdate: NoAction, map: "fk_Cultivo_Variedad1")
   DemoPlot      DemoPlot[]
-  PlanCultivos  PlanCultivos[]
   Visita        Visita[]
 }
 
@@ -604,6 +604,7 @@ model Vegetacion {
   codi            String?           @db.VarChar(4)
   BlancoBiologico BlancoBiologico[]
   Charla          Charla[]
+  PlanCultivos    PlanCultivos[]
   Variedad        Variedad[]
 }
 
@@ -977,8 +978,8 @@ model PlanCultivos {
   id            Int           @id(map: "PK__PlanCult__3213E83F220762F6") @default(autoincrement())
   planId        Int
   cultivoId     Int
-  Cultivo       Cultivo       @relation(fields: [cultivoId], references: [id], onUpdate: NoAction, map: "FK__PlanCulti__culti__07E124C1")
   Planificacion Planificacion @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanCulti__planI__06ED0088")
+  Cultivo       Vegetacion    @relation(fields: [cultivoId], references: [id], onUpdate: NoAction, map: "FK__PlanCulti__culti__07E124C1")
 }
 
 model PlanGtes {
@@ -1006,6 +1007,7 @@ model Planificacion {
   createdBy             Int?
   updatedAt             DateTime                @default(dbgenerated("sysutcdatetime()"), map: "DF__Planifica__updat__789EE131")
   updatedBy             Int?
+  comentariosJefe       String?                 @db.VarChar(255)
   DemoPlot              DemoPlot[]
   PlanBlancosBiologicos PlanBlancosBiologicos[]
   PlanCultivos          PlanCultivos[]

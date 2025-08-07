@@ -10,6 +10,7 @@ export class UpdatePlanificacionDto {
         public readonly estado?: string,
         public readonly checkJefe?: boolean,
         public readonly comentarios?: string,
+        public readonly comentariosJefe?: string,
         public readonly activo?: boolean,
         public readonly updatedBy?: number,
         // Relaciones opcionales
@@ -37,6 +38,7 @@ export class UpdatePlanificacionDto {
             estado: this.estado,
             checkJefe: this.checkJefe,
             comentarios: this.comentarios,
+            comentariosJefe: this.comentariosJefe,
             activo: this.activo,
             updatedBy: this.updatedBy,
             gtes: this.gtes,
@@ -99,6 +101,7 @@ export class UpdatePlanificacionDto {
                 props.estado,
                 this.parseBoolean(props.checkJefe),
                 props.comentarios,
+                props.comentariosJefe,
                 this.parseBoolean(props.activo),
                 this.parseNumber(props.updatedBy),
                 arrayValidationResult.gtes,
