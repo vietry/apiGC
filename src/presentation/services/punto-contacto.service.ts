@@ -549,6 +549,236 @@ export class PuntoContactoService {
         }
     }
 
+    async getUniquePuntosContactoByZone(filters: PuntoFilters = {}) {
+        const {
+            nombre,
+            numDoc,
+            idGte,
+            idColaborador,
+            idMacrozona,
+            idEmpresa,
+            activo,
+            idDistrito,
+            idProvincia,
+            idDepartamento,
+            idSubzona,
+            codZona,
+            nomZona,
+            gestion,
+        } = filters;
+
+        // Construir el objeto where para los filtros
+        const where: any = {};
+
+        // Filtros básicos
+        if (nombre) {
+            where.nombre = { contains: nombre };
+        }
+        if (numDoc) {
+            where.numDoc = { contains: numDoc };
+        }
+        if (idGte) {
+            where.idGte = idGte;
+        }
+        if (idEmpresa) {
+            where.idEmpresa = idEmpresa;
+        }
+        if (activo !== undefined) {
+            where.activo = activo;
+        }
+        if (codZona) {
+            where.codZona = codZona;
+        }
+        if (gestion !== undefined) {
+            where.gestion = gestion;
+        }
+
+        // Filtro por distrito
+        if (idDistrito) {
+            where.idDistrito = idDistrito;
+        }
+
+        // Filtro por provincia
+        if (idProvincia) {
+            where.Distrito = {
+                ...where.Distrito,
+                idProvincia,
+            };
+        }
+
+        // Filtro por departamento
+        if (idDepartamento) {
+            where.Distrito = {
+                ...where.Distrito,
+                Provincia: {
+                    ...where.Distrito?.Provincia,
+                    idDepartamento,
+                },
+            };
+        }
+
+        // Filtros relacionados con Gte y Colaborador
+        if (idColaborador || idMacrozona || idSubzona || nomZona) {
+            where.Gte = {
+                AND: [
+                    // Condición idColaborador
+                    idColaborador
+                        ? {
+                              Colaborador: { id: idColaborador },
+                          }
+                        : {},
+                    // Condición idMacrozona
+                    idMacrozona
+                        ? {
+                              Colaborador: {
+                                  ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
+                                      {
+                                          some: {
+                                              SuperZona: { id: idMacrozona },
+                                          },
+                                      },
+                              },
+                          }
+                        : {},
+                    // Condición para SubZona
+                    idSubzona
+                        ? {
+                              Colaborador: {
+                                  ZonaAnterior: { id: idSubzona },
+                              },
+                          }
+                        : {},
+                    // Condición nomZona
+                    nomZona
+                        ? {
+                              Colaborador: {
+                                  ZonaAnterior: {
+                                      nombre: { contains: nomZona },
+                                  },
+                              },
+                          }
+                        : {},
+                ].filter((condition) => Object.keys(condition).length > 0),
+            };
+        }
+
+        try {
+            const puntosContacto = await prisma.puntoContacto.findMany({
+                where,
+                orderBy: [{ codZona: 'asc' }, { nombre: 'asc' }],
+                include: {
+                    Gte: {
+                        select: {
+                            SubZona: true,
+                            Usuario: {
+                                select: {
+                                    id: true,
+                                },
+                            },
+                            Colaborador: {
+                                select: {
+                                    id: true,
+                                    ZonaAnterior: true,
+                                    ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
+                                        {
+                                            select: {
+                                                SuperZona: true,
+                                            },
+                                        },
+                                },
+                            },
+                        },
+                    },
+                    Distrito: {
+                        select: {
+                            nombre: true,
+                            id: true,
+                            idProvincia: true,
+                            Provincia: {
+                                select: {
+                                    id: true,
+                                    nombre: true,
+                                    idDepartamento: true,
+                                    Departamento: {
+                                        select: {
+                                            id: true,
+                                            nombre: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            // Crear un mapa para filtrar valores únicos por numDoc dentro de cada codZona
+            const uniqueMap = new Map<string, any>();
+
+            puntosContacto.forEach((puntoContacto) => {
+                const key = `${puntoContacto.codZona}-${puntoContacto.numDoc}`;
+
+                // Solo agregar si no existe la combinación codZona-numDoc
+                if (!uniqueMap.has(key)) {
+                    const macrozona =
+                        puntoContacto.Gte?.Colaborador
+                            ?.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
+                            ?.SuperZona?.nombre ?? null;
+
+                    const idMacrozona =
+                        puntoContacto.Gte?.Colaborador
+                            ?.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
+                            ?.SuperZona?.id ?? null;
+
+                    uniqueMap.set(key, {
+                        id: puntoContacto.id,
+                        nombre: puntoContacto.nombre,
+                        tipoDoc: puntoContacto.tipoDoc,
+                        numDoc: puntoContacto.numDoc,
+                        tipo: puntoContacto.tipo,
+                        dirReferencia: puntoContacto.dirReferencia,
+                        lider: puntoContacto.lider,
+                        activo: puntoContacto.activo,
+                        idGte: puntoContacto.idGte,
+                        hectareas: puntoContacto.hectareas,
+                        idUsuario: puntoContacto.Gte?.Usuario?.id,
+                        idColaborador: puntoContacto.Gte?.Colaborador?.id,
+                        idDistrito: puntoContacto.Distrito?.id,
+                        distrito: puntoContacto.Distrito?.nombre,
+                        idProvincia: puntoContacto.Distrito?.idProvincia,
+                        provincia: puntoContacto.Distrito?.Provincia?.nombre,
+                        idDepartamento:
+                            puntoContacto.Distrito?.Provincia?.idDepartamento,
+                        departamento:
+                            puntoContacto.Distrito?.Provincia?.Departamento
+                                ?.nombre,
+                        idEmpresa: puntoContacto.idEmpresa,
+                        codZona: puntoContacto.codZona,
+                        nomSubZona: puntoContacto.Gte?.SubZona?.nombre,
+                        idSubzona:
+                            puntoContacto.Gte?.Colaborador?.ZonaAnterior?.id,
+                        nomZona:
+                            puntoContacto.Gte?.Colaborador?.ZonaAnterior
+                                ?.nombre,
+                        idMacrozona,
+                        macrozona,
+                        //subTipo: puntoContacto.subTipo,
+                        //cantR0: puntoContacto.cantR0,
+                        //cantR1: puntoContacto.cantR1,
+                        //cantR2: puntoContacto.cantR2,
+                        //aniversario: puntoContacto.aniversario,
+                        //gestion: puntoContacto.gestion,
+                        sede: puntoContacto.sede,
+                    });
+                }
+            });
+
+            return Array.from(uniqueMap.values());
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getPuntoContactoById(id: number) {
         try {
             const puntoContacto = await prisma.puntoContacto.findUnique({

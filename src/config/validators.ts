@@ -31,10 +31,11 @@ export class Validators {
         tipo: string;
         cargo?: string;
         zona: string;
-        idMacrozona?: number;
+        idMacrozona?: number | number[];
         idEmpresa: number;
         empresa?: string;
         area?: string;
+        colaboradorExternoId?: number | number[];
     }> {
         const colaborador = await prisma.colaborador.findFirst({
             where: { idUsuario },
@@ -187,18 +188,91 @@ export class Validators {
             where: { idUsuario },
             include: {
                 Representada: true,
+                ExternoColaborador: {
+                    include: {
+                        Colaborador: true,
+                        SuperZona: true,
+                    },
+                },
             },
         });
         if (externo) {
+            // Extraer los IDs de macrozona y colaboradores relacionados
+            const macrozonaIds = externo.ExternoColaborador.map(
+                (ec) => ec.macrozonaId
+            );
+
+            // Filtrar valores únicos de macrozona
+            const uniqueMacrozonaIds = [...new Set(macrozonaIds)];
+
+            // Determinar idMacrozona basado en la cantidad de relaciones únicas
+            let idMacrozona: number | number[];
+            if (uniqueMacrozonaIds.length === 0) {
+                idMacrozona = 0;
+            } else if (uniqueMacrozonaIds.length === 1) {
+                idMacrozona = uniqueMacrozonaIds[0];
+            } else {
+                idMacrozona = uniqueMacrozonaIds;
+            }
+
+            // Determinar colaboradorExternoId basado en jerarquía
+            let colaboradorExternoId: number | number[] | undefined;
+
+            // Verificar si el externo es jefe (tiene registros con jefeId null)
+            const esJefe = externo.ExternoColaborador.some(
+                (ec) => ec.jefeId === null
+            );
+
+            if (esJefe) {
+                // Si es jefe, buscar todos los colaboradorId de sus subordinados
+                const subordinadosColaboradorIds =
+                    await prisma.externoColaborador.findMany({
+                        where: { jefeId: externo.id },
+                        select: { colaboradorId: true },
+                    });
+
+                const allColaboradorIds = subordinadosColaboradorIds.map(
+                    (sub) => sub.colaboradorId
+                );
+
+                // Filtrar valores únicos de colaboradores
+                const uniqueColaboradorIds = [...new Set(allColaboradorIds)];
+
+                if (uniqueColaboradorIds.length === 0) {
+                    colaboradorExternoId = undefined;
+                } else if (uniqueColaboradorIds.length === 1) {
+                    colaboradorExternoId = uniqueColaboradorIds[0];
+                } else {
+                    colaboradorExternoId = uniqueColaboradorIds;
+                }
+            } else {
+                // Si no es jefe, usar la lógica original
+                const colaboradorIds = externo.ExternoColaborador.map(
+                    (ec) => ec.colaboradorId
+                );
+
+                // Filtrar valores únicos de colaboradores
+                const uniqueColaboradorIds = [...new Set(colaboradorIds)];
+
+                if (uniqueColaboradorIds.length === 0) {
+                    colaboradorExternoId = undefined;
+                } else if (uniqueColaboradorIds.length === 1) {
+                    colaboradorExternoId = uniqueColaboradorIds[0];
+                } else {
+                    colaboradorExternoId = uniqueColaboradorIds;
+                }
+            }
+
             return {
                 idTipo: externo.id,
                 tipo: 'externo',
                 cargo: externo.cargo ?? '',
                 //area: '',
                 zona: '',
-                idMacrozona: 0,
+                idMacrozona,
                 idEmpresa: externo.Representada?.id,
                 empresa: externo.Representada?.nombre,
+                colaboradorExternoId,
             };
         }
 

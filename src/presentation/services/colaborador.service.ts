@@ -7,6 +7,7 @@ import {
 } from '../../domain';
 
 interface ColaboradorFilters {
+    id?: number | number[];
     nombres?: string;
     apellidos?: string;
     area?: string;
@@ -14,7 +15,7 @@ interface ColaboradorFilters {
     cargo?: string;
     zonaAnt?: string;
     empresa?: string;
-    macrozona?: number;
+    macrozona?: number | number[];
 }
 
 export class ColaboradorService {
@@ -225,6 +226,7 @@ export class ColaboradorService {
 
     async getAllColaboradores(filters: ColaboradorFilters) {
         const {
+            id,
             nombres,
             apellidos,
             area,
@@ -239,6 +241,9 @@ export class ColaboradorService {
             // Construimos el objeto 'where' usando los filtros recibidos.
             const where: any = {};
 
+            if (id) {
+                where.id = Array.isArray(id) ? { in: id } : id;
+            }
             if (nombres) {
                 where.Usuario = {
                     ...where.Usuario,
@@ -293,9 +298,15 @@ export class ColaboradorService {
                 where.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador =
                     {
                         some: {
-                            SuperZona: {
-                                id: macrozona,
-                            },
+                            SuperZona: Array.isArray(macrozona)
+                                ? {
+                                      id: {
+                                          in: macrozona,
+                                      },
+                                  }
+                                : {
+                                      id: macrozona,
+                                  },
                         },
                     };
             }

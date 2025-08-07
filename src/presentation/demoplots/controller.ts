@@ -283,7 +283,14 @@ export class DemoplotController {
                     ? macrozona.split(',').map((m) => +m.trim())
                     : [+macrozona]
                 : undefined,
-            idColaborador: idColaborador ? +idColaborador : undefined,
+            idColaborador: idColaborador
+                ? Array.isArray(idColaborador)
+                    ? idColaborador.map((c) => +c)
+                    : typeof idColaborador === 'string' &&
+                      idColaborador.includes(',')
+                    ? idColaborador.split(',').map((c) => +c.trim())
+                    : +idColaborador
+                : undefined,
             idPunto: idPunto ? +idPunto : undefined,
             numDocPunto: numDocPunto ? (numDocPunto as string) : undefined,
             blancoComun: blancoComun ? (blancoComun as string) : undefined,

@@ -203,6 +203,7 @@ export class AuthService {
                 cargo: tipoUser.cargo,
                 zona: tipoUser.zona,
                 idMacrozona: tipoUser.idMacrozona,
+                colaboradorExternoId: tipoUser.colaboradorExternoId,
                 idEmpresa: tipoUser.idEmpresa,
                 empresa: tipoUser.empresa,
             },

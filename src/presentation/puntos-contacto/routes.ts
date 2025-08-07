@@ -10,6 +10,7 @@ export class PuntoContactoRoutes {
 
         router.get('/', controller.getPuntosContacto);
         router.get('/all', controller.getAllPuntosContacto);
+        router.get('/unique-by-zone', controller.getUniquePuntosContactoByZone);
         router.get('/:id', controller.getPuntoContactoById);
         router.get('/gte/:idGte', controller.getPuntosContactoByGteId);
         router.post('/', controller.createPuntoContacto);

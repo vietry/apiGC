@@ -81,6 +81,7 @@ export class ColaboradorController {
 
     getAllColaboradores = async (req: Request, res: Response) => {
         const {
+            id,
             nombres,
             apellidos,
             cargo,
@@ -91,7 +92,20 @@ export class ColaboradorController {
             macrozona,
         } = req.query;
 
+        // Helper function to process array parameters
+        const processArrayParam = (
+            param: any
+        ): number | number[] | undefined => {
+            if (!param) return undefined;
+            if (Array.isArray(param)) return param.map((p) => +p);
+            if (typeof param === 'string' && param.includes(',')) {
+                return param.split(',').map((p) => +p.trim());
+            }
+            return +param;
+        };
+
         const filters = {
+            id: processArrayParam(id),
             nombres: typeof nombres === 'string' ? nombres : undefined,
             apellidos: typeof apellidos === 'string' ? apellidos : undefined,
             cargo: typeof cargo === 'string' ? cargo.trim() : undefined,
@@ -99,8 +113,8 @@ export class ColaboradorController {
             codigoZona:
                 typeof codigoZona === 'string' ? codigoZona.trim() : undefined,
             zonaAnt: typeof zonaAnt === 'string' ? zonaAnt.trim() : undefined,
-            macrozona: macrozona ? +macrozona : undefined,
-            empresa: empresa?.toString(),
+            macrozona: processArrayParam(macrozona),
+            empresa: typeof empresa === 'string' ? empresa : undefined,
         };
 
         this.colaboradorService

@@ -6,6 +6,14 @@ export class AuthController {
     //DI
     constructor(public readonly authService: AuthService) {}
 
+    private readonly handleError = (error: unknown, res: Response) => {
+        if (error instanceof CustomError) {
+            return res.status(error.statusCode).json({ error: error.message });
+        }
+        console.log(`${error}`);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    };
+
     validateSessionFromEmail = async (req: Request, res: Response) => {
         const { email } = req.body;
         try {
@@ -14,14 +22,6 @@ export class AuthController {
         } catch (error) {
             return this.handleError(error, res);
         }
-    };
-
-    private readonly handleError = (error: unknown, res: Response) => {
-        if (error instanceof CustomError) {
-            return res.status(error.statusCode).json({ error: error.message });
-        }
-        console.log(`${error}`);
-        return res.status(500).json({ error: 'Internal Server Error' });
     };
 
     registerUsuario = (req: Request, res: Response) => {

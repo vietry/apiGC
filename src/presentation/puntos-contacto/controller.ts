@@ -170,6 +170,55 @@ export class PuntoContactoController {
             .catch((error) => this.handleError(res, error));
     };
 
+    getUniquePuntosContactoByZone = async (req: Request, res: Response) => {
+        // Extraer los filtros del query
+        const {
+            nombre,
+            numDoc,
+            idGte,
+            idColaborador,
+            idMacrozona,
+            idEmpresa,
+            activo,
+            idDistrito,
+            idProvincia,
+            idDepartamento,
+            idSubzona,
+            codZona,
+            nomZona,
+            gestion,
+        } = req.query;
+
+        // Construir objeto de filtros
+        const filters: PuntoFilters = {
+            nombre: typeof nombre === 'string' ? nombre : undefined,
+            numDoc: typeof numDoc === 'string' ? numDoc : undefined,
+            idGte: idGte ? +idGte : undefined,
+            idColaborador: idColaborador ? +idColaborador : undefined,
+            idMacrozona: idMacrozona ? +idMacrozona : undefined,
+            idEmpresa: idEmpresa ? +idEmpresa : undefined,
+            activo:
+                activo !== undefined
+                    ? !!(activo === 'true' || activo === '1')
+                    : undefined,
+            idDistrito: idDistrito ? +idDistrito : undefined,
+            idProvincia: idProvincia ? +idProvincia : undefined,
+            idDepartamento: idDepartamento ? +idDepartamento : undefined,
+            idSubzona: idSubzona ? +idSubzona : undefined,
+            codZona: typeof codZona === 'string' ? codZona : undefined,
+            nomZona: typeof nomZona === 'string' ? nomZona : undefined,
+            gestion:
+                gestion !== undefined
+                    ? !!(gestion === 'true' || gestion === '1')
+                    : undefined,
+        };
+
+        this.puntoContactoService
+            .getUniquePuntosContactoByZone(filters)
+            .then((puntosContacto) => res.status(200).json(puntosContacto))
+            .catch((error) => this.handleError(res, error));
+    };
+
     getPuntoContactoById = async (req: Request, res: Response) => {
         const id = +req.params.id;
         if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });

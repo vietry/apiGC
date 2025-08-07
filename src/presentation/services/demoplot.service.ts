@@ -27,7 +27,7 @@ export interface DemoplotFilters {
     checkJefe?: boolean;
     empresa?: string;
     macrozona?: number | number[];
-    idColaborador?: number;
+    idColaborador?: number | number[];
     gdactivo?: boolean;
     idPunto?: number;
     numDocPunto?: string;
@@ -1586,7 +1586,15 @@ export class DemoplotService {
                     // Condición idColaborador
                     filters.idColaborador
                         ? {
-                              Colaborador: { id: filters.idColaborador },
+                              Colaborador: Array.isArray(filters.idColaborador)
+                                  ? {
+                                        id: {
+                                            in: filters.idColaborador,
+                                        },
+                                    }
+                                  : {
+                                        id: filters.idColaborador,
+                                    },
                           }
                         : {},
                 ].filter((condition) => Object.keys(condition).length > 0),
@@ -2361,6 +2369,7 @@ export class DemoplotService {
                                 id: true,
                                 nombre: true,
                                 numDoc: true,
+                                codZona: true,
                             },
                         },
                     },

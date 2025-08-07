@@ -83,6 +83,7 @@ export class AuthMiddleware {
                     idMacrozona: tipoUser.idMacrozona,
                     idEmpresa: tipoUser.idEmpresa,
                     empresa: tipoUser.empresa,
+                    repColaboradorId: tipoUser.colaboradorExternoId,
                     token: newToken,
                 },
                 token: newToken,

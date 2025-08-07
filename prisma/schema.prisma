@@ -802,15 +802,16 @@ model FotoDemoPlotLog {
 }
 
 model Externo {
-  id                 Int                  @id(map: "PK__Externo__3213E83FC7A0FB3D") @default(autoincrement())
-  cargo              String?              @db.VarChar(45)
-  idRepresentada     Int
-  idUsuario          Int?
-  createdAt          DateTime?            @db.DateTime
-  updatedAt          DateTime?            @db.DateTime
-  Representada       Representada         @relation(fields: [idRepresentada], references: [id], onUpdate: NoAction, map: "fk_ExternoRepresentada")
-  Usuario            Usuario?             @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ExternoUsuario")
-  ExternoColaborador ExternoColaborador[]
+  id                                                    Int                  @id(map: "PK__Externo__3213E83FC7A0FB3D") @default(autoincrement())
+  cargo                                                 String?              @db.VarChar(45)
+  idRepresentada                                        Int
+  idUsuario                                             Int?
+  createdAt                                             DateTime?            @db.DateTime
+  updatedAt                                             DateTime?            @db.DateTime
+  Representada                                          Representada         @relation(fields: [idRepresentada], references: [id], onUpdate: NoAction, map: "fk_ExternoRepresentada")
+  Usuario                                               Usuario?             @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ExternoUsuario")
+  ExternoColaborador_ExternoColaborador_jefeIdToExterno ExternoColaborador[] @relation("ExternoColaborador_jefeIdToExterno")
+  ExternoColaborador                                    ExternoColaborador[]
 }
 
 model CostoLaboral {
@@ -852,8 +853,8 @@ model VariablePersonal {
   Usuario_VariablePersonal_createdByToUsuario Usuario?  @relation("VariablePersonal_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalCreated")
   Gte                                         Gte       @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VariablePersonalGenerador")
   Usuario_VariablePersonal_updatedByToUsuario Usuario?  @relation("VariablePersonal_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VariablePersonalUpdated")
- @@unique([idGte, year, month], name: "idGte_year_month")
 
+  @@unique([idGte, year, month], name: "idGte_year_month", map: "idGte_year_month")
 }
 
 model RegistroLaboralGD {
@@ -1042,11 +1043,13 @@ model PlanMomentoAplicacion {
 }
 
 model ExternoColaborador {
-  id            Int         @id(map: "PK__ExternoC__3213E83F083C03A5") @default(autoincrement())
-  externoId     Int
-  colaboradorId Int
-  macrozonaId   Int
-  Colaborador   Colaborador @relation(fields: [colaboradorId], references: [id], onUpdate: NoAction, map: "FK__ExternoCo__colab__153B1FDF")
-  Externo       Externo     @relation(fields: [externoId], references: [id], onUpdate: NoAction, map: "FK__ExternoCo__exter__1446FBA6")
-  SuperZona     SuperZona   @relation(fields: [macrozonaId], references: [id], onUpdate: NoAction, map: "FK__ExternoCo__macro__162F4418")
+  id                                         Int         @id(map: "PK__ExternoC__3213E83F083C03A5") @default(autoincrement())
+  externoId                                  Int
+  colaboradorId                              Int
+  macrozonaId                                Int
+  jefeId                                     Int?
+  Externo_ExternoColaborador_jefeIdToExterno Externo?    @relation("ExternoColaborador_jefeIdToExterno", fields: [jefeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ExternoColaborador_Jefe_Externo")
+  Colaborador                                Colaborador @relation(fields: [colaboradorId], references: [id], onUpdate: NoAction, map: "FK__ExternoCo__colab__153B1FDF")
+  Externo                                    Externo     @relation(fields: [externoId], references: [id], onUpdate: NoAction, map: "FK__ExternoCo__exter__1446FBA6")
+  SuperZona                                  SuperZona   @relation(fields: [macrozonaId], references: [id], onUpdate: NoAction, map: "FK__ExternoCo__macro__162F4418")
 }
