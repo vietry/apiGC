@@ -20,6 +20,7 @@ export class UpdateVisitaDto {
         public readonly idCultivo?: number | null,
         public readonly idRepresentada?: number | null,
         public readonly empGrupo?: string | null,
+        public readonly empresa?: string | null,
         public readonly programada?: boolean | null //public readonly updatedBy?: number | null
     ) {}
 
@@ -49,9 +50,9 @@ export class UpdateVisitaDto {
         if (this.idRepresentada !== undefined)
             returnObj.idRepresentada = this.idRepresentada;
         if (this.empGrupo !== undefined) returnObj.empGrupo = this.empGrupo;
+        if (this.empresa !== undefined) returnObj.empresa = this.empresa;
         if (this.programada !== undefined)
             returnObj.programada = this.programada;
-        //if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
         return returnObj;
     }
 
@@ -79,6 +80,7 @@ export class UpdateVisitaDto {
             idCultivo,
             idRepresentada,
             empGrupo,
+            empresa,
             programada,
             //updatedBy,
         } = object;
@@ -122,6 +124,7 @@ export class UpdateVisitaDto {
                 parseFk(idCultivo),
                 parseFk(idRepresentada),
                 empGrupo ?? undefined,
+                empresa ?? undefined,
                 programada !== undefined ? Boolean(programada) : undefined
                 //updatedBy !== undefined ? Number(updatedBy) : undefined
             ),

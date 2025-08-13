@@ -8,7 +8,7 @@ import {
 
 export class BlancoBiologicoService {
     // DI
-    constructor() {}
+    //constructor() {}
 
     async createBlancoBiologico(
         createBlancoBiologicoDto: CreateBlancoBiologicoDto
@@ -192,6 +192,69 @@ export class BlancoBiologicoService {
                 );
 
             return blancoBiologico;
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
+    async getBlancosBiologicosByGtePeriodo(
+        idGte: number,
+        month: number,
+        year: number
+    ) {
+        try {
+            // Buscar las planificaciones del GTE en el período especificado
+            const planificaciones = await prisma.nuevaPlanificacion.findMany({
+                where: {
+                    gteId: idGte,
+                    checkJefe: true,
+                    activo: true,
+                    mes: month,
+                    monthYear: {
+                        gte: new Date(
+                            `${year}-${month.toString().padStart(2, '0')}-01`
+                        ),
+                        lt: new Date(year, month, 1), // Primer día del siguiente mes
+                    },
+                },
+                select: {
+                    blancoId: true, // blancoId corresponde al ID del blanco biológico
+                },
+                distinct: ['blancoId'], // Obtener IDs únicos de blancos biológicos
+            });
+
+            // Extraer los IDs únicos de los blancos biológicos
+            const blancoIds = planificaciones.map((p) => p.blancoId);
+
+            if (blancoIds.length === 0) {
+                return []; // No hay planificaciones para este GTE en el período especificado
+            }
+
+            // Buscar los blancos biológicos correspondientes
+            const blancosBiologicos = await prisma.blancoBiologico.findMany({
+                where: {
+                    id: {
+                        in: blancoIds,
+                    },
+                },
+                include: {
+                    Vegetacion: true,
+                },
+                orderBy: {
+                    estandarizado: 'asc',
+                },
+            });
+
+            return blancosBiologicos.map((blancoBiologico) => ({
+                id: blancoBiologico.id,
+                cientifico: blancoBiologico.cientifico,
+                estandarizado: blancoBiologico.estandarizado,
+                idVegetacion: blancoBiologico.idVegetacion,
+                vegetacion: blancoBiologico.Vegetacion.nombre,
+                codi: blancoBiologico.codi,
+                createdAt: blancoBiologico.createdAt,
+                updatedAt: blancoBiologico.updatedAt,
+            }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

@@ -119,6 +119,67 @@ export class FamiliaService {
         }
     }
 
+    async getFamiliasByGtePeriodo(idGte: number, month: number, year: number) {
+        try {
+            // Buscar las planificaciones del GTE en el período especificado
+            const planificaciones = await prisma.nuevaPlanificacion.findMany({
+                where: {
+                    gteId: idGte,
+                    checkJefe: true,
+                    activo: true,
+                    mes: month,
+                    monthYear: {
+                        gte: new Date(
+                            `${year}-${month.toString().padStart(2, '0')}-01`
+                        ),
+                        lt: new Date(year, month, 1), // Primer día del siguiente mes
+                    },
+                },
+                select: {
+                    productoId: true, // productoId corresponde al ID de la familia
+                },
+                distinct: ['productoId'], // Obtener IDs únicos de familias
+            });
+
+            // Extraer los IDs únicos de las familias
+            const familiaIds = planificaciones.map((p) => p.productoId);
+
+            if (familiaIds.length === 0) {
+                return []; // No hay planificaciones para este GTE en el período especificado
+            }
+
+            // Buscar las familias correspondientes
+            const familias = await prisma.familia.findMany({
+                where: {
+                    id: {
+                        in: familiaIds,
+                    },
+                },
+                include: {
+                    Empresa: true,
+                },
+                orderBy: {
+                    nombre: 'asc',
+                },
+            });
+
+            return familias.map((familia) => ({
+                id: familia.id,
+                codigo: familia.codigo.trim(),
+                nombre: familia.nombre.trim(),
+                idEmpresa: familia.idEmpresa,
+                enfoque: familia.enfoque,
+                clase: familia.clase,
+                createdAt: familia.createdAt,
+                updatedAt: familia.updatedAt,
+                empresaNombre: familia.Empresa.nomEmpresa,
+                codiEmpresa: `0${familia.Empresa.id}`,
+            }));
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     async getFamiliasEscuela() {
         try {
             const familias = await prisma.familia.findMany({

@@ -99,4 +99,46 @@ export class BlancoBiologicoController {
             .then((blancoBiologico) => res.status(200).json(blancoBiologico))
             .catch((error) => this.handleError(res, error));
     };
+
+    getBlancosBiologicosByGtePeriodo = async (req: Request, res: Response) => {
+        const { idGte, month, year } = req.query;
+
+        // Validar parámetros requeridos
+        if (!idGte || !month || !year) {
+            return res.status(400).json({
+                error: 'Los parámetros idGte, month y year son requeridos',
+            });
+        }
+
+        const gteId = +idGte;
+        const monthNum = +month;
+        const yearNum = +year;
+
+        // Validar que los parámetros sean números válidos
+        if (isNaN(gteId) || isNaN(monthNum) || isNaN(yearNum)) {
+            return res.status(400).json({
+                error: 'Los parámetros idGte, month y year deben ser números válidos',
+            });
+        }
+
+        // Validar rangos
+        if (monthNum < 1 || monthNum > 12) {
+            return res.status(400).json({
+                error: 'El mes debe estar entre 1 y 12',
+            });
+        }
+
+        if (yearNum < 2020 || yearNum > 2030) {
+            return res.status(400).json({
+                error: 'El año debe estar en un rango válido',
+            });
+        }
+
+        this.blancoBiologicoService
+            .getBlancosBiologicosByGtePeriodo(gteId, monthNum, yearNum)
+            .then((blancosBiologicos) =>
+                res.status(200).json(blancosBiologicos)
+            )
+            .catch((error) => this.handleError(res, error));
+    };
 }

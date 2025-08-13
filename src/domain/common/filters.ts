@@ -87,6 +87,7 @@ export interface VisitaFilters {
     idSubLabor1?: number;
     idSubLabor2?: number;
     programada?: boolean;
+    empresa?: string;
 }
 
 export interface ConsumoFilters {

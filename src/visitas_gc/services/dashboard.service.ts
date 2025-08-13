@@ -1,5 +1,5 @@
 import { prisma } from '../../data/sqlserver';
-import { GestionVisitasFilters } from '../../domain';
+import { GestionVisitasFilters, CustomError } from '../../domain';
 
 // Tipos para la respuesta de estadísticas
 interface SubLaborEstadistica {
@@ -46,241 +46,251 @@ export class DashboardService {
     async obtenerEstadisticasGestionVisitas(
         filters: GestionVisitasFilters
     ): Promise<GestionVisitasEstadisticas> {
-        // Construir el WHERE clause basado en los filtros
-        const whereConditions: any = {};
+        try {
+            // Construir el WHERE clause basado en los filtros
+            const whereConditions: any = {};
 
-        if (filters.idColaborador) {
-            whereConditions.idColaborador = filters.idColaborador;
-        }
-
-        if (filters.year) {
-            whereConditions.fecha = {
-                ...whereConditions.fecha,
-                gte: new Date(
-                    filters.year,
-                    filters.month ? filters.month - 1 : 0,
-                    1
-                ),
-            };
-
-            if (filters.month) {
-                whereConditions.fecha = {
-                    ...whereConditions.fecha,
-                    lt: new Date(filters.year, filters.month, 1),
-                };
-            } else {
-                whereConditions.fecha = {
-                    ...whereConditions.fecha,
-                    lt: new Date(filters.year + 1, 0, 1),
-                };
+            if (filters.idColaborador) {
+                whereConditions.idColaborador = filters.idColaborador;
             }
-        }
 
-        // Si se especifica macrozona o empresa, necesitamos filtrar por la relación ColaboradorJefe
-        let colaboradorIds: number[] | undefined;
+            if (filters.year) {
+                whereConditions.programacion = {
+                    ...whereConditions.programacion,
+                    gte: new Date(
+                        filters.year,
+                        filters.month ? filters.month - 1 : 0,
+                        1
+                    ),
+                };
 
-        if (filters.idMacrozona || filters.idEmpresa) {
-            const colaboradorJefes = await prisma.colaboradorJefe.findMany({
-                where: {
-                    ...(filters.idMacrozona && {
-                        idMacroZona: filters.idMacrozona,
-                    }),
-                    ...(filters.idEmpresa && { idEmpresa: filters.idEmpresa }),
+                if (filters.month) {
+                    whereConditions.programacion = {
+                        ...whereConditions.programacion,
+                        lt: new Date(filters.year, filters.month, 1),
+                    };
+                } else {
+                    whereConditions.programacion = {
+                        ...whereConditions.programacion,
+                        lt: new Date(filters.year + 1, 0, 1),
+                    };
+                }
+            }
+
+            // Si se especifica macrozona o empresa, necesitamos filtrar por la relación ColaboradorJefe
+            let colaboradorIds: number[] | undefined;
+
+            if (filters.idMacrozona || filters.idEmpresa) {
+                const colaboradorJefes = await prisma.colaboradorJefe.findMany({
+                    where: {
+                        ...(filters.idMacrozona && {
+                            idMacroZona: filters.idMacrozona,
+                        }),
+                        ...(filters.idEmpresa && {
+                            idEmpresa: filters.idEmpresa,
+                        }),
+                    },
+                    select: { idColaborador: true },
+                });
+
+                colaboradorIds = colaboradorJefes.map((cj) => cj.idColaborador);
+
+                if (colaboradorIds.length > 0) {
+                    whereConditions.idColaborador = {
+                        in: colaboradorIds,
+                    };
+                } else {
+                    // Si no hay colaboradores que coincidan con los filtros, retornar estadísticas vacías
+                    return {
+                        resumen: {
+                            totalVisitas: 0,
+                            visitasCompletadas: 0,
+                            porcentajeCompletadas: 0,
+                            colaboradores: 0,
+                            labores: 0,
+                            sublabores: 0,
+                        },
+                        colaboradores: [],
+                    };
+                }
+            }
+
+            // Obtener visitas con sus labores y sublabores
+            const visitas = await prisma.visita.findMany({
+                where: whereConditions,
+                include: {
+                    Colaborador: {
+                        include: {
+                            Usuario: {
+                                select: { nombres: true, apellidos: true },
+                            },
+                            ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
+                                {
+                                    include: {
+                                        SuperZona: true,
+                                        Empresa: true,
+                                    },
+                                },
+                        },
+                    },
+                    LaborVisita: {
+                        include: {
+                            SubLabor: {
+                                include: {
+                                    Labor: true,
+                                },
+                            },
+                        },
+                        where: {
+                            ...(filters.idLabor && {
+                                SubLabor: { idLabor: filters.idLabor },
+                            }),
+                            ...(filters.idSubLabor && {
+                                idSubLabor: filters.idSubLabor,
+                            }),
+                        },
+                    },
                 },
-                select: { idColaborador: true },
             });
 
-            colaboradorIds = colaboradorJefes.map((cj) => cj.idColaborador);
+            // Procesar los datos para crear las estadísticas
+            const colaboradoresMap = new Map<number, ColaboradorEstadistica>();
+            const laboresSet = new Set<number>();
+            const sublaboresSet = new Set<number>();
+            visitas.forEach((visita) => {
+                const colaborador = visita.Colaborador;
+                const colaboradorJefe =
+                    colaborador
+                        .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador[0];
 
-            if (colaboradorIds.length > 0) {
-                whereConditions.idColaborador = {
-                    in: colaboradorIds,
-                };
-            } else {
-                // Si no hay colaboradores que coincidan con los filtros, retornar estadísticas vacías
-                return {
-                    resumen: {
+                const nombreCompleto = `${colaborador.Usuario?.nombres ?? ''} ${
+                    colaborador.Usuario?.apellidos ?? ''
+                }`.trim();
+                const empresa = colaboradorJefe?.Empresa?.nomEmpresa;
+                const macrozona = colaboradorJefe?.SuperZona?.nombre;
+
+                // Inicializar colaborador si no existe
+                if (!colaboradoresMap.has(colaborador.id)) {
+                    colaboradoresMap.set(colaborador.id, {
+                        idColaborador: colaborador.id,
+                        nombreColaborador: nombreCompleto,
+                        empresa,
+                        macrozona,
                         totalVisitas: 0,
                         visitasCompletadas: 0,
                         porcentajeCompletadas: 0,
-                        colaboradores: 0,
-                        labores: 0,
-                        sublabores: 0,
-                    },
-                    colaboradores: [],
-                };
-            }
-        }
+                        labores: [],
+                    });
+                }
 
-        // Obtener visitas con sus labores y sublabores
-        const visitas = await prisma.visita.findMany({
-            where: whereConditions,
-            include: {
-                Colaborador: {
-                    include: {
-                        Usuario: {
-                            select: { nombres: true, apellidos: true },
-                        },
-                        ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
-                            {
-                                include: {
-                                    SuperZona: true,
-                                    Empresa: true,
-                                },
-                            },
-                    },
-                },
-                LaborVisita: {
-                    include: {
-                        SubLabor: {
-                            include: {
-                                Labor: true,
-                            },
-                        },
-                    },
-                    where: {
-                        ...(filters.idLabor && {
-                            SubLabor: { idLabor: filters.idLabor },
-                        }),
-                        ...(filters.idSubLabor && {
-                            idSubLabor: filters.idSubLabor,
-                        }),
-                    },
-                },
-            },
-        });
+                const colaboradorStat = colaboradoresMap.get(colaborador.id)!;
+                colaboradorStat.totalVisitas++;
 
-        // Procesar los datos para crear las estadísticas
-        const colaboradoresMap = new Map<number, ColaboradorEstadistica>();
-        const laboresSet = new Set<number>();
-        const sublaboresSet = new Set<number>();
-        visitas.forEach((visita) => {
-            const colaborador = visita.Colaborador;
-            const colaboradorJefe =
-                colaborador
-                    .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador[0];
+                if (visita.estado === 'Completado') {
+                    colaboradorStat.visitasCompletadas++;
+                }
 
-            const nombreCompleto = `${colaborador.Usuario?.nombres ?? ''} ${
-                colaborador.Usuario?.apellidos ?? ''
-            }`.trim();
-            const empresa = colaboradorJefe?.Empresa?.nomEmpresa;
-            const macrozona = colaboradorJefe?.SuperZona?.nombre;
+                // Procesar labores de esta visita
+                this.procesarLaboresDeVisita(
+                    visita,
+                    colaboradorStat,
+                    laboresSet,
+                    sublaboresSet
+                );
+            });
 
-            // Inicializar colaborador si no existe
-            if (!colaboradoresMap.has(colaborador.id)) {
-                colaboradoresMap.set(colaborador.id, {
-                    idColaborador: colaborador.id,
-                    nombreColaborador: nombreCompleto,
-                    empresa,
-                    macrozona,
-                    totalVisitas: 0,
-                    visitasCompletadas: 0,
-                    porcentajeCompletadas: 0,
-                    labores: [],
-                });
-            }
+            // Calcular porcentajes
+            const colaboradores = Array.from(colaboradoresMap.values());
 
-            const colaboradorStat = colaboradoresMap.get(colaborador.id)!;
-            colaboradorStat.totalVisitas++;
-
-            if (visita.estado === 'Completado') {
-                colaboradorStat.visitasCompletadas++;
-            }
-
-            // Procesar labores de esta visita
-            this.procesarLaboresDeVisita(
-                visita,
-                colaboradorStat,
-                laboresSet,
-                sublaboresSet
-            );
-        });
-
-        // Calcular porcentajes
-        const colaboradores = Array.from(colaboradoresMap.values());
-
-        colaboradores.forEach((colaborador) => {
-            colaborador.porcentajeCompletadas =
-                colaborador.totalVisitas > 0
-                    ? Number(
-                          (
-                              (colaborador.visitasCompletadas /
-                                  colaborador.totalVisitas) *
-                              100
-                          ).toFixed(2)
-                      )
-                    : 0;
-
-            colaborador.labores.forEach((labor) => {
-                labor.porcentajeCompletadas =
-                    labor.totalVisitas > 0
+            colaboradores.forEach((colaborador) => {
+                colaborador.porcentajeCompletadas =
+                    colaborador.totalVisitas > 0
                         ? Number(
                               (
-                                  (labor.visitasCompletadas /
-                                      labor.totalVisitas) *
+                                  (colaborador.visitasCompletadas /
+                                      colaborador.totalVisitas) *
                                   100
                               ).toFixed(2)
                           )
                         : 0;
 
-                labor.sublabores.forEach((sublabor) => {
-                    sublabor.porcentajeCompletadas =
-                        sublabor.totalVisitas > 0
+                colaborador.labores.forEach((labor) => {
+                    labor.porcentajeCompletadas =
+                        labor.totalVisitas > 0
                             ? Number(
                                   (
-                                      (sublabor.visitasCompletadas /
-                                          sublabor.totalVisitas) *
+                                      (labor.visitasCompletadas /
+                                          labor.totalVisitas) *
                                       100
                                   ).toFixed(2)
                               )
                             : 0;
+
+                    labor.sublabores.forEach((sublabor) => {
+                        sublabor.porcentajeCompletadas =
+                            sublabor.totalVisitas > 0
+                                ? Number(
+                                      (
+                                          (sublabor.visitasCompletadas /
+                                              sublabor.totalVisitas) *
+                                          100
+                                      ).toFixed(2)
+                                  )
+                                : 0;
+                    });
+
+                    // Ordenar sublabores por nombre
+                    labor.sublabores.sort((a, b) =>
+                        a.nombre.localeCompare(b.nombre)
+                    );
                 });
 
-                // Ordenar sublabores por nombre
-                labor.sublabores.sort((a, b) =>
+                // Ordenar labores por nombre
+                colaborador.labores.sort((a, b) =>
                     a.nombre.localeCompare(b.nombre)
                 );
             });
 
-            // Ordenar labores por nombre
-            colaborador.labores.sort((a, b) =>
-                a.nombre.localeCompare(b.nombre)
+            // Ordenar colaboradores por nombre
+            colaboradores.sort((a, b) =>
+                a.nombreColaborador.localeCompare(b.nombreColaborador)
             );
-        });
 
-        // Ordenar colaboradores por nombre
-        colaboradores.sort((a, b) =>
-            a.nombreColaborador.localeCompare(b.nombreColaborador)
-        );
+            // Calcular resumen general
+            const totalVisitas = colaboradores.reduce(
+                (sum, c) => sum + c.totalVisitas,
+                0
+            );
+            const totalCompletadas = colaboradores.reduce(
+                (sum, c) => sum + c.visitasCompletadas,
+                0
+            );
 
-        // Calcular resumen general
-        const totalVisitas = colaboradores.reduce(
-            (sum, c) => sum + c.totalVisitas,
-            0
-        );
-        const totalCompletadas = colaboradores.reduce(
-            (sum, c) => sum + c.visitasCompletadas,
-            0
-        );
-
-        return {
-            resumen: {
-                totalVisitas,
-                visitasCompletadas: totalCompletadas,
-                porcentajeCompletadas:
-                    totalVisitas > 0
-                        ? Number(
-                              ((totalCompletadas / totalVisitas) * 100).toFixed(
-                                  2
+            return {
+                resumen: {
+                    totalVisitas,
+                    visitasCompletadas: totalCompletadas,
+                    porcentajeCompletadas:
+                        totalVisitas > 0
+                            ? Number(
+                                  (
+                                      (totalCompletadas / totalVisitas) *
+                                      100
+                                  ).toFixed(2)
                               )
-                          )
-                        : 0,
-                colaboradores: colaboradores.length,
-                labores: laboresSet.size,
-                sublabores: sublaboresSet.size,
-            },
-            colaboradores,
-        };
+                            : 0,
+                    colaboradores: colaboradores.length,
+                    labores: laboresSet.size,
+                    sublabores: sublaboresSet.size,
+                },
+                colaboradores,
+            };
+        } catch (error) {
+            console.error('Error en obtenerEstadisticasGestionVisitas:', error);
+            throw CustomError.internalServer(
+                `Error al obtener estadísticas de gestión de visitas: ${error}`
+            );
+        }
     }
 
     private procesarLaboresDeVisita(

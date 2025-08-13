@@ -12,6 +12,7 @@ export class FamiliaRoutes {
         router.get('/', controller.getFamilias);
         router.get('/enfoque', controller.getFamiliasConEnfoque);
         router.get('/escuela', controller.getFamiliasEscuela);
+        router.get('/gte-periodo', controller.getFamiliasByGtePeriodo);
         router.get('/:id', controller.getFamiliaById);
 
         return router;

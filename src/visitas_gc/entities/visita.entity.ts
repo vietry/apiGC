@@ -22,6 +22,7 @@ export class VisitaEntity {
         public idCultivo: number | null,
         public idRepresentada: number | null,
         public empGrupo: string | null,
+        public empresa: string | null,
         public programada: boolean | null //public createdAt: Date | null, //public updatedAt: Date | null
     ) {}
 
@@ -47,6 +48,7 @@ export class VisitaEntity {
             idCultivo,
             idRepresentada,
             empGrupo,
+            empresa,
             programada,
             //createdAt,
             //updatedAt,
@@ -76,6 +78,7 @@ export class VisitaEntity {
             idCultivo,
             idRepresentada,
             empGrupo,
+            empresa,
             programada
             //createdAt,
             //updatedAt

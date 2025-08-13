@@ -16,31 +16,46 @@ export class DashboardController {
     };
 
     obtenerEstadisticasGestionVisitas = async (req: Request, res: Response) => {
-        // Extraer los filtros del query
-        const {
-            idColaborador,
-            idMacrozona,
-            idEmpresa,
-            year,
-            month,
-            idLabor,
-            idSubLabor,
-        } = req.query;
+        try {
+            // Extraer los filtros del query
+            const {
+                idColaborador,
+                idMacrozona,
+                idEmpresa,
+                year,
+                month,
+                idLabor,
+                idSubLabor,
+            } = req.query;
 
-        // Construir objeto de filtros
-        const filters: GestionVisitasFilters = {
-            idColaborador: idColaborador ? +idColaborador : undefined,
-            idMacrozona: idMacrozona ? +idMacrozona : undefined,
-            idEmpresa: idEmpresa ? +idEmpresa : undefined,
-            year: year ? +year : undefined,
-            month: month ? +month : undefined,
-            idLabor: idLabor ? +idLabor : undefined,
-            idSubLabor: idSubLabor ? +idSubLabor : undefined,
-        };
+            // Construir objeto de filtros
+            const filters: GestionVisitasFilters = {
+                idColaborador: idColaborador ? +idColaborador : undefined,
+                idMacrozona: idMacrozona ? +idMacrozona : undefined,
+                idEmpresa: idEmpresa ? +idEmpresa : undefined,
+                year: year ? +year : undefined,
+                month: month ? +month : undefined,
+                idLabor: idLabor ? +idLabor : undefined,
+                idSubLabor: idSubLabor ? +idSubLabor : undefined,
+            };
 
-        this.dashboardService
-            .obtenerEstadisticasGestionVisitas(filters)
-            .then((estadisticas) => res.status(200).json(estadisticas))
-            .catch((error) => this.handleError(res, error));
+            const estadisticas =
+                await this.dashboardService.obtenerEstadisticasGestionVisitas(
+                    filters
+                );
+
+            // Responder con las estadísticas (puede ser un objeto vacío si no hay datos)
+            return res.status(200).json({
+                success: true,
+                message:
+                    estadisticas.resumen.totalVisitas === 0
+                        ? 'No se encontraron visitas con los filtros aplicados'
+                        : 'Estadísticas obtenidas exitosamente',
+                data: estadisticas,
+                filtros: filters,
+            });
+        } catch (error) {
+            return this.handleError(res, error);
+        }
     };
 }
