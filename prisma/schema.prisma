@@ -399,6 +399,7 @@ model Visita {
   motivo         String?          @db.VarChar(255)
   programada     Boolean?
   empresa        String?          @db.VarChar(10)
+  negocio        String?          @db.VarChar(20)
   FotoVisita     FotoVisita[]
   LaborVisita    LaborVisita[]
   Colaborador    Colaborador      @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_Visita_Colaborador1")

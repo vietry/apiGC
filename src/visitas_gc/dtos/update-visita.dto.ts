@@ -21,7 +21,8 @@ export class UpdateVisitaDto {
         public readonly idRepresentada?: number | null,
         public readonly empGrupo?: string | null,
         public readonly empresa?: string | null,
-        public readonly programada?: boolean | null //public readonly updatedBy?: number | null
+        public readonly programada?: boolean | null,
+        public readonly negocio?: string | null //public readonly updatedBy?: number | null
     ) {}
 
     get values(): { [key: string]: any } {
@@ -53,6 +54,7 @@ export class UpdateVisitaDto {
         if (this.empresa !== undefined) returnObj.empresa = this.empresa;
         if (this.programada !== undefined)
             returnObj.programada = this.programada;
+        if (this.negocio !== undefined) returnObj.negocio = this.negocio;
         return returnObj;
     }
 
@@ -82,6 +84,7 @@ export class UpdateVisitaDto {
             empGrupo,
             empresa,
             programada,
+            negocio,
             //updatedBy,
         } = object;
 
@@ -125,7 +128,8 @@ export class UpdateVisitaDto {
                 parseFk(idRepresentada),
                 empGrupo ?? undefined,
                 empresa ?? undefined,
-                programada !== undefined ? Boolean(programada) : undefined
+                programada !== undefined ? Boolean(programada) : undefined,
+                negocio ?? undefined
                 //updatedBy !== undefined ? Number(updatedBy) : undefined
             ),
         ];

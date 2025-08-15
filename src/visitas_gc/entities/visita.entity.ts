@@ -23,7 +23,8 @@ export class VisitaEntity {
         public idRepresentada: number | null,
         public empGrupo: string | null,
         public empresa: string | null,
-        public programada: boolean | null //public createdAt: Date | null, //public updatedAt: Date | null
+        public programada: boolean | null,
+        public negocio: string | null //public createdAt: Date | null, //public updatedAt: Date | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): VisitaEntity {
@@ -50,6 +51,7 @@ export class VisitaEntity {
             empGrupo,
             empresa,
             programada,
+            negocio,
             //createdAt,
             //updatedAt,
         } = object;
@@ -79,7 +81,8 @@ export class VisitaEntity {
             idRepresentada,
             empGrupo,
             empresa,
-            programada
+            programada,
+            negocio
             //createdAt,
             //updatedAt
         );

@@ -35,6 +35,7 @@ export class Validators {
         idEmpresa: number;
         empresa?: string;
         area?: string;
+        negocio?: string;
         colaboradorExternoId?: number | number[];
     }> {
         const colaborador = await prisma.colaborador.findFirst({
@@ -133,6 +134,7 @@ export class Validators {
                 empresa: isJefe
                     ? isJefe.Empresa?.nomEmpresa
                     : colaborador.ZonaAnterior?.Empresa?.nomEmpresa!,
+                negocio: colaborador?.negocio ?? '',
             };
         }
 
@@ -176,7 +178,7 @@ export class Validators {
                 idTipo: gte.id,
                 tipo: 'gte',
                 cargo: 'Generador',
-
+                negocio: '',
                 zona: gte.Colaborador?.ZonaAnterior?.codigo!,
                 idMacrozona: idMacrozona ?? 0,
                 idEmpresa: gte.Colaborador?.ZonaAnterior?.idEmpresa!,
@@ -267,7 +269,7 @@ export class Validators {
                 idTipo: externo.id,
                 tipo: 'externo',
                 cargo: externo.cargo ?? '',
-                //area: '',
+                negocio: '',
                 zona: '',
                 idMacrozona,
                 idEmpresa: externo.Representada?.id,

@@ -175,15 +175,20 @@ export class NuevaPlanificacionService {
                             },
                         },
                     },
-                    // Búsqueda por nombre del GTE
+                    // Búsqueda por nombre o tipo del GTE
                     {
                         Gte: {
                             is: {
-                                Usuario: {
-                                    is: {
-                                        nombres: { contains: search },
+                                OR: [
+                                    {
+                                        Usuario: {
+                                            is: {
+                                                nombres: { contains: search },
+                                            },
+                                        },
                                     },
-                                },
+                                    { tipo: { contains: search } },
+                                ],
                             },
                         },
                     },

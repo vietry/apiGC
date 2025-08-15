@@ -63,6 +63,7 @@ export class VisitaController {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = req.query;
 
         // Construir objeto de filtros
@@ -84,6 +85,7 @@ export class VisitaController {
                     ? !!(programada === 'true' || programada === '1')
                     : undefined,
             empresa: typeof empresa === 'string' ? empresa : undefined,
+            negocio: typeof negocio === 'string' ? negocio : undefined,
         };
 
         this.visitaService
@@ -135,6 +137,7 @@ export class VisitaController {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = req.query;
 
         // Construir objeto de filtros
@@ -156,6 +159,7 @@ export class VisitaController {
                     ? !!(programada === 'true' || programada === '1')
                     : undefined,
             empresa: typeof empresa === 'string' ? empresa : undefined,
+            negocio: typeof negocio === 'string' ? negocio : undefined,
         };
 
         this.visitaService
@@ -181,6 +185,7 @@ export class VisitaController {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = req.query;
         const filters: any = {
             idColaborador: idColaborador ? +idColaborador : undefined,
@@ -200,6 +205,7 @@ export class VisitaController {
                     ? !!(programada === 'true' || programada === '1')
                     : undefined,
             empresa: typeof empresa === 'string' ? empresa : undefined,
+            negocio: typeof negocio === 'string' ? negocio : undefined,
         };
 
         this.visitaService
@@ -237,6 +243,7 @@ export class VisitaController {
                 idSubLabor2,
                 programada,
                 empresa,
+                negocio,
             } = req.query;
 
             const filters: VisitaFilters = {
@@ -255,6 +262,7 @@ export class VisitaController {
                         ? !!(programada === 'true' || programada === '1')
                         : undefined,
                 empresa: typeof empresa === 'string' ? empresa : undefined,
+                negocio: typeof negocio === 'string' ? negocio : undefined,
             };
 
             // Construir objetos de periodo

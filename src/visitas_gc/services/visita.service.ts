@@ -354,6 +354,7 @@ export class VisitaService {
                     motivo: createVisitaDto.motivo,
                     empresa: createVisitaDto.empresa,
                     programada: createVisitaDto.programada,
+                    negocio: createVisitaDto.negocio,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -411,6 +412,7 @@ export class VisitaService {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = filters;
 
         const where: any = {};
@@ -488,6 +490,11 @@ export class VisitaService {
         // Filtro por empresa
         if (empresa) {
             where.empresa = { contains: empresa };
+        }
+
+        // Filtro por negocio
+        if (negocio) {
+            where.negocio = { contains: negocio };
         }
 
         // Filtros de fecha
@@ -585,6 +592,7 @@ export class VisitaService {
                         motivo: visita.motivo,
                         empresa: visita.empresa,
                         programada: visita.programada,
+                        negocio: visita.negocio,
                         idColaborador: visita.idColaborador,
                         colaborador: visita.Colaborador
                             ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
@@ -705,6 +713,7 @@ export class VisitaService {
                 motivo: visita.motivo,
                 empresa: visita.empresa,
                 programada: visita.programada,
+                negocio: visita.negocio,
                 idColaborador: visita.idColaborador,
                 colaborador: visita.Colaborador
                     ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
@@ -766,6 +775,7 @@ export class VisitaService {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = filters;
 
         const where: any = {};
@@ -843,6 +853,11 @@ export class VisitaService {
         // Filtro por empresa
         if (empresa) {
             where.empresa = { contains: empresa };
+        }
+
+        // Filtro por negocio
+        if (negocio) {
+            where.negocio = { contains: negocio };
         }
 
         // Filtros de fecha (usamos updatedAt como ejemplo; puede cambiarse según el negocio)
@@ -929,6 +944,7 @@ export class VisitaService {
                     empGrupo: visita.motivo,
                     empresa: visita.empresa,
                     programada: visita.programada,
+                    negocio: visita.negocio,
                     idColaborador: visita.idColaborador,
                     colaborador: visita.Colaborador
                         ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
@@ -984,6 +1000,7 @@ export class VisitaService {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = filters;
         const where: any = {};
         if (idColaborador) where.idColaborador = idColaborador;
@@ -995,6 +1012,11 @@ export class VisitaService {
         // Filtro por empresa
         if (empresa) {
             where.empresa = { contains: empresa };
+        }
+
+        // Filtro por negocio
+        if (negocio) {
+            where.negocio = { contains: negocio };
         }
 
         if (idVegetacion) {
@@ -1129,6 +1151,7 @@ export class VisitaService {
                                     motivo: dto.motivo,
                                     empresa: dto.empresa,
                                     programada: dto.programada,
+                                    negocio: dto.negocio,
                                     createdAt: currentDate,
                                     updatedAt: currentDate,
                                 },
@@ -1175,6 +1198,7 @@ export class VisitaService {
             idSubLabor2,
             programada,
             empresa,
+            negocio,
         } = filters;
         const whereBase: any = {};
         if (idColaborador) whereBase.idColaborador = idColaborador;
@@ -1210,6 +1234,11 @@ export class VisitaService {
         // Filtro por empresa
         if (empresa) {
             whereBase.empresa = { contains: empresa };
+        }
+
+        // Filtro por negocio
+        if (negocio) {
+            whereBase.negocio = { contains: negocio };
         }
 
         // Calcular periodos

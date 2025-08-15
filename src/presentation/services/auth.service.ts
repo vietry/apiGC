@@ -115,6 +115,7 @@ export class AuthService {
                 zona: tipoUser.zona,
                 idMacrozona: tipoUser.idMacrozona,
                 idEmpresa: tipoUser.idEmpresa,
+                negocio: tipoUser.negocio ?? '',
                 empresa: tipoUser.empresa,
                 token: token,
                 foto: user.Foto?.nombre,
@@ -205,6 +206,7 @@ export class AuthService {
                 idMacrozona: tipoUser.idMacrozona,
                 colaboradorExternoId: tipoUser.colaboradorExternoId,
                 idEmpresa: tipoUser.idEmpresa,
+                negocio: tipoUser.negocio,
                 empresa: tipoUser.empresa,
             },
         };

@@ -81,6 +81,7 @@ export class AuthMiddleware {
                     cargo: tipoUser.cargo,
                     zona: tipoUser.zona,
                     idMacrozona: tipoUser.idMacrozona,
+                    negocio: tipoUser.negocio,
                     idEmpresa: tipoUser.idEmpresa,
                     empresa: tipoUser.empresa,
                     repColaboradorId: tipoUser.colaboradorExternoId,
