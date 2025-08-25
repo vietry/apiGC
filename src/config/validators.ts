@@ -41,6 +41,9 @@ export class Validators {
         const colaborador = await prisma.colaborador.findFirst({
             where: { idUsuario },
             include: {
+                Usuario: {
+                    select: { rol: true },
+                },
                 ZonaAnterior: {
                     select: {
                         codigo: true,
@@ -110,8 +113,23 @@ export class Validators {
                 idMacrozona = null;
             }
 
-            let finalIdMacrozona: number | undefined;
-            if (isJefe) {
+            let finalIdMacrozona: number | number[] | undefined;
+
+            // Si el usuario tiene rol "ml" (Multilinea), puede tener múltiples macrozonas
+            if (colaborador.Usuario?.rol === 'ml') {
+                const macrozonaIds =
+                    colaborador.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.map(
+                        (jefe) => jefe.SuperZona?.id
+                    ).filter((id) => id !== null && id !== undefined) ?? [];
+
+                if (macrozonaIds.length === 0) {
+                    finalIdMacrozona = 0;
+                } else if (macrozonaIds.length === 1) {
+                    finalIdMacrozona = macrozonaIds[0]!;
+                } else {
+                    finalIdMacrozona = macrozonaIds;
+                }
+            } else if (isJefe) {
                 finalIdMacrozona =
                     isJefe.idMacroZona &&
                     colaborador.cargo === 'GERENTE COMERCIAL CORP.'

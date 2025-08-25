@@ -433,7 +433,7 @@ export class VariablePersonalService {
                     year: variable.year,
                     month: variable.month,
                     idGte: variable.idGte,
-                    nombreGte: `${variable.Gte.Usuario?.nombres} ${variable.Gte.Usuario?.apellidos}`,
+                    nombreGte: `${variable.Gte.Usuario?.apellidos}, ${variable.Gte.Usuario?.nombres}`,
                     idColaborador: variable.Gte.Colaborador?.id,
                     zonaanterior:
                         variable.Gte.Colaborador?.ZonaAnterior?.nombre?.trim(),

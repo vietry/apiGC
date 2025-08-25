@@ -22,7 +22,8 @@ export class UpdateVisitaDto {
         public readonly empGrupo?: string | null,
         public readonly empresa?: string | null,
         public readonly programada?: boolean | null,
-        public readonly negocio?: string | null //public readonly updatedBy?: number | null
+        public readonly negocio?: string | null,
+        public readonly macrozonaId?: number | null //public readonly updatedBy?: number | null
     ) {}
 
     get values(): { [key: string]: any } {
@@ -55,6 +56,8 @@ export class UpdateVisitaDto {
         if (this.programada !== undefined)
             returnObj.programada = this.programada;
         if (this.negocio !== undefined) returnObj.negocio = this.negocio;
+        if (this.macrozonaId !== undefined)
+            returnObj.macrozonaId = this.macrozonaId;
         return returnObj;
     }
 
@@ -85,6 +88,7 @@ export class UpdateVisitaDto {
             empresa,
             programada,
             negocio,
+            macrozonaId,
             //updatedBy,
         } = object;
 
@@ -129,7 +133,8 @@ export class UpdateVisitaDto {
                 empGrupo ?? undefined,
                 empresa ?? undefined,
                 programada !== undefined ? Boolean(programada) : undefined,
-                negocio ?? undefined
+                negocio ?? undefined,
+                macrozonaId !== undefined ? Number(macrozonaId) : undefined
                 //updatedBy !== undefined ? Number(updatedBy) : undefined
             ),
         ];

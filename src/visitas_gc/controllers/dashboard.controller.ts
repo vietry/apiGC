@@ -26,6 +26,8 @@ export class DashboardController {
                 month,
                 idLabor,
                 idSubLabor,
+                negocio,
+                macrozonaId,
             } = req.query;
 
             // Construir objeto de filtros
@@ -37,6 +39,8 @@ export class DashboardController {
                 month: month ? +month : undefined,
                 idLabor: idLabor ? +idLabor : undefined,
                 idSubLabor: idSubLabor ? +idSubLabor : undefined,
+                negocio: typeof negocio === 'string' ? negocio : undefined,
+                macrozonaId: macrozonaId ? +macrozonaId : undefined,
             };
 
             const estadisticas =

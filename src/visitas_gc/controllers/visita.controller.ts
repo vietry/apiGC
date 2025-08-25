@@ -64,6 +64,7 @@ export class VisitaController {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = req.query;
 
         // Construir objeto de filtros
@@ -86,6 +87,7 @@ export class VisitaController {
                     : undefined,
             empresa: typeof empresa === 'string' ? empresa : undefined,
             negocio: typeof negocio === 'string' ? negocio : undefined,
+            macrozonaId: macrozonaId ? +macrozonaId : undefined,
         };
 
         this.visitaService
@@ -138,6 +140,7 @@ export class VisitaController {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = req.query;
 
         // Construir objeto de filtros
@@ -160,6 +163,7 @@ export class VisitaController {
                     : undefined,
             empresa: typeof empresa === 'string' ? empresa : undefined,
             negocio: typeof negocio === 'string' ? negocio : undefined,
+            macrozonaId: macrozonaId ? +macrozonaId : undefined,
         };
 
         this.visitaService
@@ -186,6 +190,7 @@ export class VisitaController {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = req.query;
         const filters: any = {
             idColaborador: idColaborador ? +idColaborador : undefined,
@@ -206,6 +211,7 @@ export class VisitaController {
                     : undefined,
             empresa: typeof empresa === 'string' ? empresa : undefined,
             negocio: typeof negocio === 'string' ? negocio : undefined,
+            macrozonaId: macrozonaId ? +macrozonaId : undefined,
         };
 
         this.visitaService
@@ -244,6 +250,7 @@ export class VisitaController {
                 programada,
                 empresa,
                 negocio,
+                macrozonaId,
             } = req.query;
 
             const filters: VisitaFilters = {
@@ -263,6 +270,7 @@ export class VisitaController {
                         : undefined,
                 empresa: typeof empresa === 'string' ? empresa : undefined,
                 negocio: typeof negocio === 'string' ? negocio : undefined,
+                macrozonaId: macrozonaId ? +macrozonaId : undefined,
             };
 
             // Construir objetos de periodo

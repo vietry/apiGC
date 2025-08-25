@@ -385,7 +385,7 @@ export class DashboardService {
                     idColaborador: gte.Colaborador?.id,
                     zonaanterior: gte.Colaborador?.ZonaAnterior?.nombre?.trim(),
                     empresa: gte.Colaborador?.ZonaAnterior?.Empresa?.nomEmpresa,
-                    nombreGte: `${gte.Usuario?.nombres} ${gte.Usuario?.apellidos}`,
+                    nombreGte: `${gte.Usuario?.apellidos}, ${gte.Usuario?.nombres}`,
                     nomApeGte: `${gte.Usuario?.nombres.split(' ')[0]} ${
                         gte.Usuario?.apellidos?.split(' ')[0]
                     }`,

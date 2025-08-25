@@ -24,7 +24,8 @@ export class VisitaEntity {
         public empGrupo: string | null,
         public empresa: string | null,
         public programada: boolean | null,
-        public negocio: string | null //public createdAt: Date | null, //public updatedAt: Date | null
+        public negocio: string | null,
+        public macrozonaId: number | null //public createdAt: Date | null, //public updatedAt: Date | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): VisitaEntity {
@@ -52,6 +53,7 @@ export class VisitaEntity {
             empresa,
             programada,
             negocio,
+            macrozonaId,
             //createdAt,
             //updatedAt,
         } = object;
@@ -82,7 +84,8 @@ export class VisitaEntity {
             empGrupo,
             empresa,
             programada,
-            negocio
+            negocio,
+            macrozonaId
             //createdAt,
             //updatedAt
         );

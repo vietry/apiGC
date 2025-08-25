@@ -355,6 +355,7 @@ export class VisitaService {
                     empresa: createVisitaDto.empresa,
                     programada: createVisitaDto.programada,
                     negocio: createVisitaDto.negocio,
+                    macrozonaId: createVisitaDto.macrozonaId,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -413,6 +414,7 @@ export class VisitaService {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = filters;
 
         const where: any = {};
@@ -495,6 +497,11 @@ export class VisitaService {
         // Filtro por negocio
         if (negocio) {
             where.negocio = { contains: negocio };
+        }
+
+        // Filtro por macrozonaId
+        if (macrozonaId) {
+            where.macrozonaId = macrozonaId;
         }
 
         // Filtros de fecha
@@ -593,6 +600,7 @@ export class VisitaService {
                         empresa: visita.empresa,
                         programada: visita.programada,
                         negocio: visita.negocio,
+                        macrozonaId: visita.macrozonaId,
                         idColaborador: visita.idColaborador,
                         colaborador: visita.Colaborador
                             ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
@@ -714,6 +722,7 @@ export class VisitaService {
                 empresa: visita.empresa,
                 programada: visita.programada,
                 negocio: visita.negocio,
+                macrozonaId: visita.macrozonaId,
                 idColaborador: visita.idColaborador,
                 colaborador: visita.Colaborador
                     ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
@@ -776,6 +785,7 @@ export class VisitaService {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = filters;
 
         const where: any = {};
@@ -858,6 +868,11 @@ export class VisitaService {
         // Filtro por negocio
         if (negocio) {
             where.negocio = { contains: negocio };
+        }
+
+        // Filtro por macrozonaId
+        if (macrozonaId) {
+            where.macrozonaId = macrozonaId;
         }
 
         // Filtros de fecha (usamos updatedAt como ejemplo; puede cambiarse según el negocio)
@@ -945,6 +960,7 @@ export class VisitaService {
                     empresa: visita.empresa,
                     programada: visita.programada,
                     negocio: visita.negocio,
+                    macrozonaId: visita.macrozonaId,
                     idColaborador: visita.idColaborador,
                     colaborador: visita.Colaborador
                         ? `${visita.Colaborador.Usuario?.nombres ?? ''} ${
@@ -1001,6 +1017,7 @@ export class VisitaService {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = filters;
         const where: any = {};
         if (idColaborador) where.idColaborador = idColaborador;
@@ -1017,6 +1034,11 @@ export class VisitaService {
         // Filtro por negocio
         if (negocio) {
             where.negocio = { contains: negocio };
+        }
+
+        // Filtro por macrozonaId
+        if (macrozonaId) {
+            where.macrozonaId = macrozonaId;
         }
 
         if (idVegetacion) {
@@ -1199,6 +1221,7 @@ export class VisitaService {
             programada,
             empresa,
             negocio,
+            macrozonaId,
         } = filters;
         const whereBase: any = {};
         if (idColaborador) whereBase.idColaborador = idColaborador;
@@ -1239,6 +1262,11 @@ export class VisitaService {
         // Filtro por negocio
         if (negocio) {
             whereBase.negocio = { contains: negocio };
+        }
+
+        // Filtro por macrozonaId
+        if (macrozonaId) {
+            whereBase.macrozonaId = macrozonaId;
         }
 
         // Calcular periodos

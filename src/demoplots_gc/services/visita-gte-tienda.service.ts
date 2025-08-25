@@ -226,10 +226,7 @@ export class VisitaGteTiendaService {
                         longitud: visita.longitud,
                         createdAt: visita.createdAt,
                         //Datos relacionados
-                        gte:
-                            visita.Gte.Usuario?.nombres +
-                            ' ' +
-                            visita.Gte.Usuario?.apellidos,
+                        gte: `${visita.Gte.Usuario?.apellidos}, ${visita.Gte.Usuario?.nombres}`,
                         puntoContacto: visita.PuntoContacto?.nombre,
                         familia: visita.Familia?.nombre.trim(),
                         //otros datos
@@ -327,10 +324,7 @@ export class VisitaGteTiendaService {
                 latitud: visita.latitud,
                 longitud: visita.longitud,
                 createdAt: visita.createdAt,
-                gte:
-                    visita.Gte.Usuario?.nombres +
-                    ' ' +
-                    visita.Gte.Usuario?.apellidos,
+                gte: `${visita.Gte.Usuario?.apellidos}, ${visita.Gte.Usuario?.nombres}`,
                 puntoContacto: visita.PuntoContacto?.nombre,
                 familia: visita.Familia?.nombre.trim(),
                 idColaborador: visita.Gte.Colaborador?.id,

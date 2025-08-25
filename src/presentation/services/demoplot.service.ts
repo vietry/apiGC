@@ -1817,7 +1817,7 @@ export class DemoplotService {
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
                         //FotoDemoPlot: demoplot.FotoDemoPlot,
-                        nombreGte: `${demoplot.Gte.Usuario?.nombres} ${demoplot.Gte.Usuario?.apellidos}`,
+                        nombreGte: `${demoplot.Gte.Usuario?.apellidos}, ${demoplot.Gte.Usuario?.nombres}`,
                         subzona: demoplot.Gte.SubZona?.nombre,
                         tipo: demoplot.Gte.tipo,
                         departamento:
@@ -1859,7 +1859,7 @@ export class DemoplotService {
             case 'BIOGEN':
                 return ['BIOGEN'];
             case 'TALEX':
-                return ['TALEX'];
+                return ['TALEX', 'SYNGENTA'];
             case 'UPL':
                 return ['UPL'];
             default:

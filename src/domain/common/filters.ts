@@ -89,6 +89,7 @@ export interface VisitaFilters {
     programada?: boolean;
     empresa?: string;
     negocio?: string;
+    macrozonaId?: number;
 }
 
 export interface ConsumoFilters {
@@ -160,4 +161,6 @@ export interface GestionVisitasFilters {
     month?: number;
     idLabor?: number;
     idSubLabor?: number;
+    negocio?: string;
+    macrozonaId?: number;
 }

@@ -24,6 +24,8 @@ interface ColaboradorEstadistica {
     nombreColaborador: string;
     empresa?: string;
     macrozona?: string;
+    negocio?: string;
+    macrozonaId?: number;
     totalVisitas: number;
     visitasCompletadas: number;
     porcentajeCompletadas: number;
@@ -52,6 +54,14 @@ export class DashboardService {
 
             if (filters.idColaborador) {
                 whereConditions.idColaborador = filters.idColaborador;
+            }
+
+            if (filters.negocio) {
+                whereConditions.negocio = filters.negocio;
+            }
+
+            if (filters.macrozonaId) {
+                whereConditions.macrozonaId = filters.macrozonaId;
             }
 
             if (filters.year) {
@@ -133,6 +143,7 @@ export class DashboardService {
                                 },
                         },
                     },
+                    SuperZona: true,
                     LaborVisita: {
                         include: {
                             SubLabor: {
@@ -167,7 +178,12 @@ export class DashboardService {
                     colaborador.Usuario?.apellidos ?? ''
                 }`.trim();
                 const empresa = colaboradorJefe?.Empresa?.nomEmpresa;
-                const macrozona = colaboradorJefe?.SuperZona?.nombre;
+                // Usar la macrozona directamente de la visita, no del colaborador
+                const macrozona =
+                    visita.SuperZona?.nombre ||
+                    colaboradorJefe?.SuperZona?.nombre;
+                const negocio = visita.negocio || undefined;
+                const macrozonaId = visita.macrozonaId || undefined;
 
                 // Inicializar colaborador si no existe
                 if (!colaboradoresMap.has(colaborador.id)) {
@@ -176,6 +192,8 @@ export class DashboardService {
                         nombreColaborador: nombreCompleto,
                         empresa,
                         macrozona,
+                        negocio,
+                        macrozonaId,
                         totalVisitas: 0,
                         visitasCompletadas: 0,
                         porcentajeCompletadas: 0,

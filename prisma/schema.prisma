@@ -400,11 +400,13 @@ model Visita {
   programada     Boolean?
   empresa        String?          @db.VarChar(10)
   negocio        String?          @db.VarChar(20)
+  macrozonaId    Int?
   FotoVisita     FotoVisita[]
   LaborVisita    LaborVisita[]
   Colaborador    Colaborador      @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_Visita_Colaborador1")
   Contacto       ContactoPunto?   @relation(fields: [idContacto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Contacto1")
   Cultivo        Cultivo?         @relation(fields: [idCultivo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Cultivo1")
+  SuperZona      SuperZona?       @relation(fields: [macrozonaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Macrozona")
   Representada   Representada?    @relation(fields: [idRepresentada], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Representada1")
   VisitaProducto VisitaProducto[]
 }
@@ -671,6 +673,7 @@ model SuperZona {
   ColaboradorJefe    ColaboradorJefe[]
   ExternoColaborador ExternoColaborador[]
   SubZona            SubZona[]
+  Visita             Visita[]
 }
 
 model Zona {
