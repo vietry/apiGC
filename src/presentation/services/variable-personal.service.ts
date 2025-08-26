@@ -485,7 +485,8 @@ export class VariablePersonalService {
             });
 
             // Obtener fecha actual
-            const now = new Date();
+            const date = new Date();
+            const now = new Date(date.getTime() - 5 * 60 * 60 * 1000);
             const currentYear = year ?? now.getFullYear();
             const currentMonth = month ?? now.getMonth() + 1;
 

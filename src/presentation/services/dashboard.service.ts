@@ -1,7 +1,12 @@
 import { prisma } from '../../data/sqlserver';
-import { CustomError, Empresa, GteRankingFilters } from '../../domain';
+import {
+    CustomError,
+    DemoplotFilters,
+    Empresa,
+    GteRankingFilters,
+} from '../../domain';
 
-import { DemoplotFilters } from './demoplot.service';
+//import { DemoplotFilters } from './demoplot.service';
 
 export class DashboardService {
     async getGteRankings(filters: GteRankingFilters = {}) {

@@ -19,12 +19,13 @@ export interface DemoplotFilters {
     checkJefe?: boolean;
     empresa?: string;
     macrozona?: number | number[];
-    idColaborador?: number;
+    idColaborador?: number | number[];
     gdactivo?: boolean;
     idPunto?: number;
     numDocPunto?: string;
     tipoFecha?: string;
     blancoComun?: string;
+    subZona?: string;
 }
 
 export interface GteRankingFilters {

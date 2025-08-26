@@ -4,36 +4,8 @@ import {
     CustomError,
     PaginationDto,
     UpdateDemoplotDto,
+    DemoplotFilters,
 } from '../../domain';
-
-export interface DemoplotFilters {
-    id?: number;
-    objetivo?: string;
-    descripcion?: string;
-    idGte?: number;
-    idVegetacion?: number;
-    cultivo?: string;
-    estado?: string;
-    idFamilia?: number;
-    clase?: string;
-    infestacion?: string;
-    departamento?: string;
-    provincia?: string;
-    distrito?: string;
-    year?: number;
-    month?: number;
-    venta?: boolean;
-    validacion?: boolean;
-    checkJefe?: boolean;
-    empresa?: string;
-    macrozona?: number | number[];
-    idColaborador?: number | number[];
-    gdactivo?: boolean;
-    idPunto?: number;
-    numDocPunto?: string;
-    tipoFecha?: string;
-    blancoComun?: string;
-}
 
 export class DemoplotService {
     async patchDemoplot(updateDemoplotDto: UpdateDemoplotDto) {
@@ -1490,6 +1462,7 @@ export class DemoplotService {
             idPunto,
             numDocPunto,
             blancoComun,
+            subZona,
         } = filters;
 
         const where: any = {};
@@ -1634,6 +1607,16 @@ export class DemoplotService {
             where.updatedAt = {
                 gte: new Date(year, month - 1),
                 lt: new Date(year, month),
+            };
+        }
+
+        // Filtrar por subZona
+        if (subZona) {
+            where.Gte = {
+                ...(where.Gte || {}),
+                SubZona: {
+                    nombre: { contains: subZona },
+                },
             };
         }
 

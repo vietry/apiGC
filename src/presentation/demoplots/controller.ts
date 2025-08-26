@@ -239,6 +239,7 @@ export class DemoplotController {
             idPunto,
             numDocPunto,
             blancoComun,
+            subZona,
         } = req.query;
 
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
@@ -294,6 +295,7 @@ export class DemoplotController {
             idPunto: idPunto ? +idPunto : undefined,
             numDocPunto: numDocPunto ? (numDocPunto as string) : undefined,
             blancoComun: blancoComun ? (blancoComun as string) : undefined,
+            subZona: subZona ? (subZona as string) : undefined,
         };
 
         this.demoplotService
