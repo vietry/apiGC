@@ -233,6 +233,8 @@ export class DemoplotController {
             venta,
             validacion,
             checkJefe,
+            validacionCampo,
+            checkJefeCampo,
             empresa,
             macrozona,
             idColaborador,
@@ -274,6 +276,14 @@ export class DemoplotController {
             checkJefe:
                 checkJefe !== undefined
                     ? !!(checkJefe === 'true' || checkJefe === '1')
+                    : undefined,
+            validacionCampo:
+                validacionCampo !== undefined
+                    ? !!(validacionCampo === 'true' || validacionCampo === '1')
+                    : undefined,
+            checkJefeCampo:
+                checkJefeCampo !== undefined
+                    ? !!(checkJefeCampo === 'true' || checkJefeCampo === '1')
                     : undefined,
             empresa: empresa ? (empresa as string) : undefined,
             //macrozona: macrozona?.toString(),

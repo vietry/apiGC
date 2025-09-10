@@ -69,6 +69,11 @@ export class DemoplotService {
                     validacion: null,
                     checkJefe: null,
                     resultado: createDemoplotDto.resultado,
+                    validacionCampo: createDemoplotDto.validacionCampo,
+                    checkJefeCampo: createDemoplotDto.checkJefeCampo,
+                    comentariosRtcCampo: createDemoplotDto.comentariosRtcCampo,
+                    comentariosJefeCampo:
+                        createDemoplotDto.comentariosJefeCampo,
                     programacion: createDemoplotDto.programacion,
                     diaCampo: createDemoplotDto.diaCampo,
                     idCultivo: createDemoplotDto.idCultivo,
@@ -117,22 +122,34 @@ export class DemoplotService {
         const newEstado = updateDemoplotDto.values?.estado;
         if (newEstado === 'Día campo') {
             // Obtener año y mes de la fecha actual
+            // const now = new Date();
+            // const year = now.getFullYear();
+            // const month = now.getMonth() + 1;
+            // Obtener fecha actual (UTC) y determinar año/mes de trabajo
             const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            const previousMonth = month === 1 ? 12 : month - 1;
-            const previousYear = month === 1 ? year - 1 : year;
+            const currentYear = now.getUTCFullYear();
+            const currentMonth = now.getUTCMonth() + 1;
 
-            // Rango 1-19 del mes actual
-            const currentMonthStart = new Date(year, month - 1, 1);
-            const currentMonthEnd = new Date(year, month - 1, 20);
-            // Rango 20-fin del mes anterior
-            const previousMonthStart = new Date(
-                previousYear,
-                previousMonth - 1,
-                20
+            // Calcular mes anterior
+            const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+            const previousYear =
+                currentMonth === 1 ? currentYear - 1 : currentYear;
+
+            // Fechas para el mes actual (1-19) en UTC
+            const currentMonthStart = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
             );
-            const previousMonthEnd = new Date(year, month - 1, 1);
+            const currentMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 20, 0, 0, 0, 0)
+            );
+
+            // Fechas para el mes anterior (20-fin) en UTC
+            const previousMonthStart = new Date(
+                Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+            );
+            const previousMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
+            );
 
             // Buscar si ya existe un demoplot en "Día campo" para el mismo idGte, mismo idContacto y rango de presentacion
             const existingDiaCampo = await prisma.demoPlot.findFirst({
@@ -1459,6 +1476,8 @@ export class DemoplotService {
             venta,
             validacion,
             checkJefe,
+            validacionCampo,
+            checkJefeCampo,
             idPunto,
             numDocPunto,
             blancoComun,
@@ -1597,17 +1616,13 @@ export class DemoplotService {
         if (checkJefe !== undefined) {
             where.checkJefe = checkJefe;
         }
-        if (year) {
-            where.updatedAt = {
-                gte: new Date(year, 0),
-                lt: new Date(year + 1, 0),
-            };
+
+        if (validacionCampo !== undefined) {
+            where.validacionCampo = validacionCampo;
         }
-        if (month && year) {
-            where.updatedAt = {
-                gte: new Date(year, month - 1),
-                lt: new Date(year, month),
-            };
+
+        if (checkJefeCampo !== undefined) {
+            where.checkJefeCampo = checkJefeCampo;
         }
 
         // Filtrar por subZona
@@ -1617,6 +1632,58 @@ export class DemoplotService {
                 SubZona: {
                     nombre: { contains: subZona },
                 },
+            };
+        }
+
+        // Filtro por fechas en updatedAt
+        // - Si vienen month y year: aplicar ventana en UTC (1–19 del mes actual y 20–fin del mes anterior)
+        // - Si solo viene year: filtrar por todo el año
+        if (month && year) {
+            // Obtener fecha actual (UTC) y determinar año/mes de trabajo
+            const now = new Date();
+            const currentYear = year ?? now.getUTCFullYear();
+            const currentMonth = month ?? now.getUTCMonth() + 1;
+
+            // Calcular mes anterior
+            const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+            const previousYear =
+                currentMonth === 1 ? currentYear - 1 : currentYear;
+
+            // Fechas para el mes actual (1-19) en UTC
+            const currentMonthStart = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
+            );
+            const currentMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 20, 0, 0, 0, 0)
+            );
+
+            // Fechas para el mes anterior (20-fin) en UTC
+            const previousMonthStart = new Date(
+                Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+            );
+            const previousMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
+            );
+
+            // Aplicar OR con ambas ventanas
+            where.OR = [
+                {
+                    updatedAt: {
+                        gte: currentMonthStart,
+                        lt: currentMonthEnd,
+                    },
+                },
+                {
+                    updatedAt: {
+                        gte: previousMonthStart,
+                        lt: previousMonthEnd,
+                    },
+                },
+            ];
+        } else if (year) {
+            where.updatedAt = {
+                gte: new Date(year, 0),
+                lt: new Date(year + 1, 0),
             };
         }
 
@@ -1875,21 +1942,31 @@ export class DemoplotService {
                 );
             }
 
+            // Obtener fecha actual (UTC) y determinar año/mes de trabajo
+            const now = new Date();
+            const currentYear = anio ?? now.getUTCFullYear();
+            const currentMonth = mes ?? now.getUTCMonth() + 1;
+
             // Calcular mes anterior
-            const previousMonth = mes === 1 ? 12 : mes - 1;
-            const previousYear = mes === 1 ? anio - 1 : anio;
+            const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+            const previousYear =
+                currentMonth === 1 ? currentYear - 1 : currentYear;
 
-            // Fechas para el mes actual (1-19)
-            const currentMonthStart = new Date(anio, mes - 1, 1);
-            const currentMonthEnd = new Date(anio, mes - 1, 20);
-
-            // Fechas para el mes anterior (20-fin)
-            const previousMonthStart = new Date(
-                previousYear,
-                previousMonth - 1,
-                20
+            // Fechas para el mes actual (1-19) en UTC
+            const currentMonthStart = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
             );
-            const previousMonthEnd = new Date(anio, mes - 1, 1);
+            const currentMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 20, 0, 0, 0, 0)
+            );
+
+            // Fechas para el mes anterior (20-fin) en UTC
+            const previousMonthStart = new Date(
+                Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+            );
+            const previousMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
+            );
 
             const demoplotCounts = await prisma.demoPlot.groupBy({
                 by: ['idGte', 'estado'],

@@ -1,27 +1,39 @@
 export class UpdateColaboradorDTO {
-
     private constructor(
         public readonly id: number,
         public readonly cargo?: string,
         public readonly idArea?: number,
         public readonly idZonaAnt?: number,
         public readonly idUsuario?: number,
-    ){}
+        public readonly negocio?: string
+    ) {}
 
     get values() {
-        const returnObj: {[key: string]: any} = {};
+        const returnObj: { [key: string]: any } = {};
 
-        if (this.cargo !== undefined) returnObj.cargo = this.cargo;
-        if (this.idArea !== undefined) returnObj.idArea = this.idArea;
-        if (this.idZonaAnt !== undefined) returnObj.idZonaAnt = this.idZonaAnt;
-        if (this.idUsuario !== undefined) returnObj.idUsuario = this.idUsuario;
+        if (this.cargo !== undefined) {
+            returnObj.cargo = this.cargo;
+        }
+        if (this.idArea !== undefined) {
+            returnObj.idArea = this.idArea;
+        }
+        if (this.idZonaAnt !== undefined) {
+            returnObj.idZonaAnt = this.idZonaAnt;
+        }
+        if (this.idUsuario !== undefined) {
+            returnObj.idUsuario = this.idUsuario;
+        }
+        if (this.negocio !== undefined) {
+            returnObj.negocio = this.negocio?.trim() || null;
+        }
 
         return returnObj;
     }
 
-    static create(props: {[key: string]: any}): [string?, UpdateColaboradorDTO?] {
-
-        const { id, cargo, idArea, idZonaAnt, idUsuario } = props;
+    static create(props: {
+        [key: string]: any;
+    }): [string?, UpdateColaboradorDTO?] {
+        const { id, cargo, idArea, idZonaAnt, idUsuario, negocio } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -33,19 +45,37 @@ export class UpdateColaboradorDTO {
 
         if (idArea !== undefined && typeof idArea !== 'number') {
             idAreaNumber = parseInt(idArea);
-            if (isNaN(idAreaNumber)) return ['idArea debe ser un número válido'];
+            if (isNaN(idAreaNumber))
+                return ['idArea debe ser un número válido'];
         }
 
         if (idZonaAnt !== undefined && typeof idZonaAnt !== 'number') {
             idZonaAntNumber = parseInt(idZonaAnt);
-            if (isNaN(idZonaAntNumber)) return ['idZonaAnt debe ser un número válido'];
+            if (isNaN(idZonaAntNumber))
+                return ['idZonaAnt debe ser un número válido'];
         }
 
         if (idUsuario !== undefined && typeof idUsuario !== 'number') {
             idUsuarioNumber = parseInt(idUsuario);
-            if (isNaN(idUsuarioNumber)) return ['idUsuario debe ser un número válido'];
+            if (isNaN(idUsuarioNumber))
+                return ['idUsuario debe ser un número válido'];
         }
 
-        return [undefined, new UpdateColaboradorDTO(id, cargo, idAreaNumber, idZonaAntNumber, idUsuarioNumber)];
+        const negocioStr =
+            negocio === undefined || negocio === null
+                ? undefined
+                : String(negocio).trim() || undefined;
+
+        return [
+            undefined,
+            new UpdateColaboradorDTO(
+                id,
+                cargo,
+                idAreaNumber,
+                idZonaAntNumber,
+                idUsuarioNumber,
+                negocioStr
+            ),
+        ];
     }
 }

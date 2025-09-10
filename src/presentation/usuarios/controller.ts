@@ -5,11 +5,7 @@ import { CustomError, PaginationDto } from '../../domain';
 import { UsuariosService } from '../services';
 
 export class UsuariosController {
-    //* DI
-    constructor(
-        //private readonly usuarioRepository: UsuarioRepository,
-        private readonly usuariosService: UsuariosService
-    ) {}
+    constructor(private readonly usuariosService: UsuariosService) {}
 
     private readonly handleError = (res: Response, error: unknown) => {
         if (error instanceof CustomError) {
@@ -81,7 +77,10 @@ export class UsuariosController {
             email: email?.toString(),
             celular: celular?.toString(),
             rol: rol?.toString(),
-            activo: activo === undefined ? undefined : activo === 'true',
+            activo:
+                activo !== undefined
+                    ? !!(activo === 'true' || activo === '1')
+                    : undefined,
         };
 
         this.usuariosService

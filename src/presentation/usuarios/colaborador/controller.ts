@@ -55,6 +55,7 @@ export class ColaboradorController {
             nombres,
             apellidos,
             cargo,
+            negocio,
             area,
             codigoZona,
             zonaAnt,
@@ -69,6 +70,7 @@ export class ColaboradorController {
                 apellidos:
                     typeof apellidos === 'string' ? apellidos : undefined,
                 cargo: typeof cargo === 'string' ? cargo : undefined,
+                negocio: typeof negocio === 'string' ? negocio : undefined,
                 area: typeof area === 'string' ? area : undefined,
                 codigoZona:
                     typeof codigoZona === 'string' ? codigoZona : undefined,
@@ -85,6 +87,7 @@ export class ColaboradorController {
             nombres,
             apellidos,
             cargo,
+            negocio,
             area,
             codigoZona,
             zonaAnt,
@@ -109,6 +112,7 @@ export class ColaboradorController {
             nombres: typeof nombres === 'string' ? nombres : undefined,
             apellidos: typeof apellidos === 'string' ? apellidos : undefined,
             cargo: typeof cargo === 'string' ? cargo.trim() : undefined,
+            negocio: typeof negocio === 'string' ? negocio.trim() : undefined,
             area: typeof area === 'string' ? area.trim() : undefined,
             codigoZona:
                 typeof codigoZona === 'string' ? codigoZona.trim() : undefined,

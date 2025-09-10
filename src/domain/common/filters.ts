@@ -17,6 +17,8 @@ export interface DemoplotFilters {
     venta?: boolean;
     validacion?: boolean;
     checkJefe?: boolean;
+    validacionCampo?: boolean;
+    checkJefeCampo?: boolean;
     empresa?: string;
     macrozona?: number | number[];
     idColaborador?: number | number[];
@@ -31,6 +33,7 @@ export interface DemoplotFilters {
 export interface GteRankingFilters {
     idColaborador?: number;
     empresa?: string;
+    negocio?: string;
     clase?: string;
     idFamilia?: number;
     macrozona?: number | number[];

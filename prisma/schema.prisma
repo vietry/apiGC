@@ -485,6 +485,12 @@ model DemoPlot {
   validatedAt                         DateTime?
   approvedAt                          DateTime?
   planificacionId                     Int?
+  validacionCampo                     Boolean?
+  validatedCampoAt                    DateTime?
+  comentariosRtcCampo                 String?           @db.VarChar(255)
+  checkJefeCampo                      Boolean?
+  approvedCampoAt                     DateTime?
+  comentariosJefeCampo                String?           @db.VarChar(255)
   ConsumoMuestras                     ConsumoMuestras[]
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
@@ -544,52 +550,40 @@ model Gte {
 }
 
 model PuntoContacto {
-  id                                              Int                  @id(map: "PK__PuntoCon__3213E83FC6CBF460") @default(autoincrement())
-  nombre                                          String               @db.VarChar(90)
-  tipoDoc                                         String?              @db.VarChar(3)
-  numDoc                                          String?              @db.VarChar(20)
-  hectareas                                       Decimal?             @db.Decimal(6, 2)
-  tipo                                            String               @db.VarChar(1)
-  dirReferencia                                   String?              @db.VarChar(90)
-  lider                                           Boolean?
-  activo                                          Boolean
-  idGte                                           Int?
-  createdAt                                       DateTime?            @db.DateTime
-  updatedAt                                       DateTime?            @db.DateTime
-  idDistrito                                      String?              @db.VarChar(6)
-  idEmpresa                                       Int?
-  codZona                                         String?              @db.VarChar(4)
-  subTipo                                         String?              @db.VarChar(2)
-  cantR0                                          Int?
-  cantR1                                          Int?
-  cantR2                                          Int?
-  aniversario                                     DateTime?            @db.Date
-  gestion                                         Boolean?
-  idColaborador                                   Int?
-  sede                                            String?              @db.VarChar(30)
-  Charla                                          Charla[]
-  ContactoPunto                                   ContactoPunto[]
-  Fundo                                           Fundo[]
-  NuevaPlanificacion                              NuevaPlanificacion[]
-  PlanTiendas                                     PlanTiendas[]
-  Colaborador                                     Colaborador?         @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Colaborador")
-  Distrito                                        Distrito?            @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Distrito")
-  Empresa                                         Empresa?             @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Empresa1")
-  Gte                                             Gte?                 @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Gte")
-  PuntoTienda_PuntoTienda_idPuntoToPuntoContacto  PuntoTienda[]        @relation("PuntoTienda_idPuntoToPuntoContacto")
-  PuntoTienda_PuntoTienda_idTiendaToPuntoContacto PuntoTienda[]        @relation("PuntoTienda_idTiendaToPuntoContacto")
-  PuntoUbigeo                                     PuntoUbigeo[]
-  VisitaGteTienda                                 VisitaGteTienda[]
-}
-
-model PuntoTienda {
-  id                                                Int           @id(map: "PK__PuntoTie__3213E83F7906C88D") @default(autoincrement())
-  idPunto                                           Int
-  idTienda                                          Int
-  createdAt                                         DateTime?     @db.DateTime
-  updatedAt                                         DateTime?     @db.DateTime
-  PuntoContacto_PuntoTienda_idPuntoToPuntoContacto  PuntoContacto @relation("PuntoTienda_idPuntoToPuntoContacto", fields: [idPunto], references: [id], onUpdate: NoAction, map: "fk_PuntoTienda_Punto")
-  PuntoContacto_PuntoTienda_idTiendaToPuntoContacto PuntoContacto @relation("PuntoTienda_idTiendaToPuntoContacto", fields: [idTienda], references: [id], onUpdate: NoAction, map: "fk_PuntoTienda_Tienda")
+  id                 Int                  @id(map: "PK__PuntoCon__3213E83FC6CBF460") @default(autoincrement())
+  nombre             String               @db.VarChar(90)
+  tipoDoc            String?              @db.VarChar(3)
+  numDoc             String?              @db.VarChar(20)
+  hectareas          Decimal?             @db.Decimal(6, 2)
+  tipo               String               @db.VarChar(1)
+  dirReferencia      String?              @db.VarChar(90)
+  lider              Boolean?
+  activo             Boolean
+  idGte              Int?
+  createdAt          DateTime?            @db.DateTime
+  updatedAt          DateTime?            @db.DateTime
+  idDistrito         String?              @db.VarChar(6)
+  idEmpresa          Int?
+  codZona            String?              @db.VarChar(4)
+  subTipo            String?              @db.VarChar(2)
+  cantR0             Int?
+  cantR1             Int?
+  cantR2             Int?
+  aniversario        DateTime?            @db.Date
+  gestion            Boolean?
+  idColaborador      Int?
+  sede               String?              @db.VarChar(30)
+  Charla             Charla[]
+  ContactoPunto      ContactoPunto[]
+  Fundo              Fundo[]
+  NuevaPlanificacion NuevaPlanificacion[]
+  PlanTiendas        PlanTiendas[]
+  Colaborador        Colaborador?         @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Colaborador")
+  Distrito           Distrito?            @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Distrito")
+  Empresa            Empresa?             @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Empresa1")
+  Gte                Gte?                 @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Gte")
+  PuntoUbigeo        PuntoUbigeo[]
+  VisitaGteTienda    VisitaGteTienda[]
 }
 
 model SubZona {
@@ -966,9 +960,9 @@ model VisitaGteTienda {
   idFoto        Int?
   cantidad      Decimal?      @db.Decimal(6, 2)
   Familia       Familia?      @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VisitaGteTiend3")
-  Foto          Foto?         @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VisitaGteTiend4")
+  Foto          Foto?         @relation(fields: [idFoto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaGteTiend4")
   Gte           Gte           @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VisitaGteTienda1")
-  PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onUpdate: NoAction, map: "fk_VisitaGteTienda2")
+  PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaGteTienda2")
 }
 
 model MomentoAplicacion {
@@ -1101,4 +1095,33 @@ model NuevaPlanificacion {
   Familia           Familia           @relation(fields: [productoId], references: [id], onUpdate: NoAction, map: "FK__NuevaPlan__produ__22951AFD")
   PuntoContacto     PuntoContacto     @relation(fields: [tiendaId], references: [id], onUpdate: NoAction, map: "FK__NuevaPlan__tiend__1FB8AE52")
   Vegetacion        Vegetacion        @relation(fields: [vegetacionId], references: [id], onUpdate: NoAction, map: "FK__NuevaPlan__veget__20ACD28B")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model PuntoContacto_Backup {
+  id            Int       @default(autoincrement())
+  nombre        String    @db.VarChar(90)
+  tipoDoc       String?   @db.VarChar(3)
+  numDoc        String?   @db.VarChar(20)
+  hectareas     Decimal?  @db.Decimal(6, 2)
+  tipo          String    @db.VarChar(1)
+  dirReferencia String?   @db.VarChar(90)
+  lider         Boolean?
+  activo        Boolean
+  idGte         Int?
+  createdAt     DateTime? @db.DateTime
+  updatedAt     DateTime? @db.DateTime
+  idDistrito    String?   @db.VarChar(6)
+  idEmpresa     Int?
+  codZona       String?   @db.VarChar(4)
+  subTipo       String?   @db.VarChar(2)
+  cantR0        Int?
+  cantR1        Int?
+  cantR2        Int?
+  aniversario   DateTime? @db.Date
+  gestion       Boolean?
+  idColaborador Int?
+  sede          String?   @db.VarChar(30)
+
+  @@ignore
 }

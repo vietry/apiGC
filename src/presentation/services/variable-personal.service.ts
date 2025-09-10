@@ -7,7 +7,7 @@ import {
 } from '../../domain';
 import { getCurrentDate } from '../../config/time';
 import { GteRankingFilters } from '../../domain/common/filters';
-import { Empresa } from '../../domain/entities/dashboard/variables_jerarquia.entity';
+import { EmpresaNegocio } from '../../domain/entities/dashboard/variables_jerarquia.entity';
 
 export class VariablePersonalService {
     async createVariablePersonal(
@@ -257,6 +257,7 @@ export class VariablePersonalService {
                 filters.empresa ||
                 filters.macrozona ||
                 filters.idColaborador ||
+                filters.negocio ||
                 filters.activo !== undefined
             ) {
                 where.Gte = {
@@ -266,6 +267,9 @@ export class VariablePersonalService {
                     Colaborador: {
                         ...(filters.idColaborador && {
                             id: filters.idColaborador,
+                        }),
+                        ...(filters.negocio && {
+                            negocio: { contains: filters.negocio },
                         }),
                         ...(filters.empresa && {
                             ZonaAnterior: {
@@ -351,46 +355,119 @@ export class VariablePersonalService {
                 const previousMonth = month === 1 ? 12 : month - 1;
                 const previousYear = month === 1 ? year - 1 : year;
 
-                // Rango 1-19 del mes actual y 20-fin del mes anterior
+                // Rango 1-19 del mes actual y 20-fin del mes anterior en UTC (00:00:00.000Z)
+                const currentMonthStart = new Date(
+                    Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+                );
+                const currentMonthEnd = new Date(
+                    Date.UTC(year, month - 1, 20, 0, 0, 0, 0)
+                );
+                const previousMonthStart = new Date(
+                    Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+                );
+                const previousMonthEnd = new Date(
+                    Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+                );
+
                 demoplotWhere.OR = [
                     {
                         updatedAt: {
-                            gte: new Date(year, month - 1, 1),
-                            lt: new Date(year, month - 1, 20),
+                            gte: currentMonthStart,
+                            lt: currentMonthEnd,
                         },
                     },
                     {
                         updatedAt: {
-                            gte: new Date(previousYear, previousMonth - 1, 20),
-                            lt: new Date(year, month - 1, 1),
+                            gte: previousMonthStart,
+                            lt: previousMonthEnd,
                         },
                     },
                 ];
             }
 
-            // Obtener conteos por GTE
-            const [completadosCount, diaCampoCount] = await Promise.all([
-                prisma.demoPlot.groupBy({
-                    by: ['idGte'],
-                    where: {
-                        ...demoplotWhere,
-                        validacion: true,
-                        checkJefe: true,
-                        NOT: {
-                            AND: [
-                                { updatedAt: { gte: new Date('2024-01-01') } },
-                                { updatedAt: { lt: new Date('2025-01-01') } },
-                            ],
-                        },
-                        estado: 'Completado',
+            // Obtener conteos por GTE en una sola consulta
+            const countsPorEstado = await prisma.demoPlot.groupBy({
+                by: ['idGte', 'estado'],
+                where: {
+                    ...demoplotWhere,
+                    //validacion: true,
+                    checkJefe: true,
+                    NOT: {
+                        AND: [
+                            { updatedAt: { gte: new Date('2024-01-01') } },
+                            { updatedAt: { lt: new Date('2025-01-01') } },
+                        ],
                     },
-                    _count: { id: true },
-                }),
-                prisma.demoPlot.groupBy({
+                    estado: { in: ['Completado', 'Día campo'] },
+                },
+                _count: { id: true },
+            });
+
+            // Construir filtro OR para que Familia.clase sea igual al Gte.tipo por cada GTE
+            const gteTipoPorId = new Map<number, string>();
+            for (const v of variables) {
+                const tipo = v.Gte?.tipo?.trim();
+                if (tipo) gteTipoPorId.set(v.idGte, tipo);
+            }
+            const orClaseIgualTipo = Array.from(gteTipoPorId.entries()).map(
+                ([idGte, tipo]) => ({
+                    idGte,
+                    Familia: { clase: tipo },
+                })
+            );
+
+            const countsPorFoco = await prisma.demoPlot.groupBy({
+                by: ['idGte', 'estado'],
+                where: {
+                    AND: [
+                        {
+                            ...demoplotWhere, // conserva el OR de fechas y el filtro de idGte
+                        },
+                        {
+                            //validacion: true,
+                            checkJefe: true,
+                            NOT: {
+                                AND: [
+                                    {
+                                        updatedAt: {
+                                            gte: new Date('2024-01-01'),
+                                        },
+                                    },
+                                    {
+                                        updatedAt: {
+                                            lt: new Date('2025-01-01'),
+                                        },
+                                    },
+                                ],
+                            },
+                            estado: { in: ['Completado', 'Día campo'] },
+                        },
+                        orClaseIgualTipo.length
+                            ? { OR: orClaseIgualTipo }
+                            : { idGte: -1 }, // Si no hay tipos, forzar 0 resultados
+                    ],
+                },
+                _count: { id: true },
+            });
+
+            // Conteo adicional: Día campo con finalizacion < previousMonthStart usando el mismo demoplotWhere
+            let previousMonthStartForCount: Date | undefined = undefined;
+            if (filters.year && filters.month) {
+                const year = filters.year;
+                const month = filters.month;
+                const prevMonth = month === 1 ? 12 : month - 1;
+                const prevYear = month === 1 ? year - 1 : year;
+                previousMonthStartForCount = new Date(
+                    Date.UTC(prevYear, prevMonth - 1, 20, 0, 0, 0, 0)
+                );
+            }
+
+            const countsDiaCampoFinalizacionAntes =
+                await prisma.demoPlot.groupBy({
                     by: ['idGte'],
                     where: {
                         ...demoplotWhere,
-                        validacion: true,
+                        //validacion: true,
                         checkJefe: true,
                         NOT: {
                             AND: [
@@ -399,20 +476,90 @@ export class VariablePersonalService {
                             ],
                         },
                         estado: 'Día campo',
+                        ...(previousMonthStartForCount
+                            ? {
+                                  finalizacion: {
+                                      lt: previousMonthStartForCount,
+                                  },
+                              }
+                            : {}),
                     },
                     _count: { id: true },
-                }),
-            ]);
+                });
+
+            // Conteo adicional con foco: Día campo con finalizacion < previousMonthStart y OR de clases por tipo GTE
+            const countsDiaCampoFinalizacionAntesFoco =
+                await prisma.demoPlot.groupBy({
+                    by: ['idGte'],
+                    where: {
+                        AND: [
+                            {
+                                ...demoplotWhere,
+                            },
+                            {
+                                //validacion: true,
+                                checkJefe: true,
+                                NOT: {
+                                    AND: [
+                                        {
+                                            updatedAt: {
+                                                gte: new Date('2024-01-01'),
+                                            },
+                                        },
+                                        {
+                                            updatedAt: {
+                                                lt: new Date('2025-01-01'),
+                                            },
+                                        },
+                                    ],
+                                },
+                                estado: 'Día campo',
+                                ...(previousMonthStartForCount
+                                    ? {
+                                          finalizacion: {
+                                              lt: previousMonthStartForCount,
+                                          },
+                                      }
+                                    : {}),
+                            },
+                            orClaseIgualTipo.length
+                                ? { OR: orClaseIgualTipo }
+                                : { idGte: -1 },
+                        ],
+                    },
+                    _count: { id: true },
+                });
 
             // Crear diccionarios para búsqueda rápida
             const completadosPorGte: Record<number, number> = {};
             const diaCampoPorGte: Record<number, number> = {};
+            const focoCompletadoPorGte: Record<number, number> = {};
+            const focoDiasCampoPorGte: Record<number, number> = {};
+            const diaCampoPrevPorGte: Record<number, number> = {};
+            const focoDiaCampoPrevPorGte: Record<number, number> = {};
 
-            completadosCount.forEach((count) => {
-                completadosPorGte[count.idGte] = count._count.id;
+            countsPorEstado.forEach((row) => {
+                if (row.estado === 'Completado') {
+                    completadosPorGte[row.idGte] = row._count.id;
+                } else if (row.estado === 'Día campo') {
+                    diaCampoPorGte[row.idGte] = row._count.id;
+                }
             });
-            diaCampoCount.forEach((count) => {
-                diaCampoPorGte[count.idGte] = count._count.id;
+
+            countsPorFoco.forEach((row) => {
+                if (row.estado === 'Completado') {
+                    focoCompletadoPorGte[row.idGte] = row._count.id;
+                } else if (row.estado === 'Día campo') {
+                    focoDiasCampoPorGte[row.idGte] = row._count.id;
+                }
+            });
+
+            countsDiaCampoFinalizacionAntes.forEach((row) => {
+                diaCampoPrevPorGte[row.idGte] = row._count.id;
+            });
+
+            countsDiaCampoFinalizacionAntesFoco.forEach((row) => {
+                focoDiaCampoPrevPorGte[row.idGte] = row._count.id;
             });
 
             return variables.map((variable) => {
@@ -440,10 +587,16 @@ export class VariablePersonalService {
                     empresa:
                         variable.Gte.Colaborador?.ZonaAnterior?.Empresa
                             .nomEmpresa,
+                    negocio: variable.Gte?.Colaborador?.negocio,
                     macrozona,
                     costoLaboral: costoLaboralTotal || 0,
                     completados: completadosPorGte[variable.idGte] || 0,
+                    focoCompletado: focoCompletadoPorGte[variable.idGte] || 0,
+                    focoDiasCampo: focoDiasCampoPorGte[variable.idGte] || 0,
                     diasCampo: diaCampoPorGte[variable.idGte] || 0,
+                    diasCampoPrev: diaCampoPrevPorGte[variable.idGte] || 0,
+                    focoDiasCampoPrev:
+                        focoDiaCampoPrevPorGte[variable.idGte] || 0,
                     createdBy: variable.createdBy,
                     updatedBy: variable.updatedBy,
                     createdAt: variable.createdAt,
@@ -484,32 +637,31 @@ export class VariablePersonalService {
                 select: { id: true, tipo: true },
             });
 
-            // Obtener fecha actual
-            const date = new Date();
-            const now = new Date(date.getTime() - 5 * 60 * 60 * 1000);
-            const currentYear = year ?? now.getFullYear();
-            const currentMonth = month ?? now.getMonth() + 1;
+            // Obtener fecha actual (UTC) y determinar año/mes de trabajo
+            const now = new Date();
+            const currentYear = year ?? now.getUTCFullYear();
+            const currentMonth = month ?? now.getUTCMonth() + 1;
 
             // Calcular mes anterior
             const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
             const previousYear =
                 currentMonth === 1 ? currentYear - 1 : currentYear;
 
-            // Fechas para el mes actual (1-19)
+            // Fechas para el mes actual (1-19) en UTC
             const currentMonthStart = new Date(
-                currentYear,
-                currentMonth - 1,
-                1
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
             );
-            const currentMonthEnd = new Date(currentYear, currentMonth - 1, 20);
+            const currentMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 20, 0, 0, 0, 0)
+            );
 
-            // Fechas para el mes anterior (20-fin)
+            // Fechas para el mes anterior (20-fin) en UTC
             const previousMonthStart = new Date(
-                previousYear,
-                previousMonth - 1,
-                20
+                Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
             );
-            const previousMonthEnd = new Date(currentYear, currentMonth - 1, 1);
+            const previousMonthEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
+            );
 
             const createdVariables = [];
 
@@ -530,7 +682,7 @@ export class VariablePersonalService {
                 const total = await prisma.demoPlot.count({
                     where: {
                         idGte: gte.id,
-                        validacion: true,
+                        //validacion: true,
                         checkJefe: true,
                         NOT: {
                             AND: [
@@ -562,7 +714,7 @@ export class VariablePersonalService {
                     where: {
                         idGte: gte.id,
                         ...familyCondition,
-                        validacion: true,
+                        //validacion: true,
                         checkJefe: true,
                         NOT: {
                             AND: [
@@ -590,10 +742,10 @@ export class VariablePersonalService {
                 });
 
                 // Contar demoplots solo en estado "Día campo"
-                const totalC = await prisma.demoPlot.count({
+                const totalDemosCampo = await prisma.demoPlot.count({
                     where: {
                         idGte: gte.id,
-                        validacion: true,
+                        //validacion: true,
                         checkJefe: true,
                         NOT: {
                             AND: [
@@ -624,7 +776,7 @@ export class VariablePersonalService {
                     where: {
                         idGte: gte.id,
                         estado: 'Día campo',
-                        validacion: true,
+                        //validacion: true,
                         checkJefe: true,
                         NOT: {
                             AND: [
@@ -643,7 +795,7 @@ export class VariablePersonalService {
                     },
                 });
 
-                const totalCMesAnt = totalC - demosCampoMesAct;
+                const totalCMesAnt = totalDemosCampo - demosCampoMesAct;
                 const totalD = total - totalCMesAnt;
 
                 const costoLaboral = await prisma.costoLaboral.findFirst({
@@ -696,8 +848,8 @@ export class VariablePersonalService {
                     }
 
                     // Calcular variableCampo solo si total >= 30
-                    if (totalC >= 1) {
-                        variableCampo = totalC * diaCampo;
+                    if (totalDemosCampo >= 1) {
+                        variableCampo = totalDemosCampo * diaCampo;
                     }
                 }
                 let variable = variableCompletado + variableCampo;
@@ -786,10 +938,12 @@ export class VariablePersonalService {
             const variablesStats = await this.getAllVariablesPersonales(
                 filters
             );
-            const empresas: { [key: string]: Empresa } = {};
+            // Estructura con nivel de negocio dentro de empresa
+            const empresas: { [key: string]: EmpresaNegocio } = {};
 
             variablesStats.forEach((variable) => {
                 const empresaName = variable.empresa ?? 'Sin Empresa';
+                const negocioName = variable.negocio ?? 'Sin Negocio';
                 const macrozonaId =
                     variable.macrozona?.toString() ?? 'Sin Macrozona';
                 const rtcId = variable.idColaborador?.toString() ?? 'Sin RTC';
@@ -799,11 +953,15 @@ export class VariablePersonalService {
                     empresas[empresaName] = {
                         id: empresaName,
                         name: empresaName,
-                        macroZonas: [],
+                        negocios: [],
                         total: {
                             demoplots: 0,
                             completados: 0,
                             diasCampo: 0,
+                            focoCompletado: 0,
+                            diasCampoPrev: 0,
+                            focoDiasCampo: 0,
+                            focoDiasCampoPrev: 0,
                             variable: 0,
                             bono10: 0,
                             vidaLey: 0,
@@ -814,10 +972,36 @@ export class VariablePersonalService {
                     };
                 }
 
-                let macrozona = empresas[empresaName].macroZonas.find(
+                let negocio = empresas[empresaName].negocios.find(
+                    (n) => n.id === negocioName
+                );
+                if (!negocio) {
+                    negocio = {
+                        id: negocioName,
+                        name: negocioName,
+                        macroZonas: [],
+                        total: {
+                            demoplots: 0,
+                            completados: 0,
+                            diasCampo: 0,
+                            focoCompletado: 0,
+                            diasCampoPrev: 0,
+                            focoDiasCampo: 0,
+                            focoDiasCampoPrev: 0,
+                            variable: 0,
+                            bono10: 0,
+                            vidaLey: 0,
+                            beneficio: 0,
+                            total: 0,
+                            costoLaboral: 0,
+                        },
+                    };
+                    empresas[empresaName].negocios.push(negocio);
+                }
+
+                let macrozona = negocio.macroZonas.find(
                     (m) => m.id === macrozonaId
                 );
-
                 if (!macrozona) {
                     macrozona = {
                         id: macrozonaId,
@@ -827,6 +1011,10 @@ export class VariablePersonalService {
                             demoplots: 0,
                             completados: 0,
                             diasCampo: 0,
+                            focoCompletado: 0,
+                            diasCampoPrev: 0,
+                            focoDiasCampo: 0,
+                            focoDiasCampoPrev: 0,
                             variable: 0,
                             bono10: 0,
                             vidaLey: 0,
@@ -835,11 +1023,10 @@ export class VariablePersonalService {
                             costoLaboral: 0,
                         },
                     };
-                    empresas[empresaName].macroZonas.push(macrozona);
+                    negocio.macroZonas.push(macrozona);
                 }
 
                 let rtc = macrozona.retailers.find((r) => r.id === rtcId);
-
                 if (!rtc) {
                     rtc = {
                         id: rtcId,
@@ -849,6 +1036,10 @@ export class VariablePersonalService {
                             demoplots: 0,
                             completados: 0,
                             diasCampo: 0,
+                            focoCompletado: 0,
+                            diasCampoPrev: 0,
+                            focoDiasCampo: 0,
+                            focoDiasCampoPrev: 0,
                             variable: 0,
                             bono10: 0,
                             vidaLey: 0,
@@ -866,6 +1057,10 @@ export class VariablePersonalService {
                     demoplots: 0,
                     completados: variable.completados,
                     diasCampo: variable.diasCampo,
+                    focoCompletado: variable.focoCompletado,
+                    diasCampoPrev: variable.diasCampoPrev,
+                    focoDiasCampo: variable.focoDiasCampo,
+                    focoDiasCampoPrev: variable.focoDiasCampoPrev,
                     variable: variable.variable,
                     bono10: variable.bono10,
                     vidaLey: variable.vidaLey,
@@ -875,68 +1070,127 @@ export class VariablePersonalService {
                 });
             });
 
-            Object.values(empresas).forEach((empresa) => {
-                empresa.macroZonas.forEach((macrozona) => {
-                    macrozona.retailers.forEach((rtc) => {
-                        // Calcular totales de RTC
-                        rtc.total = rtc.generadores.reduce(
-                            (total, gte) => ({
-                                demoplots: total.demoplots + gte.demoplots,
-                                completados:
-                                    total.completados + gte.completados,
-                                diasCampo: total.diasCampo + gte.diasCampo,
-                                variable: total.variable + gte.variable,
-                                bono10: total.bono10 + gte.bono10,
-                                vidaLey: total.vidaLey + gte.vidaLey,
-                                beneficio: total.beneficio + gte.beneficio,
-                                total: total.total + gte.total,
-                                costoLaboral:
-                                    total.costoLaboral + gte.costoLaboral,
-                            }),
-                            {
+            // Agregaciones: primero RTC, luego Macrozona, luego Negocio y finalmente Empresa
+            for (const empresa of Object.values(empresas)) {
+                for (const negocio of empresa.negocios) {
+                    for (const macrozona of negocio.macroZonas) {
+                        for (const rtc of macrozona.retailers) {
+                            const accRtc = {
                                 demoplots: 0,
                                 completados: 0,
                                 diasCampo: 0,
+                                focoCompletado: 0,
+                                diasCampoPrev: 0,
+                                focoDiasCampo: 0,
+                                focoDiasCampoPrev: 0,
                                 variable: 0,
                                 bono10: 0,
                                 vidaLey: 0,
                                 beneficio: 0,
                                 total: 0,
                                 costoLaboral: 0,
+                            };
+                            for (const gte of rtc.generadores) {
+                                accRtc.demoplots += gte.demoplots;
+                                accRtc.completados += gte.completados;
+                                accRtc.diasCampo += gte.diasCampo;
+                                accRtc.focoCompletado += gte.focoCompletado;
+                                accRtc.diasCampoPrev += gte.diasCampoPrev;
+                                accRtc.focoDiasCampo += gte.focoDiasCampo;
+                                accRtc.focoDiasCampoPrev +=
+                                    gte.focoDiasCampoPrev;
+                                accRtc.variable += gte.variable;
+                                accRtc.bono10 += gte.bono10;
+                                accRtc.vidaLey += gte.vidaLey;
+                                accRtc.beneficio += gte.beneficio;
+                                accRtc.total += gte.total;
+                                accRtc.costoLaboral += gte.costoLaboral;
                             }
-                        );
-                    });
+                            rtc.total = accRtc;
+                        }
 
-                    // Calcular totales de Macrozona
-                    macrozona.total = macrozona.retailers.reduce(
-                        (total, rtc) => ({
-                            demoplots: total.demoplots + rtc.total.demoplots,
-                            completados:
-                                total.completados + rtc.total.completados,
-                            diasCampo: total.diasCampo + rtc.total.diasCampo,
-                            variable: total.variable + rtc.total.variable,
-                            bono10: total.bono10 + rtc.total.bono10,
-                            vidaLey: total.vidaLey + rtc.total.vidaLey,
-                            beneficio: total.beneficio + rtc.total.beneficio,
-                            total: total.total + rtc.total.total,
-                            costoLaboral:
-                                total.costoLaboral + rtc.total.costoLaboral,
-                        }),
-                        macrozona.total
-                    );
+                        const accMz = {
+                            demoplots: 0,
+                            completados: 0,
+                            diasCampo: 0,
+                            focoCompletado: 0,
+                            diasCampoPrev: 0,
+                            focoDiasCampo: 0,
+                            focoDiasCampoPrev: 0,
+                            variable: 0,
+                            bono10: 0,
+                            vidaLey: 0,
+                            beneficio: 0,
+                            total: 0,
+                            costoLaboral: 0,
+                        };
+                        for (const rtc of macrozona.retailers) {
+                            accMz.demoplots += rtc.total.demoplots;
+                            accMz.completados += rtc.total.completados;
+                            accMz.diasCampo += rtc.total.diasCampo;
+                            accMz.focoCompletado += rtc.total.focoCompletado;
+                            accMz.diasCampoPrev += rtc.total.diasCampoPrev;
+                            accMz.focoDiasCampo += rtc.total.focoDiasCampo;
+                            accMz.focoDiasCampoPrev +=
+                                rtc.total.focoDiasCampoPrev;
+                            accMz.variable += rtc.total.variable;
+                            accMz.bono10 += rtc.total.bono10;
+                            accMz.vidaLey += rtc.total.vidaLey;
+                            accMz.beneficio += rtc.total.beneficio;
+                            accMz.total += rtc.total.total;
+                            accMz.costoLaboral += rtc.total.costoLaboral;
+                        }
+                        macrozona.total = accMz;
+                    }
 
-                    // Sumar totales a empresa
-                    empresa.total.demoplots += macrozona.total.demoplots;
-                    empresa.total.completados += macrozona.total.completados;
-                    empresa.total.diasCampo += macrozona.total.diasCampo;
-                    empresa.total.variable += macrozona.total.variable;
-                    empresa.total.bono10 += macrozona.total.bono10;
-                    empresa.total.vidaLey += macrozona.total.vidaLey;
-                    empresa.total.beneficio += macrozona.total.beneficio;
-                    empresa.total.total += macrozona.total.total;
-                    empresa.total.costoLaboral += macrozona.total.costoLaboral;
-                });
-            });
+                    const accNeg = {
+                        demoplots: 0,
+                        completados: 0,
+                        diasCampo: 0,
+                        focoCompletado: 0,
+                        diasCampoPrev: 0,
+                        focoDiasCampo: 0,
+                        focoDiasCampoPrev: 0,
+                        variable: 0,
+                        bono10: 0,
+                        vidaLey: 0,
+                        beneficio: 0,
+                        total: 0,
+                        costoLaboral: 0,
+                    };
+                    for (const mz of negocio.macroZonas) {
+                        accNeg.demoplots += mz.total.demoplots;
+                        accNeg.completados += mz.total.completados;
+                        accNeg.diasCampo += mz.total.diasCampo;
+                        accNeg.focoCompletado += mz.total.focoCompletado;
+                        accNeg.diasCampoPrev += mz.total.diasCampoPrev;
+                        accNeg.focoDiasCampo += mz.total.focoDiasCampo;
+                        accNeg.focoDiasCampoPrev += mz.total.focoDiasCampoPrev;
+                        accNeg.variable += mz.total.variable;
+                        accNeg.bono10 += mz.total.bono10;
+                        accNeg.vidaLey += mz.total.vidaLey;
+                        accNeg.beneficio += mz.total.beneficio;
+                        accNeg.total += mz.total.total;
+                        accNeg.costoLaboral += mz.total.costoLaboral;
+                    }
+                    negocio.total = accNeg;
+
+                    // Sumar a empresa
+                    empresa.total.demoplots += accNeg.demoplots;
+                    empresa.total.completados += accNeg.completados;
+                    empresa.total.diasCampo += accNeg.diasCampo;
+                    empresa.total.focoCompletado += accNeg.focoCompletado;
+                    empresa.total.diasCampoPrev += accNeg.diasCampoPrev;
+                    empresa.total.focoDiasCampo += accNeg.focoDiasCampo;
+                    empresa.total.focoDiasCampoPrev += accNeg.focoDiasCampoPrev;
+                    empresa.total.variable += accNeg.variable;
+                    empresa.total.bono10 += accNeg.bono10;
+                    empresa.total.vidaLey += accNeg.vidaLey;
+                    empresa.total.beneficio += accNeg.beneficio;
+                    empresa.total.total += accNeg.total;
+                    empresa.total.costoLaboral += accNeg.costoLaboral;
+                }
+            }
 
             return Object.values(empresas);
         } catch (error) {

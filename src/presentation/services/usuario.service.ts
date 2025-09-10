@@ -199,14 +199,16 @@ export class UsuariosService {
             });
 
             // 2. Obtener todos los usuarios activos (que existen en colaborador o gte)
-            const [colaboradores, gtes] = await Promise.all([
+            const [colaboradores, gtes, externos] = await Promise.all([
                 prisma.colaborador.findMany({ select: { idUsuario: true } }),
                 prisma.gte.findMany({ select: { idUsuario: true } }),
+                prisma.externo.findMany({ select: { idUsuario: true } }),
             ]);
 
             const idsActivos = new Set([
                 ...colaboradores.map((c) => c.idUsuario),
                 ...gtes.map((g) => g.idUsuario),
+                ...externos.map((e) => e.idUsuario),
             ]);
 
             // 3. Filtrar usuarios según el parámetro activo

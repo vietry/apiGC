@@ -16,6 +16,7 @@ interface ColaboradorFilters {
     zonaAnt?: string;
     empresa?: string;
     macrozona?: number | number[];
+    negocio?: string;
 }
 
 export class ColaboradorService {
@@ -51,6 +52,7 @@ export class ColaboradorService {
                     idArea: createColaboradorDto.idArea,
                     idZonaAnt: createColaboradorDto.idZonaAnt,
                     idUsuario: createColaboradorDto.idUsuario,
+                    negocio: createColaboradorDto.negocio,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -59,6 +61,7 @@ export class ColaboradorService {
             return {
                 id: colaborador.id,
                 cargo: colaborador.cargo,
+                negocio: colaborador.negocio,
                 Area: colaborador.idArea,
                 ZonaA: colaborador.idZonaAnt,
             };
@@ -104,6 +107,7 @@ export class ColaboradorService {
             cargo,
             zonaAnt,
             macrozona,
+            negocio,
         } = filters;
 
         try {
@@ -125,6 +129,11 @@ export class ColaboradorService {
             if (cargo) {
                 where.cargo = {
                     contains: cargo,
+                };
+            }
+            if (negocio) {
+                where.negocio = {
+                    contains: negocio,
                 };
             }
             if (area) {
@@ -204,6 +213,7 @@ export class ColaboradorService {
                     return {
                         id: colaborador.id,
                         cargo: colaborador.cargo,
+                        negocio: colaborador.negocio,
                         idUsuario: colaborador.idUsuario,
                         idArea: colaborador.idArea,
                         idZonaAnt: colaborador.idZonaAnt,
@@ -235,6 +245,7 @@ export class ColaboradorService {
             zonaAnt,
             empresa,
             macrozona,
+            negocio,
         } = filters;
 
         try {
@@ -263,6 +274,11 @@ export class ColaboradorService {
             if (cargo) {
                 where.cargo = {
                     contains: cargo,
+                };
+            }
+            if (negocio) {
+                where.negocio = {
+                    contains: negocio,
                 };
             }
             if (area) {
@@ -357,6 +373,7 @@ export class ColaboradorService {
                 return {
                     id: colaborador.id,
                     cargo: colaborador.cargo,
+                    negocio: colaborador.negocio,
                     idUsuario: colaborador.idUsuario,
                     idArea: colaborador.idArea,
                     idZonaAnt: colaborador.idZonaAnt,

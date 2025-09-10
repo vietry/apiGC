@@ -20,6 +20,12 @@ export class UpdateDemoplotDto {
         public readonly comentariosJefe?: string | null,
         public readonly validatedAt?: Date | null,
         public readonly approvedAt?: Date | null,
+        public readonly validacionCampo?: boolean | null,
+        public readonly validatedCampoAt?: Date | null,
+        public readonly comentariosRtcCampo?: string | null,
+        public readonly checkJefeCampo?: boolean | null,
+        public readonly approvedCampoAt?: Date | null,
+        public readonly comentariosJefeCampo?: string | null,
         public readonly idCultivo?: number,
         public readonly idContactoP?: number,
         public readonly idBlanco?: number,
@@ -61,6 +67,18 @@ export class UpdateDemoplotDto {
             returnObj.comentariosJefe = this.comentariosJefe;
         if (this.validatedAt) returnObj.validatedAt = this.validatedAt;
         if (this.approvedAt) returnObj.approvedAt = this.approvedAt;
+        if (this.validacionCampo !== undefined)
+            returnObj.validacionCampo = this.validacionCampo;
+        if (this.validatedCampoAt)
+            returnObj.validatedCampoAt = this.validatedCampoAt;
+        if (this.comentariosRtcCampo)
+            returnObj.comentariosRtcCampo = this.comentariosRtcCampo;
+        if (this.checkJefeCampo !== undefined)
+            returnObj.checkJefeCampo = this.checkJefeCampo;
+        if (this.approvedCampoAt)
+            returnObj.approvedCampoAt = this.approvedCampoAt;
+        if (this.comentariosJefeCampo)
+            returnObj.comentariosJefeCampo = this.comentariosJefeCampo;
         if (this.idCultivo) returnObj.idCultivo = this.idCultivo;
         if (this.idContactoP) returnObj.idContactoP = this.idContactoP;
         if (this.idBlanco) returnObj.idBlanco = this.idBlanco;
@@ -102,6 +120,12 @@ export class UpdateDemoplotDto {
             comentariosJefe,
             validatedAt,
             approvedAt,
+            validacionCampo,
+            validatedCampoAt,
+            comentariosRtcCampo,
+            checkJefeCampo,
+            approvedCampoAt,
+            comentariosJefeCampo,
             idCultivo,
             idContactoP,
             idBlanco,
@@ -203,13 +227,19 @@ export class UpdateDemoplotDto {
                 comentariosJefe,
                 validatedAt,
                 approvedAt,
+                validacionCampo,
+                validatedCampoAt,
+                comentariosRtcCampo,
+                checkJefeCampo,
+                approvedCampoAt,
+                comentariosJefeCampo,
                 idCultivoNumber,
                 idContactoPNumber,
                 idBlancoNumber,
                 idDistrito,
                 idFamiliaNumber,
                 idGteNumber,
-                parseNumber(idCharla),
+                idCharla !== undefined ? parseNumber(idCharla) : undefined,
                 programacion,
                 diaCampo,
                 venta,

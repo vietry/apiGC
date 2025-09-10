@@ -56,6 +56,7 @@ export class VariablePersonalController {
                 idColaborador,
                 macrozona,
                 empresa,
+                negocio,
                 activo,
                 idGte,
             } = req.query;
@@ -69,7 +70,8 @@ export class VariablePersonalController {
                 idColaborador: idColaborador ? +idColaborador : undefined,
                 idGte: idGte ? +idGte : undefined,
                 macrozona: macrozona ? +macrozona : undefined,
-                empresa: empresa?.toString(),
+                empresa: empresa as string,
+                negocio: negocio as string,
                 activo:
                     activo !== undefined
                         ? !!(activo === 'true' || activo === '1')
@@ -92,6 +94,7 @@ export class VariablePersonalController {
             idColaborador,
             macrozona,
             empresa,
+            negocio,
             activo,
             idGte,
         } = req.query;
@@ -102,7 +105,8 @@ export class VariablePersonalController {
             idColaborador: idColaborador ? +idColaborador : undefined,
             idGte: idGte ? +idGte : undefined,
             macrozona: macrozona ? +macrozona : undefined,
-            empresa: empresa?.toString(),
+            empresa: empresa as string,
+            negocio: negocio as string,
             activo:
                 activo !== undefined
                     ? !!(activo === 'true' || activo === '1')
@@ -156,6 +160,7 @@ export class VariablePersonalController {
                 idColaborador,
                 macrozona,
                 empresa,
+                negocio,
                 activo,
                 idGte,
             } = req.query;
@@ -166,7 +171,8 @@ export class VariablePersonalController {
                 idColaborador: idColaborador ? +idColaborador : undefined,
                 idGte: idGte ? +idGte : undefined,
                 macrozona: macrozona ? +macrozona : undefined,
-                empresa: empresa?.toString(),
+                empresa: empresa as string,
+                negocio: negocio as string,
                 activo:
                     activo !== undefined
                         ? !!(activo === 'true' || activo === '1')
