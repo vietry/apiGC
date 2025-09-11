@@ -253,6 +253,7 @@ export class FamiliaService {
         negocio?: string;
         macrozona?: number;
         activo?: boolean;
+        search?: string;
     }) {
         try {
             const {
@@ -263,6 +264,7 @@ export class FamiliaService {
                 negocio,
                 macrozona,
                 activo,
+                search,
             } = filters || {};
 
             // Unificar filtros para Gte y su Colaborador en un único objeto (evita sobrescrituras)
@@ -301,8 +303,13 @@ export class FamiliaService {
             // 1) Traer entregas filtradas
             const entregas = await prisma.entregaMuestras.findMany({
                 where: {
-                    // Excluir familias con clase = "VETSAN"
-                    Familia: { is: { clase: { not: 'VETSAN' } } },
+                    // Excluir familias con clase = "VETSAN" y aplicar búsqueda por nombre
+                    Familia: {
+                        is: {
+                            clase: { not: 'VETSAN' },
+                            ...(search ? { nombre: { contains: search } } : {}),
+                        },
+                    },
                     ...(idGte ? { idGte } : {}),
                     ...(idFamilia ? { idFamilia } : {}),
                     ...(Object.keys(gteWhere).length > 0
@@ -379,8 +386,13 @@ export class FamiliaService {
                 ...(Object.keys(gteWhere).length > 0
                     ? { Gte: { is: gteWhere } }
                     : {}),
-                // Excluir familias con clase = "VETSAN" en demoplots
-                Familia: { is: { clase: { not: 'VETSAN' } } },
+                // Excluir familias con clase = "VETSAN" en demoplots y aplicar búsqueda por nombre
+                Familia: {
+                    is: {
+                        clase: { not: 'VETSAN' },
+                        ...(search ? { nombre: { contains: search } } : {}),
+                    },
+                },
             };
 
             const consumos = await prisma.consumoMuestras.findMany({

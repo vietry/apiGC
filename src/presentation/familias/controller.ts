@@ -51,6 +51,7 @@ export class FamiliaController {
                 negocio: this.parseStr(req.query.negocio),
                 macrozona: this.parseNum(req.query.macrozona),
                 activo: this.parseBool(req.query.activo),
+                search: this.parseStr(req.query.search),
             } as {
                 idGte?: number;
                 idFamilia?: number;
@@ -59,6 +60,7 @@ export class FamiliaController {
                 negocio?: string;
                 macrozona?: number;
                 activo?: boolean;
+                search?: string;
             };
 
             const data = await this.familiaService.getResumenMuestras(filters);
