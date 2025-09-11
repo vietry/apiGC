@@ -16,6 +16,58 @@ export class FamiliaController {
             .json({ error: 'Internal server error - check logs' });
     };
 
+    private parseNum(v: unknown): number | undefined {
+        return v !== undefined && v !== '' && !Number.isNaN(+v!)
+            ? +v!
+            : undefined;
+    }
+
+    private parseBool(v: unknown): boolean | undefined {
+        if (v === undefined) return undefined;
+        if (typeof v === 'boolean') return v;
+        if (typeof v === 'number') return v === 1;
+        if (typeof v === 'string') {
+            const s = v.trim().toLowerCase();
+            if (s === 'true' || s === '1') return true;
+            if (s === 'false' || s === '0') return false;
+            return undefined;
+        }
+        return undefined;
+    }
+
+    private parseStr(v: unknown): string | undefined {
+        if (typeof v !== 'string') return undefined;
+        const t = v.trim();
+        return t.length ? t : undefined;
+    }
+
+    getResumenMuestras = async (req: Request, res: Response) => {
+        try {
+            const filters = {
+                idGte: this.parseNum(req.query.idGte),
+                idFamilia: this.parseNum(req.query.idFamilia),
+                idColaborador: this.parseNum(req.query.idColaborador),
+                empresa: this.parseStr(req.query.empresa),
+                negocio: this.parseStr(req.query.negocio),
+                macrozona: this.parseNum(req.query.macrozona),
+                activo: this.parseBool(req.query.activo),
+            } as {
+                idGte?: number;
+                idFamilia?: number;
+                idColaborador?: number;
+                empresa?: string;
+                negocio?: string;
+                macrozona?: number;
+                activo?: boolean;
+            };
+
+            const data = await this.familiaService.getResumenMuestras(filters);
+            return res.status(200).json(data);
+        } catch (error) {
+            return this.handleError(res, error);
+        }
+    };
+
     getFamilias = async (req: Request, res: Response) => {
         const { idEmpresa, enfoque, escuela, clase, visitas } = req.query;
 
@@ -60,7 +112,7 @@ export class FamiliaController {
 
         const filters = {
             idEmpresa: idEmpresa ? +idEmpresa : undefined,
-            clase: clase?.toString(),
+            clase: typeof clase === 'string' ? clase : undefined,
             enfoque:
                 enfoque !== undefined
                     ? !!(enfoque === 'true' || enfoque === '1')

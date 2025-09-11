@@ -7,6 +7,13 @@ import { UsuariosService } from '../services';
 export class UsuariosController {
     constructor(private readonly usuariosService: UsuariosService) {}
 
+    private readonly toStringParam = (param: any): string | undefined => {
+        if (param === undefined || param === null) return undefined;
+        if (typeof param === 'string') return param;
+        if (Array.isArray(param)) return param[0]?.toString();
+        return String(param);
+    };
+
     private readonly handleError = (res: Response, error: unknown) => {
         if (error instanceof CustomError) {
             res.status(error.statusCode).json({ error: error.message });
@@ -38,8 +45,6 @@ export class UsuariosController {
             id,
         });
         if (error) return res.status(400).json({ error });
-        console.log('body', req.body);
-        console.log('updateUsuarioDto', updateUsuarioDto?.values);
 
         this.usuariosService
             .updateUsuarioById(updateUsuarioDto!)
@@ -72,11 +77,11 @@ export class UsuariosController {
         const { nombres, apellidos, email, celular, rol, activo } = req.query;
 
         const filters = {
-            nombres: nombres?.toString(),
-            apellidos: apellidos?.toString(),
-            email: email?.toString(),
-            celular: celular?.toString(),
-            rol: rol?.toString(),
+            nombres: this.toStringParam(nombres),
+            apellidos: this.toStringParam(apellidos),
+            email: this.toStringParam(email),
+            celular: this.toStringParam(celular),
+            rol: this.toStringParam(rol),
             activo:
                 activo !== undefined
                     ? !!(activo === 'true' || activo === '1')
@@ -107,11 +112,11 @@ export class UsuariosController {
 
         // Construir filtros
         const filters = {
-            nombres: nombres?.toString(),
-            apellidos: apellidos?.toString(),
-            email: email?.toString(),
-            celular: celular?.toString(),
-            rol: rol?.toString(),
+            nombres: this.toStringParam(nombres),
+            apellidos: this.toStringParam(apellidos),
+            email: this.toStringParam(email),
+            celular: this.toStringParam(celular),
+            rol: this.toStringParam(rol),
             //activo: activo === undefined ? undefined : activo === "true",
             activo:
                 activo !== undefined

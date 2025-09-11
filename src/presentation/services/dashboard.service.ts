@@ -6,8 +6,6 @@ import {
     GteRankingFilters,
 } from '../../domain';
 
-//import { DemoplotFilters } from './demoplot.service';
-
 export class DashboardService {
     async getGteRankings(filters: GteRankingFilters = {}) {
         const {
@@ -1301,7 +1299,6 @@ export class DashboardService {
             );
 
             return empresasArray;
-            //return Object.values(empresas);
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
