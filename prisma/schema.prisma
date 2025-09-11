@@ -424,14 +424,6 @@ model ZonaAnterior {
   Empresa        Empresa          @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Zona_Empresa1")
 }
 
-model Todo {
-  id          Int       @id(map: "PK__Todo__3213E83FEE651EA7") @default(autoincrement())
-  text        String    @db.VarChar(45)
-  completedAt DateTime? @db.DateTime
-  createdAt   DateTime? @db.DateTime
-  updatedAt   DateTime? @db.DateTime
-}
-
 model BlancoBiologico {
   id                    Int                     @id(map: "PK__BlancoBi__3213E83FFBD81CEA") @default(autoincrement())
   cientifico            String?                 @db.VarChar(45)
