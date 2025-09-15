@@ -11,7 +11,7 @@ import {
 export class FundoController {
     constructor(private readonly fundoService: FundoService) {}
 
-    private handleError = (res: Response, error: unknown) => {
+    private readonly handleError = (res: Response, error: unknown) => {
         if (error instanceof CustomError) {
             return res.status(error.statusCode).json({ error: error.message });
         }
@@ -45,16 +45,16 @@ export class FundoController {
             .catch((error) => this.handleError(res, error));
     };
 
-    getFundosByPuntoContactoId = async (req: Request, res: Response) => {
-        const idPuntoContacto = +req.params.idPuntoContacto;
-        if (isNaN(idPuntoContacto))
-            return res.status(400).json({ error: 'Invalid ID' });
+    // getFundosByPuntoContactoId = async (req: Request, res: Response) => {
+    //     const idPuntoContacto = +req.params.idPuntoContacto;
+    //     if (isNaN(idPuntoContacto))
+    //         return res.status(400).json({ error: 'Invalid ID' });
 
-        this.fundoService
-            .getFundosByPuntoContactoId(idPuntoContacto)
-            .then((fundos) => res.status(200).json(fundos))
-            .catch((error) => this.handleError(res, error));
-    };
+    //     this.fundoService
+    //         .getFundosByPuntoContactoId(idPuntoContacto)
+    //         .then((fundos) => res.status(200).json(fundos))
+    //         .catch((error) => this.handleError(res, error));
+    // };
 
     getFundosByContactoPuntoId = async (req: Request, res: Response) => {
         const idContactoPunto = +req.params.idContactoPunto;

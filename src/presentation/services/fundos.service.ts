@@ -244,52 +244,52 @@ export class FundoService {
         }
     }
 
-    async getFundosByPuntoContactoId(idPuntoContacto: number) {
-        try {
-            const fundos = await prisma.fundo.findMany({
-                where: { idPuntoContacto },
-                include: {
-                    PuntoUbigeo: {
-                        select: {
-                            Distrito: {
-                                select: {
-                                    id: true,
-                                    nombre: true,
-                                },
-                            },
-                        },
-                    },
-                    PuntoContacto: {
-                        select: {
-                            id: true,
-                            nombre: true,
-                        },
-                    },
-                    ContactoPunto: {
-                        select: {
-                            id: true,
-                            nombre: true,
-                        },
-                    },
-                },
-            });
+    // async getFundosByPuntoContactoId(idPuntoContacto: number) {
+    //     try {
+    //         const fundos = await prisma.fundo.findMany({
+    //             where: { idPuntoContacto },
+    //             include: {
+    //                 PuntoUbigeo: {
+    //                     select: {
+    //                         Distrito: {
+    //                             select: {
+    //                                 id: true,
+    //                                 nombre: true,
+    //                             },
+    //                         },
+    //                     },
+    //                 },
+    //                 PuntoContacto: {
+    //                     select: {
+    //                         id: true,
+    //                         nombre: true,
+    //                     },
+    //                 },
+    //                 ContactoPunto: {
+    //                     select: {
+    //                         id: true,
+    //                         nombre: true,
+    //                     },
+    //                 },
+    //             },
+    //         });
 
-            return fundos.map((fundo) => ({
-                id: fundo.id,
-                nombre: fundo.nombre,
-                idClienteUbigeo: fundo.idClienteUbigeo,
-                idPuntoUbigeo: fundo.idPuntoUbigeo,
-                idPuntoContacto: fundo.idPuntoContacto,
-                punto: fundo.PuntoContacto?.nombre,
-                idDistrito: fundo.PuntoUbigeo?.Distrito.id,
-                distrito: fundo.PuntoUbigeo?.Distrito.nombre,
-                createdAt: fundo.createdAt,
-                updatedAt: fundo.updatedAt,
-            }));
-        } catch (error) {
-            throw CustomError.internalServer(`${error}`);
-        }
-    }
+    //         return fundos.map((fundo) => ({
+    //             id: fundo.id,
+    //             nombre: fundo.nombre,
+    //             idClienteUbigeo: fundo.idClienteUbigeo,
+    //             idPuntoUbigeo: fundo.idPuntoUbigeo,
+    //             idPuntoContacto: fundo.idPuntoContacto,
+    //             punto: fundo.PuntoContacto?.nombre,
+    //             idDistrito: fundo.PuntoUbigeo?.Distrito.id,
+    //             distrito: fundo.PuntoUbigeo?.Distrito.nombre,
+    //             createdAt: fundo.createdAt,
+    //             updatedAt: fundo.updatedAt,
+    //         }));
+    //     } catch (error) {
+    //         throw CustomError.internalServer(`${error}`);
+    //     }
+    // }
 
     async getFundosByContactoPuntoId(idContactoPunto: number) {
         try {

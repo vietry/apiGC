@@ -116,7 +116,6 @@ model Cliente {
   Empresa        Empresa?         @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Cliente_Empresa")
   ClienteUbigeo  ClienteUbigeo[]
   ClienteZonaAnt ClienteZonaAnt[]
-  Contacto       Contacto[]
 }
 
 model ClienteUbigeo {
@@ -153,31 +152,41 @@ model Colaborador {
   createdAt                                                  DateTime?            @db.DateTime
   updatedAt                                                  DateTime?            @db.DateTime
   negocio                                                    String?              @db.VarChar(25)
+  ClienteVendedorGC_ClienteVendedorGC_createdByToColaborador ClienteVendedorGC[]  @relation("ClienteVendedorGC_createdByToColaborador")
+  ClienteVendedorGC_ClienteVendedorGC_updatedByToColaborador ClienteVendedorGC[]  @relation("ClienteVendedorGC_updatedByToColaborador")
   Usuario                                                    Usuario?             @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Usuario1")
   ZonaAnterior                                               ZonaAnterior?        @relation(fields: [idZonaAnt], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Colaborador_Zona1")
   Area                                                       Area                 @relation(fields: [idArea], references: [id], onUpdate: NoAction, map: "fk_ColaboradorArea")
   ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador ColaboradorJefe[]    @relation("ColaboradorJefe_idColaboradorToColaborador")
   ColaboradorJefe_ColaboradorJefe_idJefeToColaborador        ColaboradorJefe[]    @relation("ColaboradorJefe_idJefeToColaborador")
+  Contacto                                                   Contacto[]
   ExternoColaborador                                         ExternoColaborador[]
   Gte                                                        Gte[]
   NuevaPlanificacion                                         NuevaPlanificacion[]
   Planificacion                                              Planificacion[]
   PuntoContacto                                              PuntoContacto[]
+  TiendaCliente                                              TiendaCliente[]
   Visita                                                     Visita[]
 }
 
 model Contacto {
-  id        Int       @id(map: "PK__Contacto__3213E83F32EEC6B3") @default(autoincrement())
-  nombre    String    @db.VarChar(45)
-  apellido  String    @db.VarChar(45)
-  cargo     String    @db.VarChar(20)
-  correo    String?   @db.VarChar(30)
-  celularA  String?   @db.VarChar(20)
-  celularB  String?   @db.VarChar(20)
-  idCliente Int
-  createdAt DateTime? @db.DateTime
-  updatedAt DateTime? @db.DateTime
-  Cliente   Cliente   @relation(fields: [idCliente], references: [id], onUpdate: NoAction, map: "fk_Contacto_Cliente")
+  id                     Int                    @id(map: "PK__Contacto__3213E83F32EEC6B3") @default(autoincrement())
+  nombre                 String                 @db.VarChar(45)
+  apellido               String                 @db.VarChar(45)
+  cargo                  String                 @db.VarChar(45)
+  email                  String?                @db.VarChar(50)
+  celularA               String?                @db.VarChar(20)
+  celularB               String?                @db.VarChar(20)
+  activo                 Boolean                @default(true, map: "DF__Contacto__idClie__65570293")
+  createdAt              DateTime               @default(dbgenerated("sysutcdatetime()"), map: "DF__Contacto__create__636EBA21")
+  updatedAt              DateTime               @default(dbgenerated("sysutcdatetime()"), map: "DF__Contacto__update__6462DE5A")
+  clienteExactusId       Int
+  clienteGestionCId      Int
+  tipo                   String?                @db.VarChar(20)
+  createdBy              Int?
+  ClienteVendedorExactus ClienteVendedorExactus @relation(fields: [clienteExactusId], references: [id], onUpdate: NoAction, map: "Contacto_ClienteExactus")
+  ClienteVendedorGC      ClienteVendedorGC      @relation(fields: [clienteGestionCId], references: [id], onUpdate: NoAction, map: "Contacto_ClienteGestionC")
+  Colaborador            Colaborador?           @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Contacto_CreatedByColaborador")
 }
 
 model Cultivo {
@@ -217,7 +226,6 @@ model Distrito {
   Provincia      Provincia       @relation(fields: [idProvincia], references: [id], onUpdate: NoAction, map: "FK_Distrito_Provincia")
   Fundo          Fundo[]
   PuntoContacto  PuntoContacto[]
-  PuntoUbigeo    PuntoUbigeo[]
 }
 
 model Division {
@@ -233,21 +241,22 @@ model Division {
 }
 
 model Empresa {
-  id              Int               @id(map: "PK__Empresa__3213E83F9EE8C362")
-  nomEmpresa      String            @db.VarChar(15)
-  createdAt       DateTime?         @db.DateTime
-  updatedAt       DateTime?         @db.DateTime
-  Articulo        Articulo[]
-  Clase           Clase[]
-  Cliente         Cliente[]
-  ClienteZona     ClienteZona[]
-  ClienteZonaAnt  ClienteZonaAnt[]
-  ColaboradorJefe ColaboradorJefe[]
-  Division        Division[]
-  Familia         Familia[]
-  Linea           Linea[]
-  PuntoContacto   PuntoContacto[]
-  ZonaAnterior    ZonaAnterior[]
+  id                Int                 @id(map: "PK__Empresa__3213E83F9EE8C362")
+  nomEmpresa        String              @db.VarChar(15)
+  createdAt         DateTime?           @db.DateTime
+  updatedAt         DateTime?           @db.DateTime
+  Articulo          Articulo[]
+  Clase             Clase[]
+  Cliente           Cliente[]
+  ClienteVendedorGC ClienteVendedorGC[]
+  ClienteZona       ClienteZona[]
+  ClienteZonaAnt    ClienteZonaAnt[]
+  ColaboradorJefe   ColaboradorJefe[]
+  Division          Division[]
+  Familia           Familia[]
+  Linea             Linea[]
+  PuntoContacto     PuntoContacto[]
+  ZonaAnterior      ZonaAnterior[]
 }
 
 model Familia {
@@ -268,9 +277,10 @@ model Familia {
   EntregaMuestras    EntregaMuestras[]
   Empresa            Empresa              @relation(fields: [idEmpresa], references: [id], onUpdate: NoAction, map: "fk_Empresa_Familia1")
   NuevaPlanificacion NuevaPlanificacion[]
-  PlanProductos      PlanProductos[]
   VisitaGteTienda    VisitaGteTienda[]
   VisitaProducto     VisitaProducto[]
+
+  @@index([clase], map: "IX_Familia_clase")
 }
 
 model Fundo {
@@ -286,7 +296,7 @@ model Fundo {
   idContactoPunto Int?
   Cultivo         Cultivo[]
   ClienteUbigeo   ClienteUbigeo? @relation(fields: [idClienteUbigeo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_ClienteUbigeo")
-  ContactoPunto   ContactoPunto? @relation(fields: [idContactoPunto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_ContactoPunto1")
+  ContactoPunto   ContactoPunto? @relation(fields: [idContactoPunto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Fundo_ContactoPunto1")
   Distrito        Distrito?      @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_Distrito1")
   PuntoContacto   PuntoContacto? @relation(fields: [idPuntoContacto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_PuntoContacto1")
   PuntoUbigeo     PuntoUbigeo?   @relation(fields: [idPuntoUbigeo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Fundo_PuntoUbigeo1")
@@ -309,7 +319,7 @@ model LaborVisita {
   updatedAt      DateTime?     @db.DateTime
   Representada   Representada? @relation(fields: [idRepresentada], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_LaborVisita_Representada")
   SubLabor       SubLabor      @relation(fields: [idSubLabor], references: [id], onUpdate: NoAction, map: "fk_LaborVisita_SubLabor")
-  Visita         Visita        @relation(fields: [idVisita], references: [id], onUpdate: NoAction, map: "fk_LaborVisita_Visita1")
+  Visita         Visita        @relation(fields: [idVisita], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_LaborVisita_Visita1")
 }
 
 model Linea {
@@ -425,19 +435,18 @@ model ZonaAnterior {
 }
 
 model BlancoBiologico {
-  id                    Int                     @id(map: "PK__BlancoBi__3213E83FFBD81CEA") @default(autoincrement())
-  cientifico            String?                 @db.VarChar(45)
-  estandarizado         String?                 @db.VarChar(45)
-  idVegetacion          Int
-  createdAt             DateTime?               @db.DateTime
-  updatedAt             DateTime?               @db.DateTime
-  codi                  String?                 @db.VarChar(5)
-  Vegetacion            Vegetacion              @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Blanco_Vegetacion1")
-  Charla                Charla[]
-  CharlaProducto        CharlaProducto[]
-  DemoPlot              DemoPlot[]
-  NuevaPlanificacion    NuevaPlanificacion[]
-  PlanBlancosBiologicos PlanBlancosBiologicos[]
+  id                 Int                  @id(map: "PK__BlancoBi__3213E83FFBD81CEA") @default(autoincrement())
+  cientifico         String?              @db.VarChar(45)
+  estandarizado      String?              @db.VarChar(45)
+  idVegetacion       Int
+  createdAt          DateTime?            @db.DateTime
+  updatedAt          DateTime?            @db.DateTime
+  codi               String?              @db.VarChar(5)
+  Vegetacion         Vegetacion           @relation(fields: [idVegetacion], references: [id], onUpdate: NoAction, map: "fk_Blanco_Vegetacion1")
+  Charla             Charla[]
+  CharlaProducto     CharlaProducto[]
+  DemoPlot           DemoPlot[]
+  NuevaPlanificacion NuevaPlanificacion[]
 }
 
 model DemoPlot {
@@ -496,6 +505,9 @@ model DemoPlot {
   Usuario_DemoPlot_updatedByToUsuario Usuario?          @relation("DemoPlot_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_updatedBy1")
   FotoDemoPlot                        FotoDemoPlot[]
   FotoDemoPlotLog                     FotoDemoPlotLog[]
+
+  @@index([idGte, estado], map: "IX_DemoPlot_idGte_estado")
+  @@index([idGte, idFamilia], map: "IX_DemoPlot_idGte_idFamilia")
 }
 
 model FotoDemoPlot {
@@ -507,7 +519,7 @@ model FotoDemoPlot {
   createdAt                               DateTime? @db.DateTime
   updatedAt                               DateTime? @db.DateTime
   rutaFoto                                String?   @db.VarChar(255)
-  comentario                              String?   @db.VarChar(255)
+  comentario                              String?   @db.VarChar(Max)
   nombre                                  String?   @db.VarChar(50)
   estado                                  String?   @db.VarChar(15)
   createdBy                               Int?
@@ -534,7 +546,6 @@ model Gte {
   SubZona            SubZona?             @relation(fields: [idSubZona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_SubZona1")
   Usuario            Usuario?             @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Gte_Usuario1")
   NuevaPlanificacion NuevaPlanificacion[]
-  PlanGtes           PlanGtes[]
   PuntoContacto      PuntoContacto[]
   RegistroLaboralGD  RegistroLaboralGD[]
   VariablePersonal   VariablePersonal[]
@@ -569,12 +580,10 @@ model PuntoContacto {
   ContactoPunto      ContactoPunto[]
   Fundo              Fundo[]
   NuevaPlanificacion NuevaPlanificacion[]
-  PlanTiendas        PlanTiendas[]
   Colaborador        Colaborador?         @relation(fields: [idColaborador], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Colaborador")
   Distrito           Distrito?            @relation(fields: [idDistrito], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Distrito")
   Empresa            Empresa?             @relation(fields: [idEmpresa], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Empresa1")
   Gte                Gte?                 @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_PuntoContacto_Gte")
-  PuntoUbigeo        PuntoUbigeo[]
   VisitaGteTienda    VisitaGteTienda[]
 }
 
@@ -600,7 +609,6 @@ model Vegetacion {
   BlancoBiologico    BlancoBiologico[]
   Charla             Charla[]
   NuevaPlanificacion NuevaPlanificacion[]
-  PlanCultivos       PlanCultivos[]
   Variedad           Variedad[]
 }
 
@@ -614,7 +622,7 @@ model ContactoPunto {
   idPunto                                    Int
   createdAt                                  DateTime?     @db.DateTime
   updatedAt                                  DateTime?     @db.DateTime
-  email                                      String?       @db.VarChar(30)
+  email                                      String?       @db.VarChar(50)
   tipo                                       String        @db.VarChar(10)
   idGte                                      Int?
   activo                                     Boolean?
@@ -629,14 +637,12 @@ model ContactoPunto {
 }
 
 model PuntoUbigeo {
-  id            Int           @id(map: "PK__PuntoUbi__3213E83FE424B6D1") @default(autoincrement())
-  idPunto       Int
-  idDistrito    String        @db.VarChar(6)
-  createdAt     DateTime?     @db.DateTime
-  updatedAt     DateTime?     @db.DateTime
-  Fundo         Fundo[]
-  Distrito      Distrito      @relation(fields: [idDistrito], references: [id], onUpdate: NoAction, map: "fk_PuntoUbigeo_Distrito")
-  PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onUpdate: NoAction, map: "fk_PuntoUbigeo_Punto")
+  id         Int       @id(map: "PK__PuntoUbi__3213E83FE424B6D1") @default(autoincrement())
+  idPunto    Int
+  idDistrito String    @db.VarChar(6)
+  createdAt  DateTime? @db.DateTime
+  updatedAt  DateTime? @db.DateTime
+  Fundo      Fundo[]
 }
 
 model ClienteZona {
@@ -885,6 +891,8 @@ model ConsumoMuestras {
   EntregaMuestras                            EntregaMuestras? @relation(fields: [idEntrega], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ConsumoEntrega")
   Usuario_ConsumoMuestras_createdByToUsuario Usuario?         @relation("ConsumoMuestras_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ConsumoMuestrasCreated")
   Usuario_ConsumoMuestras_updatedByToUsuario Usuario?         @relation("ConsumoMuestras_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ConsumoMuestrasUpdated")
+
+  @@index([idDemoplot], map: "IX_ConsumoMuestras_idDemoplot")
 }
 
 model EntregaMuestras {
@@ -908,6 +916,8 @@ model EntregaMuestras {
   Familia                                    Familia           @relation(fields: [idFamilia], references: [id], onUpdate: NoAction, map: "fk_EntregaMuestrasFamilia")
   Gte                                        Gte               @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_EntregaMuestrasGenerador")
   Usuario_EntregaMuestras_updatedByToUsuario Usuario?          @relation("EntregaMuestras_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_EntregaMuestrasUpdated")
+
+  @@index([idGte, idFamilia], map: "IX_EntregaMuestras_idGte_idFamilia")
 }
 
 model FotoVisita {
@@ -935,7 +945,7 @@ model VisitaProducto {
   idFamilia Int
   createdAt DateTime? @db.DateTime
   updatedAt DateTime? @db.DateTime
-  Visita    Visita    @relation(fields: [idVisita], references: [id], onUpdate: NoAction, map: "fk_VisitaArticulo_Visita1")
+  Visita    Visita    @relation(fields: [idVisita], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaArticulo_Visita1")
   Familia   Familia   @relation(fields: [idFamilia], references: [id], onUpdate: NoAction, map: "fk_VisitaProducto_Producto")
 }
 
@@ -958,88 +968,31 @@ model VisitaGteTienda {
 }
 
 model MomentoAplicacion {
-  id                    Int                     @id(map: "PK__MomentoA__3213E83F6A816E5D") @default(autoincrement())
-  nombre                String                  @db.VarChar(50)
-  NuevaPlanificacion    NuevaPlanificacion[]
-  PlanMomentoAplicacion PlanMomentoAplicacion[]
-}
-
-model PlanBlancosBiologicos {
-  id              Int             @id(map: "PK__PlanBlan__3213E83FF8D5687D") @default(autoincrement())
-  planId          Int
-  blancoId        Int
-  BlancoBiologico BlancoBiologico @relation(fields: [blancoId], references: [id], onUpdate: NoAction, map: "FK__PlanBlanc__blanc__0CA5D9DE")
-  Planificacion   Planificacion   @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanBlanc__planI__0BB1B5A5")
-}
-
-model PlanCultivos {
-  id            Int           @id(map: "PK__PlanCult__3213E83F220762F6") @default(autoincrement())
-  planId        Int
-  cultivoId     Int
-  Planificacion Planificacion @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanCulti__planI__06ED0088")
-  Cultivo       Vegetacion    @relation(fields: [cultivoId], references: [id], onUpdate: NoAction, map: "FK__PlanCulti__culti__07E124C1")
-}
-
-model PlanGtes {
-  id            Int           @id(map: "PK__PlanGtes__3213E83F14BCD0D4") @default(autoincrement())
-  planId        Int
-  gteId         Int
-  Gte           Gte           @relation(fields: [gteId], references: [id], onUpdate: NoAction, map: "FK__PlanGtes__gteId__7C6F7215")
-  Planificacion Planificacion @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanGtes__planId__7B7B4DDC")
+  id                 Int                  @id(map: "PK__MomentoA__3213E83F6A816E5D") @default(autoincrement())
+  nombre             String               @db.VarChar(50)
+  NuevaPlanificacion NuevaPlanificacion[]
 }
 
 model Planificacion {
-  id                    Int                     @id(map: "PK__Planific__3213E83F0B04E56E") @default(autoincrement())
-  idColaborador         Int
-  mes                   Int
-  cantDemos             Int
-  dosisCil              Decimal?                @db.Decimal(11, 4)
-  dosisMoc              Decimal?                @db.Decimal(11, 4)
-  muestraTotal          Decimal?                @db.Decimal(11, 4)
-  estado                String                  @db.VarChar(20)
-  checkJefe             Boolean?
-  comentarios           String?                 @db.VarChar(255)
-  activo                Boolean                 @default(true, map: "DF__Planifica__activ__76B698BF")
-  approvedAt            DateTime?
-  createdAt             DateTime                @default(dbgenerated("sysutcdatetime()"), map: "DF__Planifica__creat__77AABCF8")
-  createdBy             Int?
-  updatedAt             DateTime                @default(dbgenerated("sysutcdatetime()"), map: "DF__Planifica__updat__789EE131")
-  updatedBy             Int?
-  comentariosJefe       String?                 @db.VarChar(255)
-  DemoPlot              DemoPlot[]
-  PlanBlancosBiologicos PlanBlancosBiologicos[]
-  PlanCultivos          PlanCultivos[]
-  PlanGtes              PlanGtes[]
-  Colaborador           Colaborador             @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "FK__Planifica__idCol__74CE504D")
-  PlanMomentoAplicacion PlanMomentoAplicacion[]
-  PlanProductos         PlanProductos[]
-  PlanTiendas           PlanTiendas[]
-}
-
-model PlanProductos {
-  id            Int           @id(map: "PK__PlanProd__3213E83FA9DCEFDD") @default(autoincrement())
-  planId        Int
-  productoId    Int
-  Planificacion Planificacion @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanProdu__planI__031C6FA4")
-  Familia       Familia       @relation(fields: [productoId], references: [id], onUpdate: NoAction, map: "FK__PlanProdu__produ__041093DD")
-}
-
-model PlanTiendas {
-  id            Int           @id(map: "PK__PlanTien__3213E83F096EDBCF") @default(autoincrement())
-  planId        Int
-  tiendaId      Int
-  Planificacion Planificacion @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanTiend__planI__7F4BDEC0")
-  PuntoContacto PuntoContacto @relation(fields: [tiendaId], references: [id], onUpdate: NoAction, map: "FK__PlanTiend__tiend__004002F9")
-}
-
-model PlanMomentoAplicacion {
-  id                Int               @id(map: "PK__PlanMome__3213E83FDF303300") @default(autoincrement())
-  planId            Int
-  momentoAplicaId   Int
-  paramEvaAntes     String            @db.VarChar(150)
-  paramEvaDespues   String            @db.VarChar(150)
-  MomentoAplicacion MomentoAplicacion @relation(fields: [momentoAplicaId], references: [id], onUpdate: NoAction, map: "FK__PlanMomen__momen__116A8EFB")
-  Planificacion     Planificacion     @relation(fields: [planId], references: [id], onUpdate: NoAction, map: "FK__PlanMomen__planI__10766AC2")
+  id              Int         @id(map: "PK__Planific__3213E83F0B04E56E") @default(autoincrement())
+  idColaborador   Int
+  mes             Int
+  cantDemos       Int
+  dosisCil        Decimal?    @db.Decimal(11, 4)
+  dosisMoc        Decimal?    @db.Decimal(11, 4)
+  muestraTotal    Decimal?    @db.Decimal(11, 4)
+  estado          String      @db.VarChar(20)
+  checkJefe       Boolean?
+  comentarios     String?     @db.VarChar(255)
+  activo          Boolean     @default(true, map: "DF__Planifica__activ__76B698BF")
+  approvedAt      DateTime?
+  createdAt       DateTime    @default(dbgenerated("sysutcdatetime()"), map: "DF__Planifica__creat__77AABCF8")
+  createdBy       Int?
+  updatedAt       DateTime    @default(dbgenerated("sysutcdatetime()"), map: "DF__Planifica__updat__789EE131")
+  updatedBy       Int?
+  comentariosJefe String?     @db.VarChar(255)
+  DemoPlot        DemoPlot[]
+  Colaborador     Colaborador @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "FK__Planifica__idCol__74CE504D")
 }
 
 model ExternoColaborador {
@@ -1089,31 +1042,57 @@ model NuevaPlanificacion {
   Vegetacion        Vegetacion        @relation(fields: [vegetacionId], references: [id], onUpdate: NoAction, map: "FK__NuevaPlan__veget__20ACD28B")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model PuntoContacto_Backup {
-  id            Int       @default(autoincrement())
-  nombre        String    @db.VarChar(90)
-  tipoDoc       String?   @db.VarChar(3)
-  numDoc        String?   @db.VarChar(20)
-  hectareas     Decimal?  @db.Decimal(6, 2)
-  tipo          String    @db.VarChar(1)
-  dirReferencia String?   @db.VarChar(90)
-  lider         Boolean?
-  activo        Boolean
-  idGte         Int?
-  createdAt     DateTime? @db.DateTime
-  updatedAt     DateTime? @db.DateTime
-  idDistrito    String?   @db.VarChar(6)
-  idEmpresa     Int?
-  codZona       String?   @db.VarChar(4)
-  subTipo       String?   @db.VarChar(2)
-  cantR0        Int?
-  cantR1        Int?
-  cantR2        Int?
-  aniversario   DateTime? @db.Date
-  gestion       Boolean?
-  idColaborador Int?
-  sede          String?   @db.VarChar(30)
+model ClienteVendedorExactus {
+  id        Int        @id(map: "PK__ClienteV__3213E83F33CC0E29") @default(autoincrement())
+  empresa   String     @db.VarChar(2)
+  codcli    String     @db.VarChar(20)
+  nomcli    String?    @db.VarChar(90)
+  codven    String     @db.VarChar(4)
+  nomvende  String?    @db.VarChar(80)
+  email     String?    @db.VarChar(150)
+  activo    Boolean    @default(true, map: "DF__ClienteVe__activ__5708E33C")
+  updatedAt DateTime   @default(dbgenerated("sysutcdatetime()"), map: "DF__ClienteVe__updat__57FD0775")
+  Contacto  Contacto[]
+}
 
-  @@ignore
+model ClienteVendedorGC {
+  id                                                   Int             @id(map: "PK__ClienteV__3213E83F1EDE413A") @default(autoincrement())
+  empresaId                                            Int
+  codcli                                               String          @db.VarChar(20)
+  nomcli                                               String?         @db.VarChar(90)
+  codven                                               String          @db.VarChar(4)
+  nomvende                                             String?         @db.VarChar(80)
+  email                                                String?         @db.VarChar(150)
+  activo                                               Boolean         @default(true, map: "DF__ClienteVe__activ__5CC1BC92")
+  createdAt                                            DateTime        @default(dbgenerated("sysutcdatetime()"), map: "DF__ClienteVe__creat__5DB5E0CB")
+  createdBy                                            Int
+  updatedAt                                            DateTime        @default(dbgenerated("sysutcdatetime()"), map: "DF__ClienteVe__updat__5F9E293D")
+  updatedBy                                            Int?
+  Colaborador_ClienteVendedorGC_createdByToColaborador Colaborador     @relation("ClienteVendedorGC_createdByToColaborador", fields: [createdBy], references: [id], onUpdate: NoAction, map: "FK__ClienteVe__creat__5EAA0504")
+  Empresa                                              Empresa         @relation(fields: [empresaId], references: [id], onUpdate: NoAction, map: "FK__ClienteVe__empre__5BCD9859")
+  Colaborador_ClienteVendedorGC_updatedByToColaborador Colaborador?    @relation("ClienteVendedorGC_updatedByToColaborador", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__ClienteVe__updat__60924D76")
+  Contacto                                             Contacto[]
+  TiendaCliente                                        TiendaCliente[]
+
+  @@unique([empresaId, codcli, codven], map: "UQ_CVGC_emp_cli_ven")
+}
+
+model TiendaCliente {
+  id                Int                @id(map: "PK__TiendaCl__3213E83FFEE38056") @default(autoincrement())
+  codcli            String             @db.VarChar(20)
+  id_tda            Int?
+  descrip           String?            @db.VarChar(90)
+  codsbz            String?            @db.VarChar(3)
+  direccion         String?            @db.VarChar(110)
+  debaja            Int?
+  ubigeo            String?            @db.VarChar(6)
+  observ            String?            @db.VarChar(Max)
+  vigente           Boolean            @default(true, map: "DF__TiendaCli__vigen__6C040022")
+  updated_at        DateTime           @default(dbgenerated("sysutcdatetime()"), map: "DF__TiendaCli__updat__6CF8245B")
+  editable          Boolean            @default(false, map: "DF_TiendaCliente_editable")
+  createdAt         DateTime           @default(dbgenerated("sysutcdatetime()"), map: "DF_TiendaCliente_createdAt")
+  createdBy         Int?
+  clienteVendedorId Int?
+  ClienteVendedorGC ClienteVendedorGC? @relation(fields: [clienteVendedorId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "TiendaCliente_ClienteVendedorGC")
+  Colaborador       Colaborador?       @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "TiendaCliente_CreatedBy")
 }

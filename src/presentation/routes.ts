@@ -41,7 +41,7 @@ import { FotoRoutes } from '../common/routes/foto.routes';
 import { LaborVisitaRoutes } from '../visitas_gc/routes/labor-visita.routes';
 import { VisitaProductoRoutes } from '../visitas_gc/routes/visita-producto.routes';
 import { DashboardVisitasRoutes } from '../visitas_gc/routes/dashboard.routes';
-import { PlanificacionRoutes } from '../demoplots_gc/routes/planificacion.routes';
+//import { PlanificacionRoutes } from '../demoplots_gc/routes/planificacion.routes';
 import { NuevaPlanificacionRoutes } from '../demoplots_gc/routes/nueva-planificacion.routes';
 
 export class AppRoutes {
@@ -88,7 +88,7 @@ export class AppRoutes {
         router.use('/api/labores-visita', LaborVisitaRoutes.routes);
         router.use('/api/visita-productos', VisitaProductoRoutes.routes);
         router.use('/api/visitas/dashboard', DashboardVisitasRoutes.routes);
-        router.use('/api/planificaciones', PlanificacionRoutes.routes);
+        //router.use('/api/planificaciones', PlanificacionRoutes.routes);
         router.use(
             '/api/nuevas-planificaciones',
             NuevaPlanificacionRoutes.routes

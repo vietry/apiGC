@@ -57,13 +57,28 @@ export class ConsumoMuestrasService {
             );
 
         try {
-            const updatedConsumo = await prisma.consumoMuestras.update({
-                where: { id: updateConsumoMuestrasDto.id },
-                data: {
-                    ...updateConsumoMuestrasDto.values,
-                    updatedAt: currentDate,
-                },
+            // Actualizamos el consumo y reflejamos el valor en DemoPlot.dosis del demoplot asociado
+            const updatedConsumo = await prisma.$transaction(async (tx) => {
+                const upd = await tx.consumoMuestras.update({
+                    where: { id: updateConsumoMuestrasDto.id },
+                    data: {
+                        ...updateConsumoMuestrasDto.values,
+                        updatedAt: currentDate,
+                    },
+                });
+
+                // Sincroniza siempre la dosis con el consumo guardado
+                await tx.demoPlot.update({
+                    where: { id: upd.idDemoplot },
+                    data: {
+                        dosis: upd.consumo as any,
+                        //updatedAt: currentDate,
+                    },
+                });
+
+                return upd;
             });
+
             return updatedConsumo;
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

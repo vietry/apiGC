@@ -10,10 +10,10 @@ export class FundoRoutes {
 
         router.get('/', controller.getFundos);
         router.get('/all', controller.getAllFundos);
-        router.get(
-            '/punto/:idPuntoContacto',
-            controller.getFundosByPuntoContactoId
-        );
+        // router.get(
+        //     '/punto/:idPuntoContacto',
+        //     controller.getFundosByPuntoContactoId
+        // );
         router.get(
             '/contacto/:idContactoPunto',
             controller.getFundosByContactoPuntoId
