@@ -5,16 +5,16 @@
 // export class PlanificacionController {
 //     constructor(private readonly planificacionService: PlanificacionService) {}
 
-//     private readonly handleError = (res: Response, error: unknown) => {
-//         if (error instanceof CustomError) {
-//             return res.status(error.statusCode).json({ error: error.message });
-//         }
-//         // Grabar logs
-//         console.log(`${error}`);
-//         return res
-//             .status(500)
-//             .json({ error: 'Internal server error - check logs' });
-//     };
+// private readonly handleError = (res: Response, error: unknown) => {
+//     if (error instanceof CustomError) {
+//         return res.status(error.statusCode).json({ error: error.message });
+//     }
+//     // Grabar logs
+//     console.log(`${error}`);
+//     return res
+//         .status(500)
+//         .json({ error: 'Internal server error - check logs' });
+// };
 
 //     getAllPlanificaciones = async (req: Request, res: Response) => {
 //         const {

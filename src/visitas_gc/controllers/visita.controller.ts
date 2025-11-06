@@ -56,7 +56,7 @@ export class VisitaController {
             month,
             idVegetacion,
             idFamilia,
-            idPuntoContacto,
+            idClienteVendedor,
             idContacto,
             idRepresentada,
             idSubLabor1,
@@ -76,7 +76,9 @@ export class VisitaController {
             month: month ? +month : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
             idFamilia: idFamilia ? +idFamilia : undefined,
-            idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+            idClienteVendedor: idClienteVendedor
+                ? +idClienteVendedor
+                : undefined,
             idContacto: idContacto ? +idContacto : undefined,
             idRepresentada: idRepresentada ? +idRepresentada : undefined,
             idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
@@ -132,7 +134,7 @@ export class VisitaController {
             month,
             idVegetacion,
             idFamilia,
-            idPuntoContacto,
+            idClienteVendedor,
             idContacto,
             idRepresentada,
             idSubLabor1,
@@ -152,7 +154,9 @@ export class VisitaController {
             month: month ? +month : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
             idFamilia: idFamilia ? +idFamilia : undefined,
-            idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+            idClienteVendedor: idClienteVendedor
+                ? +idClienteVendedor
+                : undefined,
             idContacto: idContacto ? +idContacto : undefined,
             idRepresentada: idRepresentada ? +idRepresentada : undefined,
             idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
@@ -172,7 +176,7 @@ export class VisitaController {
             .catch((error) => this.handleError(res, error));
     };
 
-    getPuntoContactoRanking = async (req: Request, res: Response) => {
+    getClienteVendedorRanking = async (req: Request, res: Response) => {
         // Extraer filtros del query
         const {
             idColaborador,
@@ -182,7 +186,7 @@ export class VisitaController {
             month,
             idVegetacion,
             idFamilia,
-            idPuntoContacto,
+            idClienteVendedor,
             idContacto,
             idRepresentada,
             idSubLabor1,
@@ -200,7 +204,9 @@ export class VisitaController {
             month: month ? +month : undefined,
             idVegetacion: idVegetacion ? +idVegetacion : undefined,
             idFamilia: idFamilia ? +idFamilia : undefined,
-            idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+            idClienteVendedor: idClienteVendedor
+                ? +idClienteVendedor
+                : undefined,
             idContacto: idContacto ? +idContacto : undefined,
             idRepresentada: idRepresentada ? +idRepresentada : undefined,
             idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,
@@ -215,7 +221,7 @@ export class VisitaController {
         };
 
         this.visitaService
-            .getPuntoContactoRanking(filters)
+            .getClienteVendedorRanking(filters)
             .then((ranking) => res.status(200).json(ranking))
             .catch((error) => this.handleError(res, error));
     };
@@ -242,7 +248,7 @@ export class VisitaController {
                 semana,
                 idVegetacion,
                 idFamilia,
-                idPuntoContacto,
+                idClienteVendedor,
                 idContacto,
                 idRepresentada,
                 idSubLabor1,
@@ -259,7 +265,9 @@ export class VisitaController {
                 semana: semana ? +semana : undefined,
                 idVegetacion: idVegetacion ? +idVegetacion : undefined,
                 idFamilia: idFamilia ? +idFamilia : undefined,
-                idPuntoContacto: idPuntoContacto ? +idPuntoContacto : undefined,
+                idClienteVendedor: idClienteVendedor
+                    ? +idClienteVendedor
+                    : undefined,
                 idContacto: idContacto ? +idContacto : undefined,
                 idRepresentada: idRepresentada ? +idRepresentada : undefined,
                 idSubLabor1: idSubLabor1 ? +idSubLabor1 : undefined,

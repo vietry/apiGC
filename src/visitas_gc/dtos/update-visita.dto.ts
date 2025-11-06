@@ -15,6 +15,8 @@ export class UpdateVisitaDto {
         public readonly detalle?: string | null,
         public readonly latitud?: number | null,
         public readonly longitud?: number | null,
+        public readonly latitudFin?: number | null,
+        public readonly longitudFin?: number | null,
         public readonly idColaborador?: number,
         public readonly idContacto?: number | null,
         public readonly idCultivo?: number | null,
@@ -27,38 +29,41 @@ export class UpdateVisitaDto {
     ) {}
 
     get values(): { [key: string]: any } {
-        const returnObj: { [key: string]: any } = {};
-        if (this.programacion !== undefined)
-            returnObj.programacion = this.programacion;
-        if (this.duracionP !== undefined) returnObj.duracionP = this.duracionP;
-        if (this.objetivo !== undefined) returnObj.objetivo = this.objetivo;
-        if (this.semana !== undefined) returnObj.semana = this.semana;
-        if (this.estado !== undefined) returnObj.estado = this.estado;
-        if (this.numReprog !== undefined) returnObj.numReprog = this.numReprog;
-        if (this.inicio !== undefined) returnObj.inicio = this.inicio;
-        if (this.finalizacion !== undefined)
-            returnObj.finalizacion = this.finalizacion;
-        if (this.duracionV !== undefined) returnObj.duracionV = this.duracionV;
-        if (this.resultado !== undefined) returnObj.resultado = this.resultado;
-        if (this.aFuturo !== undefined) returnObj.aFuturo = this.aFuturo;
-        if (this.detalle !== undefined) returnObj.detalle = this.detalle;
-        if (this.latitud !== undefined) returnObj.latitud = this.latitud;
-        if (this.longitud !== undefined) returnObj.longitud = this.longitud;
-        if (this.idColaborador !== undefined)
-            returnObj.idColaborador = this.idColaborador;
-        if (this.idContacto !== undefined)
-            returnObj.idContacto = this.idContacto;
-        if (this.idCultivo !== undefined) returnObj.idCultivo = this.idCultivo;
-        if (this.idRepresentada !== undefined)
-            returnObj.idRepresentada = this.idRepresentada;
-        if (this.empGrupo !== undefined) returnObj.empGrupo = this.empGrupo;
-        if (this.empresa !== undefined) returnObj.empresa = this.empresa;
-        if (this.programada !== undefined)
-            returnObj.programada = this.programada;
-        if (this.negocio !== undefined) returnObj.negocio = this.negocio;
-        if (this.macrozonaId !== undefined)
-            returnObj.macrozonaId = this.macrozonaId;
-        return returnObj;
+        const fields: Array<keyof UpdateVisitaDto> = [
+            'programacion',
+            'duracionP',
+            'objetivo',
+            'semana',
+            'estado',
+            'numReprog',
+            'inicio',
+            'finalizacion',
+            'duracionV',
+            'resultado',
+            'aFuturo',
+            'detalle',
+            'latitud',
+            'longitud',
+            'latitudFin',
+            'longitudFin',
+            'idColaborador',
+            'idContacto',
+            'idCultivo',
+            'idRepresentada',
+            'empGrupo',
+            'empresa',
+            'programada',
+            'negocio',
+            'macrozonaId',
+        ];
+
+        return fields.reduce((acc, field) => {
+            const value = (this as any)[field];
+            if (value !== undefined) {
+                acc[field] = value;
+            }
+            return acc;
+        }, {} as { [key: string]: any });
     }
 
     static async create(object: {
@@ -80,6 +85,8 @@ export class UpdateVisitaDto {
             detalle,
             latitud,
             longitud,
+            latitudFin,
+            longitudFin,
             idColaborador,
             idContacto,
             idCultivo,
@@ -126,6 +133,8 @@ export class UpdateVisitaDto {
                 detalle ?? undefined,
                 latitud !== undefined ? parseFloat(latitud) : undefined,
                 longitud !== undefined ? parseFloat(longitud) : undefined,
+                latitudFin !== undefined ? parseFloat(latitudFin) : undefined,
+                longitudFin !== undefined ? parseFloat(longitudFin) : undefined,
                 idColaborador !== undefined ? Number(idColaborador) : undefined,
                 idContacto !== undefined ? Number(idContacto) : undefined,
                 parseFk(idCultivo),

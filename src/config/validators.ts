@@ -151,7 +151,11 @@ export class Validators {
                     : idEmpresa ?? idEmpresaJefe,
                 empresa: isJefe
                     ? isJefe.Empresa?.nomEmpresa
-                    : colaborador.ZonaAnterior?.Empresa?.nomEmpresa!,
+                    : colaborador.ZonaAnterior?.Empresa?.nomEmpresa ??
+                      colaborador
+                          .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador?.[0]
+                          ?.Empresa?.nomEmpresa ??
+                      '',
                 negocio: colaborador?.negocio ?? '',
             };
         }

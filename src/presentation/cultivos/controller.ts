@@ -61,6 +61,8 @@ export class CultivoController {
             vegetacion,
             idContactoPunto,
             idPuntoContacto,
+            codCliente,
+            ubicacionClienteId,
         } = req.query;
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
         if (error) return res.status(400).json({ error });
@@ -73,12 +75,16 @@ export class CultivoController {
             idCultivo: idCultivo ? Number(idCultivo) : undefined,
             idFundo: idFundo ? Number(idFundo) : undefined,
             idVegetacion: idVegetacion ? Number(idVegetacion) : undefined,
-            vegetacion: vegetacion ? String(vegetacion) : undefined,
+            vegetacion: typeof vegetacion === 'string' ? vegetacion : undefined,
             idContactoPunto: idContactoPunto
                 ? Number(idContactoPunto)
                 : undefined,
             idPuntoContacto: idPuntoContacto
                 ? Number(idPuntoContacto)
+                : undefined,
+            codCliente: codCliente ? (codCliente as string) : undefined,
+            ubicacionClienteId: ubicacionClienteId
+                ? Number(ubicacionClienteId)
                 : undefined,
         };
 
@@ -96,6 +102,8 @@ export class CultivoController {
             idVegetacion,
             idContactoPunto,
             idPuntoContacto,
+            codCliente,
+            ubicacionClienteId,
         } = req.query;
 
         // Construir filtros desde query params
@@ -111,6 +119,10 @@ export class CultivoController {
                 : undefined,
             idPuntoContacto: idPuntoContacto
                 ? Number(idPuntoContacto)
+                : undefined,
+            codCliente: codCliente ? (codCliente as string) : undefined,
+            ubicacionClienteId: ubicacionClienteId
+                ? Number(ubicacionClienteId)
                 : undefined,
         };
 

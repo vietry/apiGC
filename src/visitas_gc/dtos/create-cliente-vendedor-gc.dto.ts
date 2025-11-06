@@ -3,7 +3,7 @@ export class CreateClienteVendedorGCDto {
         public readonly empresaId: number,
         public readonly codcli: string,
         public readonly nomcli: string | null,
-        public readonly codven: string,
+        public readonly codven: string | null,
         public readonly nomvende: string | null,
         public readonly email: string | null,
         public readonly activo: boolean,
@@ -28,8 +28,6 @@ export class CreateClienteVendedorGCDto {
             return ['empresaId es requerido y numérico'];
         if (!codcli || typeof codcli !== 'string')
             return ['codcli es requerido'];
-        if (!codven || typeof codven !== 'string')
-            return ['codven es requerido'];
         if (!createdBy || isNaN(Number(createdBy)))
             return ['createdBy es requerido y numérico'];
 

@@ -400,7 +400,7 @@ export class VariablePersonalService {
                     },
                     estado: { in: ['Completado', 'Día campo'] },
                 },
-                _count: { id: true },
+                _count: { _all: true },
             });
 
             // Construir filtro OR para que Familia.clase sea igual al Gte.tipo por cada GTE
@@ -409,11 +409,14 @@ export class VariablePersonalService {
                 const tipo = v.Gte?.tipo?.trim();
                 if (tipo) gteTipoPorId.set(v.idGte, tipo);
             }
-            const orClaseIgualTipo = Array.from(gteTipoPorId.entries()).map(
-                ([idGte, tipo]) => ({
-                    idGte,
-                    Familia: { clase: tipo },
-                })
+            // Construir condiciones OR por GTE usando clases permitidas según su tipo
+            const orClaseIgualTipo = Array.from(gteTipoPorId.entries()).flatMap(
+                ([idGte, tipo]) => {
+                    const clases = this.getFamilyClasses(tipo);
+                    return clases.length > 0
+                        ? [{ idGte, Familia: { clase: { in: clases } } }]
+                        : [];
+                }
             );
 
             const countsPorFoco = await prisma.demoPlot.groupBy({
@@ -447,7 +450,7 @@ export class VariablePersonalService {
                             : { idGte: -1 }, // Si no hay tipos, forzar 0 resultados
                     ],
                 },
-                _count: { id: true },
+                _count: { _all: true },
             });
 
             // Conteo adicional: Día campo con finalizacion < previousMonthStart usando el mismo demoplotWhere
@@ -484,7 +487,7 @@ export class VariablePersonalService {
                               }
                             : {}),
                     },
-                    _count: { id: true },
+                    _count: { _all: true },
                 });
 
             // Conteo adicional con foco: Día campo con finalizacion < previousMonthStart y OR de clases por tipo GTE
@@ -527,7 +530,7 @@ export class VariablePersonalService {
                                 : { idGte: -1 },
                         ],
                     },
-                    _count: { id: true },
+                    _count: { _all: true },
                 });
 
             // Crear diccionarios para búsqueda rápida
@@ -540,26 +543,26 @@ export class VariablePersonalService {
 
             countsPorEstado.forEach((row) => {
                 if (row.estado === 'Completado') {
-                    completadosPorGte[row.idGte] = row._count.id;
+                    completadosPorGte[row.idGte] = row._count._all;
                 } else if (row.estado === 'Día campo') {
-                    diaCampoPorGte[row.idGte] = row._count.id;
+                    diaCampoPorGte[row.idGte] = row._count._all;
                 }
             });
 
             countsPorFoco.forEach((row) => {
                 if (row.estado === 'Completado') {
-                    focoCompletadoPorGte[row.idGte] = row._count.id;
+                    focoCompletadoPorGte[row.idGte] = row._count._all;
                 } else if (row.estado === 'Día campo') {
-                    focoDiasCampoPorGte[row.idGte] = row._count.id;
+                    focoDiasCampoPorGte[row.idGte] = row._count._all;
                 }
             });
 
             countsDiaCampoFinalizacionAntes.forEach((row) => {
-                diaCampoPrevPorGte[row.idGte] = row._count.id;
+                diaCampoPrevPorGte[row.idGte] = row._count._all;
             });
 
             countsDiaCampoFinalizacionAntesFoco.forEach((row) => {
-                focoDiaCampoPrevPorGte[row.idGte] = row._count.id;
+                focoDiaCampoPrevPorGte[row.idGte] = row._count._all;
             });
 
             return variables.map((variable) => {

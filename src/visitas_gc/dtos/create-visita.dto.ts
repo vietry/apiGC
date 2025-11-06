@@ -14,6 +14,8 @@ export class CreateVisitaDto {
         public readonly detalle: string | null,
         public readonly latitud: number | null,
         public readonly longitud: number | null,
+        public readonly latitudFin: number | null,
+        public readonly longitudFin: number | null,
         public readonly idColaborador: number,
         public readonly idContacto: number | null,
         public readonly idCultivo: number | null,
@@ -43,6 +45,8 @@ export class CreateVisitaDto {
             detalle,
             latitud,
             longitud,
+            latitudFin,
+            longitudFin,
             idColaborador,
             idContacto,
             idCultivo,
@@ -64,6 +68,14 @@ export class CreateVisitaDto {
             return isNaN(num) ? null : num;
         };
 
+        const parseDecimal = (value: any): number | null => {
+            if (value === null || value === undefined || value === '') {
+                return null;
+            }
+            const num = Number(value);
+            return isNaN(num) ? null : num;
+        };
+
         return [
             undefined,
             new CreateVisitaDto(
@@ -75,12 +87,14 @@ export class CreateVisitaDto {
                 parseNumber(numReprog),
                 inicio ? new Date(inicio) : null,
                 finalizacion ? new Date(finalizacion) : null,
-                parseFloat(duracionV),
+                parseDecimal(duracionV),
                 resultado ?? null,
                 aFuturo ?? null,
                 detalle ?? null,
-                parseFloat(latitud),
-                parseFloat(longitud),
+                parseDecimal(latitud),
+                parseDecimal(longitud),
+                parseDecimal(latitudFin),
+                parseDecimal(longitudFin),
                 Number(idColaborador),
                 idContacto !== undefined ? Number(idContacto) : null,
                 idCultivo !== undefined ? Number(idCultivo) : null,

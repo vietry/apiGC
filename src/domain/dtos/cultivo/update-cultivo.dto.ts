@@ -6,8 +6,9 @@ export class UpdateCultivoDto {
         public readonly mesInicio?: string | null,
         public readonly mesFinal?: string | null,
         public readonly observacion?: string | null,
+        public readonly poblacion?: number | null,
         public readonly idFundo?: number,
-        public readonly idVariedad?: number,
+        public readonly idVariedad?: number
     ) {}
 
     get values() {
@@ -17,28 +18,53 @@ export class UpdateCultivoDto {
         if (this.mesInicio) returnObj.mesInicio = this.mesInicio;
         if (this.mesFinal) returnObj.mesFinal = this.mesFinal;
         if (this.observacion) returnObj.observacion = this.observacion;
+        if (this.poblacion !== undefined) returnObj.poblacion = this.poblacion;
         if (this.idFundo) returnObj.idFundo = this.idFundo;
         if (this.idVariedad) returnObj.idVariedad = this.idVariedad;
 
         return returnObj;
     }
 
-    static async create(props: { [key: string]: any }): Promise<[string?, UpdateCultivoDto?]> {
-        const { id, certificacion, hectareas, mesInicio, mesFinal, observacion, idFundo, idVariedad } = props;
+    static async create(props: {
+        [key: string]: any;
+    }): Promise<[string?, UpdateCultivoDto?]> {
+        const {
+            id,
+            certificacion,
+            hectareas,
+            mesInicio,
+            mesFinal,
+            observacion,
+            poblacion,
+            idFundo,
+            idVariedad,
+        } = props;
 
         if (!id || isNaN(Number(id))) return ['ID inválido o faltante'];
 
         let idFundoNumber = idFundo;
         let idVariedadNumber = idVariedad;
+        let hectareasNumber = hectareas;
+        let poblacionNumber = poblacion;
 
         if (idFundo !== undefined && typeof idFundo !== 'number') {
             idFundoNumber = parseInt(idFundo);
-            if (isNaN(idFundoNumber)) return ['idFundo debe ser un número válido'];
+            if (isNaN(idFundoNumber))
+                return ['idFundo debe ser un número válido'];
         }
 
         if (idVariedad !== undefined && typeof idVariedad !== 'number') {
             idVariedadNumber = parseInt(idVariedad);
-            if (isNaN(idVariedadNumber)) return ['idVariedad debe ser un número válido'];
+            if (isNaN(idVariedadNumber))
+                return ['idVariedad debe ser un número válido'];
+        }
+
+        if (hectareas !== undefined && typeof hectareas !== 'number') {
+            hectareasNumber = parseFloat(hectareas);
+        }
+
+        if (poblacion !== undefined && typeof poblacion !== 'number') {
+            poblacionNumber = parseFloat(poblacion);
         }
 
         return [
@@ -46,13 +72,14 @@ export class UpdateCultivoDto {
             new UpdateCultivoDto(
                 id,
                 certificacion,
-                hectareas,
+                hectareasNumber,
                 mesInicio,
                 mesFinal,
                 observacion,
+                poblacionNumber,
                 idFundoNumber,
                 idVariedadNumber
-            )
+            ),
         ];
     }
 }

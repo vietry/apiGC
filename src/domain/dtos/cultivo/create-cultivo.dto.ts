@@ -5,16 +5,27 @@ export class CreateCultivoDto {
         public readonly mesInicio: string | null,
         public readonly mesFinal: string | null,
         public readonly observacion: string | null,
+        public readonly poblacion: number | null,
         public readonly idFundo: number,
-        public readonly idVariedad: number,
+        public readonly idVariedad: number
     ) {}
 
-    static async create(object: { [key: string]: any }): Promise<[string?, CreateCultivoDto?]> {
+    static async create(object: {
+        [key: string]: any;
+    }): Promise<[string?, CreateCultivoDto?]> {
         const {
-            certificacion, hectareas, mesInicio, mesFinal, observacion, idFundo, idVariedad
+            certificacion,
+            hectareas,
+            mesInicio,
+            mesFinal,
+            observacion,
+            poblacion,
+            idFundo,
+            idVariedad,
         } = object;
 
         let hectareasNumber = hectareas;
+        let poblacionNumber = poblacion;
         let idFundoNumber = idFundo;
         let idVariedadNumber = idVariedad;
 
@@ -23,16 +34,22 @@ export class CreateCultivoDto {
 
         if (typeof idFundo !== 'number') {
             idFundoNumber = parseInt(idFundo);
-            if (isNaN(idFundoNumber)) return ['idFundo debe ser un número válido'];
+            if (isNaN(idFundoNumber))
+                return ['idFundo debe ser un número válido'];
         }
 
         if (typeof idVariedad !== 'number') {
             idVariedadNumber = parseInt(idVariedad);
-            if (isNaN(idVariedadNumber)) return ['idVariedad debe ser un número válido'];
+            if (isNaN(idVariedadNumber))
+                return ['idVariedad debe ser un número válido'];
         }
 
         if (typeof hectareas !== 'number') {
             hectareasNumber = parseFloat(hectareas);
+        }
+
+        if (poblacion !== undefined && typeof poblacion !== 'number') {
+            poblacionNumber = parseFloat(poblacion);
         }
 
         return [
@@ -43,9 +60,10 @@ export class CreateCultivoDto {
                 mesInicio,
                 mesFinal,
                 observacion,
+                poblacionNumber ?? null,
                 idFundoNumber,
                 idVariedadNumber
-            )
+            ),
         ];
     }
 }

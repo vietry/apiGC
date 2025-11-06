@@ -26,6 +26,9 @@ export class NuevaPlanificacionRoutes {
         router.patch('/:id/reject', controller.rejectPlanificacion);
         router.patch('/:id/estado', controller.changeEstadoPlanificacion);
 
+        // Rutas auxiliares
+        router.get('/momento/aplicacion', controller.getMomentosAplicacion);
+
         return router;
     }
 }

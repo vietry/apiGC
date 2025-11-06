@@ -4,6 +4,10 @@ import path from 'path';
 import compression from 'compression';
 import os from 'os';
 import { SqlServerDatabase } from '../data';
+import {
+    initializeSequelizeExactus,
+    sequelizeExactusHealthCheck,
+} from '../config';
 import cors from 'cors';
 
 interface Options {
@@ -59,6 +63,14 @@ export class Server {
             })
         );
 
+        //* Inicializar conexión Sequelize Exactus
+        try {
+            await initializeSequelizeExactus();
+        } catch (error) {
+            console.error('Error al inicializar Sequelize Exactus:', error);
+            // Opcionalmente puedes decidir si el servidor debe fallar o continuar
+        }
+
         //* Public Folder
         // this.app.use(express.static(this.publicPath));
         // this.app.use(cors());
@@ -74,6 +86,8 @@ export class Server {
                     'https://apps.tqc.com.pe',
                     'http://localhost:5173',
                     'http://localhost:5174',
+                    'http://localhost:4173',
+                    'http://localhost:4174',
                 ],
                 credentials: true,
             })
@@ -85,6 +99,7 @@ export class Server {
         // Health check mejorado
         this.app.get('/api/health', async (req, res) => {
             const dbHealth = await SqlServerDatabase.healthCheck();
+            const exactusHealth = await sequelizeExactusHealthCheck();
 
             console.log(
                 `[${new Date().toISOString()}] Health check accessed from: ${
@@ -98,6 +113,7 @@ export class Server {
                 uptime: process.uptime(),
                 //memory: process.memoryUsage(),
                 database: dbHealth ? 'connected' : 'disconnected',
+                exactusDatabase: exactusHealth ? 'connected' : 'disconnected',
                 version: '2.0.0',
                 //port: this.port,
                 //env: process.env.NODE_ENV ?? "development",

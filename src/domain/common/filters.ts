@@ -85,7 +85,7 @@ export interface VisitaFilters {
     month?: number;
     idVegetacion?: number;
     idFamilia?: number;
-    idPuntoContacto?: number;
+    idClienteVendedor?: number;
     idContacto?: number;
     idRepresentada?: number;
     idSubLabor1?: number;
@@ -145,6 +145,8 @@ export interface FundoFilters {
     departamento?: string;
     provincia?: string;
     distrito?: string;
+    ubicacionClienteId?: number;
+    createdBy?: number;
 }
 
 export interface CultivoFilters {
@@ -155,6 +157,8 @@ export interface CultivoFilters {
     vegetacion?: string;
     idContactoPunto?: number;
     idPuntoContacto?: number;
+    codCliente?: string;
+    ubicacionClienteId?: number;
 }
 
 export interface GestionVisitasFilters {
@@ -163,6 +167,8 @@ export interface GestionVisitasFilters {
     idEmpresa?: number;
     year?: number;
     month?: number;
+    semana?: number;
+    estado?: string;
     idLabor?: number;
     idSubLabor?: number;
     negocio?: string;

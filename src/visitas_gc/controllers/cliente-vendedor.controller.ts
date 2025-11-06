@@ -135,6 +135,8 @@ export class ClienteVendedorController {
             nomvende,
             email,
             activo,
+            empresa,
+            unicos,
         } = req.query as any;
         const [err, pagination] = PaginationDto.create(
             Number(page),
@@ -150,6 +152,11 @@ export class ClienteVendedorController {
             activo:
                 activo !== undefined
                     ? activo === 'true' || activo === '1'
+                    : undefined,
+            empresa,
+            unicos:
+                unicos !== undefined
+                    ? unicos === 'true' || unicos === '1'
                     : undefined,
         };
         this.service

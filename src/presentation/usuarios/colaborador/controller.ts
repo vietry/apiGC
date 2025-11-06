@@ -22,6 +22,30 @@ export class ColaboradorController {
             .json({ error: 'Internal server error - check logs' });
     };
 
+    // Helper function to process number array parameters
+    private processNumberArrayParam = (
+        param: any
+    ): number | number[] | undefined => {
+        if (!param) return undefined;
+        if (Array.isArray(param)) return param.map((p) => +p);
+        if (typeof param === 'string' && param.includes(',')) {
+            return param.split(',').map((p) => +p.trim());
+        }
+        return +param;
+    };
+
+    // Helper function to process string array parameters
+    private processStringArrayParam = (
+        param: any
+    ): string | string[] | undefined => {
+        if (!param) return undefined;
+        if (Array.isArray(param)) return param;
+        if (typeof param === 'string' && param.includes(',')) {
+            return param.split(',').map((p) => p.trim());
+        }
+        return param;
+    };
+
     createColaborador = async (req: Request, res: Response) => {
         const [error, createColaboradorDto] = CreateColaboradorDTO.create(
             req.body
@@ -69,7 +93,7 @@ export class ColaboradorController {
                 nombres: typeof nombres === 'string' ? nombres : undefined,
                 apellidos:
                     typeof apellidos === 'string' ? apellidos : undefined,
-                cargo: typeof cargo === 'string' ? cargo : undefined,
+                cargo: this.processStringArrayParam(cargo),
                 negocio: typeof negocio === 'string' ? negocio : undefined,
                 area: typeof area === 'string' ? area : undefined,
                 codigoZona:
@@ -92,33 +116,30 @@ export class ColaboradorController {
             codigoZona,
             zonaAnt,
             empresa,
+            empresaDemo,
             macrozona,
+            rol,
         } = req.query;
 
-        // Helper function to process array parameters
-        const processArrayParam = (
-            param: any
-        ): number | number[] | undefined => {
-            if (!param) return undefined;
-            if (Array.isArray(param)) return param.map((p) => +p);
-            if (typeof param === 'string' && param.includes(',')) {
-                return param.split(',').map((p) => +p.trim());
-            }
-            return +param;
-        };
-
         const filters = {
-            id: processArrayParam(id),
+            id: this.processNumberArrayParam(id),
             nombres: typeof nombres === 'string' ? nombres : undefined,
             apellidos: typeof apellidos === 'string' ? apellidos : undefined,
-            cargo: typeof cargo === 'string' ? cargo.trim() : undefined,
+            cargo: this.processStringArrayParam(cargo),
             negocio: typeof negocio === 'string' ? negocio.trim() : undefined,
             area: typeof area === 'string' ? area.trim() : undefined,
             codigoZona:
                 typeof codigoZona === 'string' ? codigoZona.trim() : undefined,
             zonaAnt: typeof zonaAnt === 'string' ? zonaAnt.trim() : undefined,
-            macrozona: processArrayParam(macrozona),
+            macrozona: this.processNumberArrayParam(macrozona),
             empresa: typeof empresa === 'string' ? empresa : undefined,
+            empresaDemo:
+                empresaDemo === 'false' || empresaDemo === '0'
+                    ? false
+                    : empresaDemo === 'true' || empresaDemo === '1'
+                    ? true
+                    : undefined,
+            rol: this.processStringArrayParam(rol),
         };
 
         this.colaboradorService

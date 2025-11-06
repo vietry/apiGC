@@ -45,17 +45,6 @@ export class FundoController {
             .catch((error) => this.handleError(res, error));
     };
 
-    // getFundosByPuntoContactoId = async (req: Request, res: Response) => {
-    //     const idPuntoContacto = +req.params.idPuntoContacto;
-    //     if (isNaN(idPuntoContacto))
-    //         return res.status(400).json({ error: 'Invalid ID' });
-
-    //     this.fundoService
-    //         .getFundosByPuntoContactoId(idPuntoContacto)
-    //         .then((fundos) => res.status(200).json(fundos))
-    //         .catch((error) => this.handleError(res, error));
-    // };
-
     getFundosByContactoPuntoId = async (req: Request, res: Response) => {
         const idContactoPunto = +req.params.idContactoPunto;
         if (isNaN(idContactoPunto))
@@ -86,6 +75,8 @@ export class FundoController {
             nombre,
             idPuntoContacto,
             idContactoPunto,
+            ubicacionClienteId,
+            createdBy,
             distrito,
             provincia,
             departamento,
@@ -102,6 +93,10 @@ export class FundoController {
             idContactoPunto: idContactoPunto
                 ? Number(idContactoPunto)
                 : undefined,
+            ubicacionClienteId: ubicacionClienteId
+                ? Number(ubicacionClienteId)
+                : undefined,
+            createdBy: createdBy !== undefined ? Number(createdBy) : undefined,
             distrito: distrito ? (distrito as string) : undefined,
             provincia: provincia ? (provincia as string) : undefined,
             departamento: departamento ? (departamento as string) : undefined,
@@ -121,6 +116,8 @@ export class FundoController {
             nombre,
             idPuntoContacto,
             idContactoPunto,
+            ubicacionClienteId,
+            createdBy,
             distrito,
             provincia,
             departamento,
@@ -134,6 +131,10 @@ export class FundoController {
             idContactoPunto: idContactoPunto
                 ? Number(idContactoPunto)
                 : undefined,
+            ubicacionClienteId: ubicacionClienteId
+                ? Number(ubicacionClienteId)
+                : undefined,
+            createdBy: createdBy !== undefined ? Number(createdBy) : undefined,
             distrito: distrito ? (distrito as string) : undefined,
             provincia: provincia ? (provincia as string) : undefined,
             departamento: departamento ? (departamento as string) : undefined,

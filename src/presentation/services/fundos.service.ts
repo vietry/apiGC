@@ -8,6 +8,42 @@ import {
 } from '../../domain';
 
 export class FundoService {
+    private buildWhere(filters: FundoFilters = {}) {
+        const where: any = {};
+        if (!filters) return where;
+
+        if (filters.nombre) where.nombre = { contains: filters.nombre };
+        if (filters.idPuntoContacto)
+            where.idPuntoContacto = filters.idPuntoContacto;
+        if (filters.idContactoPunto)
+            where.idContactoPunto = filters.idContactoPunto;
+        if (filters.ubicacionClienteId)
+            where.ubicacionClienteId = filters.ubicacionClienteId;
+        if (filters.createdBy) where.createdBy = filters.createdBy;
+        if (filters.distrito || filters.provincia || filters.departamento) {
+            where.Distrito = { ...(where.Distrito ?? {}) };
+            if (filters.distrito)
+                where.Distrito.nombre = { contains: filters.distrito };
+            if (filters.provincia) {
+                where.Distrito.Provincia = {
+                    ...(where.Distrito?.Provincia ?? {}),
+                    nombre: { contains: filters.provincia },
+                };
+            }
+            if (filters.departamento) {
+                where.Distrito = {
+                    ...(where.Distrito ?? {}),
+                    Provincia: {
+                        ...(where.Distrito?.Provincia ?? {}),
+                        Departamento: {
+                            nombre: { contains: filters.departamento },
+                        },
+                    },
+                };
+            }
+        }
+        return where;
+    }
     async createFundo(createFundoDto: CreateFundoDto) {
         try {
             const currentDate = new Date();
@@ -19,8 +55,10 @@ export class FundoService {
                     idPuntoUbigeo: createFundoDto.idPuntoUbigeo,
                     idPuntoContacto: createFundoDto.idPuntoContacto,
                     idContactoPunto: createFundoDto.idContactoPunto,
+                    ubicacionClienteId: createFundoDto.ubicacionClienteId,
                     idDistrito: createFundoDto.idDistrito,
                     centroPoblado: createFundoDto.centroPoblado,
+                    createdBy: createFundoDto.createdBy ?? undefined,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -34,7 +72,9 @@ export class FundoService {
                 idPuntoUbigeo: fundo.idPuntoUbigeo,
                 idPuntoContacto: fundo.idPuntoContacto,
                 idContactoPunto: fundo.idContactoPunto,
+                ubicacionClienteId: fundo.ubicacionClienteId,
                 idDistrito: fundo.idDistrito,
+                createdBy: fundo.createdBy,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -68,44 +108,7 @@ export class FundoService {
     async getFundos(paginationDto: PaginationDto, filters: FundoFilters = {}) {
         const { page, limit } = paginationDto;
 
-        // Construir el objeto where dinámicamente según los filtros recibidos
-        const where: any = {};
-        if (filters) {
-            if (filters.nombre)
-                where.nombre = {
-                    contains: filters.nombre,
-                };
-            if (filters.idPuntoContacto)
-                where.idPuntoContacto = filters.idPuntoContacto;
-            if (filters.idContactoPunto)
-                where.idContactoPunto = filters.idContactoPunto;
-            if (filters.distrito)
-                where.Distrito = {
-                    nombre: { contains: filters.distrito },
-                };
-            if (filters.provincia)
-                where.Distrito = {
-                    ...(where.Distrito ?? {}),
-                    Provincia: {
-                        nombre: {
-                            contains: filters.provincia,
-                        },
-                    },
-                };
-            if (filters.departamento)
-                where.Distrito = {
-                    ...(where.Distrito ?? {}),
-                    Provincia: {
-                        ...(where.Distrito?.Provincia ?? {}),
-                        Departamento: {
-                            nombre: {
-                                contains: filters.departamento,
-                            },
-                        },
-                    },
-                };
-            // Puedes agregar más filtros según sea necesario
-        }
+        const where = this.buildWhere(filters);
 
         try {
             const [total, fundos] = await Promise.all([
@@ -129,6 +132,7 @@ export class FundoService {
                             },
                         },
                         PuntoContacto: true,
+                        UbicacionCliente: true,
                     },
                 }),
             ]);
@@ -146,12 +150,15 @@ export class FundoService {
                     idPuntoUbigeo: fundo.idPuntoUbigeo,
                     idPuntoContacto: fundo.idPuntoContacto,
                     idContactoPunto: fundo.idContactoPunto,
+                    ubicacionClienteId: fundo.ubicacionClienteId,
                     idDistrito: fundo.idDistrito,
                     distrito: fundo.Distrito?.nombre,
                     idProvincia: fundo.Distrito?.idProvincia,
                     provincia: fundo.Distrito?.Provincia?.nombre,
                     departamento: fundo.Distrito?.Provincia.Departamento.nombre,
                     punto: fundo.PuntoContacto?.nombre,
+                    cliente: fundo.UbicacionCliente?.nombre,
+                    createdBy: fundo.createdBy,
                     createdAt: fundo.createdAt,
                     updatedAt: fundo.updatedAt,
                 })),
@@ -162,44 +169,7 @@ export class FundoService {
     }
 
     async getAllFundos(filters: FundoFilters = {}) {
-        // Construir el objeto where dinámicamente según los filtros recibidos
-        const where: any = {};
-        if (filters) {
-            if (filters.nombre)
-                where.nombre = {
-                    contains: filters.nombre,
-                };
-            if (filters.idPuntoContacto)
-                where.idPuntoContacto = filters.idPuntoContacto;
-            if (filters.idContactoPunto)
-                where.idContactoPunto = filters.idContactoPunto;
-            if (filters.distrito)
-                where.Distrito = {
-                    nombre: { contains: filters.distrito },
-                };
-            if (filters.provincia)
-                where.Distrito = {
-                    ...(where.Distrito ?? {}),
-                    Provincia: {
-                        nombre: {
-                            contains: filters.provincia,
-                        },
-                    },
-                };
-            if (filters.departamento)
-                where.Distrito = {
-                    ...(where.Distrito ?? {}),
-                    Provincia: {
-                        ...(where.Distrito?.Provincia ?? {}),
-                        Departamento: {
-                            nombre: {
-                                contains: filters.departamento,
-                            },
-                        },
-                    },
-                };
-            // Puedes agregar más filtros según sea necesario
-        }
+        const where = this.buildWhere(filters);
 
         try {
             const fundos = await prisma.fundo.findMany({
@@ -230,12 +200,14 @@ export class FundoService {
                 idPuntoUbigeo: fundo.idPuntoUbigeo,
                 idPuntoContacto: fundo.idPuntoContacto,
                 idContactoPunto: fundo.idContactoPunto,
+                ubicacionClienteId: fundo.ubicacionClienteId,
                 idDistrito: fundo.idDistrito,
                 distrito: fundo.Distrito?.nombre,
                 idProvincia: fundo.Distrito?.idProvincia,
                 provincia: fundo.Distrito?.Provincia?.nombre,
                 departamento: fundo.Distrito?.Provincia.Departamento.nombre,
                 punto: fundo.PuntoContacto?.nombre,
+                createdBy: fundo.createdBy,
                 createdAt: fundo.createdAt,
                 updatedAt: fundo.updatedAt,
             }));
@@ -317,8 +289,6 @@ export class FundoService {
                 },
             });
 
-            //if (fundos.length === 0) throw CustomError.badRequest(`No Fundos found with PuntoUbigeo id ${idPuntoUbigeo}`);
-
             return fundos.map((fundo) => ({
                 id: fundo.id,
                 nombre: fundo.nombre,
@@ -326,10 +296,12 @@ export class FundoService {
                 idPuntoUbigeo: fundo.idPuntoUbigeo,
                 idPuntoContacto: fundo.idPuntoContacto,
                 idContactoPunto: fundo.ContactoPunto?.id,
+                ubicacionClienteId: fundo.ubicacionClienteId,
                 idDistrito: fundo.Distrito?.id,
                 distrito: fundo.Distrito?.nombre,
                 idProvincia: fundo.Distrito?.idProvincia,
                 departamento: fundo.Distrito?.Provincia.Departamento.nombre,
+                createdBy: fundo.createdBy,
                 createdAt: fundo.createdAt,
                 updatedAt: fundo.updatedAt,
             }));

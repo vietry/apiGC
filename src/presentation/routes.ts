@@ -45,6 +45,9 @@ import { NuevaPlanificacionRoutes } from '../demoplots_gc/routes/nueva-planifica
 import { ClienteVendedorRoutes } from '../visitas_gc/routes/cliente-vendedor.routes';
 import { TiendaClienteRoutes } from '../visitas_gc/routes/tienda-cliente.routes';
 import { ContactoRoutes } from '../visitas_gc/routes/contacto.routes';
+import { direccionEntregaRoutes } from '../visitas_gc/routes/direccion-entrega.routes';
+import { UbicacionClienteRoutes } from '../visitas_gc/routes/ubicacion-cliente.routes';
+import { FamiliaVisitaRoutes } from '../visitas_gc/routes/familia-visita.routes';
 
 export class AppRoutes {
     static get routes(): Router {
@@ -94,16 +97,16 @@ export class AppRoutes {
             '/api/nuevas-planificaciones',
             NuevaPlanificacionRoutes.routes
         );
-        router.use(
-            '/api/visitas-gc/cliente-vendedor',
-            ClienteVendedorRoutes.routes
-        );
+        router.use('/api/cliente-vendedor', ClienteVendedorRoutes.routes);
         router.use(
             '/api/visitas-gc/tiendas-cliente',
             TiendaClienteRoutes.routes
         );
         router.use('/api/visitas-gc/contactos', ContactoRoutes.routes);
-
+        router.use('/api/ubicaciones', direccionEntregaRoutes);
+        router.use('/api/ubicacion-cliente', UbicacionClienteRoutes.routes);
+        router.use('/api/contacto', ContactoRoutes.routes);
+        router.use('/api/familias-visita', FamiliaVisitaRoutes.routes);
         return router;
     }
 }

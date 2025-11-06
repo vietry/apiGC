@@ -16,6 +16,14 @@ export class VisitaProductoService {
             throw CustomError.badRequest(
                 `Visita with id ${createDto.idVisita} does not exist`
             );
+        // Verificar que la familia de visita exista (FamiliaVisita)
+        const familiaVisitaExists = await prisma.familiaVisita.findUnique({
+            where: { id: createDto.idFamilia },
+        });
+        if (!familiaVisitaExists)
+            throw CustomError.badRequest(
+                `FamiliaVisita with id ${createDto.idFamilia} does not exist`
+            );
         const currentDate = getCurrentDate();
         try {
             const visitaProducto = await prisma.visitaProducto.create({
@@ -41,6 +49,49 @@ export class VisitaProductoService {
 
             for (let i = 0; i < visitaProductosDtos.length; i += BATCH_SIZE) {
                 const batch = visitaProductosDtos.slice(i, i + BATCH_SIZE);
+                // Validación previa por lote para asegurar que las visitas y familias existan
+                const visitaIds = Array.from(
+                    new Set(batch.map((b) => b.idVisita))
+                );
+                const familiaIds = Array.from(
+                    new Set(batch.map((b) => b.idFamilia))
+                );
+
+                const [visitasFound, familiasFound] = await Promise.all([
+                    prisma.visita.findMany({
+                        where: { id: { in: visitaIds } },
+                        select: { id: true },
+                    }),
+                    prisma.familiaVisita.findMany({
+                        where: { id: { in: familiaIds } },
+                        select: { id: true },
+                    }),
+                ]);
+
+                const visitaSet = new Set(visitasFound.map((v) => v.id));
+                const familiaSet = new Set(familiasFound.map((f) => f.id));
+
+                const missingVisitas = visitaIds.filter(
+                    (id) => !visitaSet.has(id)
+                );
+                if (missingVisitas.length) {
+                    throw CustomError.badRequest(
+                        `Some Visita ids do not exist: ${missingVisitas.join(
+                            ', '
+                        )}`
+                    );
+                }
+
+                const missingFamilias = familiaIds.filter(
+                    (id) => !familiaSet.has(id)
+                );
+                if (missingFamilias.length) {
+                    throw CustomError.badRequest(
+                        `Some FamiliaVisita ids do not exist: ${missingFamilias.join(
+                            ', '
+                        )}`
+                    );
+                }
 
                 const batchResults = await prisma.$transaction(
                     async (prismaClient) => {
@@ -110,8 +161,8 @@ export class VisitaProductoService {
             return {
                 id: visitaProducto.id,
                 idVisita: visitaProducto.idVisita,
-                idFamilia: visitaProducto.Familia.id,
-                producto: visitaProducto.Familia.nombre,
+                idFamilia: visitaProducto.idFamilia,
+                producto: visitaProducto.Familia?.nombre,
                 createdAt: visitaProducto.createdAt,
                 updatedAt: visitaProducto.updatedAt,
             };
@@ -132,7 +183,7 @@ export class VisitaProductoService {
                 id: visitaProducto.id,
                 idVisita: visitaProducto.idVisita,
                 idFamilia: visitaProducto.idFamilia,
-                producto: visitaProducto.Familia.nombre,
+                producto: visitaProducto.Familia?.nombre,
                 createdAt: visitaProducto.createdAt,
                 updatedAt: visitaProducto.updatedAt,
             }));

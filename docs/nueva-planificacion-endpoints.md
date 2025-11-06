@@ -16,24 +16,26 @@ Obtiene una lista paginada de planificaciones con filtros opcionales.
 
 #### **Query Parameters:**
 
-| Parámetro         | Tipo    | Descripción                                                  | Ejemplo                |
-| ----------------- | ------- | ------------------------------------------------------------ | ---------------------- |
-| `activo`          | string  | Filtrar por estado activo (`true`, `false`, `all`)           | `?activo=true`         |
-| `search`          | string  | Búsqueda en texto libre                                      | `?search=demo`         |
-| `idColaborador`   | number  | Filtrar por colaborador                                      | `?idColaborador=123`   |
-| `mes`             | number  | Filtrar por mes (1-12)                                       | `?mes=6`               |
-| `gteId`           | number  | Filtrar por GTE                                              | `?gteId=456`           |
-| `tiendaId`        | number  | Filtrar por tienda/punto de contacto                         | `?tiendaId=789`        |
-| `vegetacionId`    | number  | Filtrar por vegetación                                       | `?vegetacionId=101`    |
-| `momentoAplicaId` | number  | Filtrar por momento de aplicación                            | `?momentoAplicaId=202` |
-| `productoId`      | number  | Filtrar por producto/familia                                 | `?productoId=303`      |
-| `blancoId`        | number  | Filtrar por blanco biológico                                 | `?blancoId=404`        |
-| `estado`          | string  | Filtrar por estado (`Programado`, `Completado`, `Cancelado`) | `?estado=Programado`   |
-| `checkJefe`       | boolean | Filtrar por aprobación del jefe (`true`, `false`)            | `?checkJefe=true`      |
-| `year`            | number  | Filtrar por año                                              | `?year=2025`           |
-| `month`           | number  | Filtrar por mes específico                                   | `?month=8`             |
-| `limit`           | number  | Límite de resultados por página (default: 10)                | `?limit=20`            |
-| `page`            | number  | Número de página (default: 1)                                | `?page=2`              |
+| Parámetro         | Tipo    | Descripción                                                   | Ejemplo                |
+| ----------------- | ------- | ------------------------------------------------------------- | ---------------------- |
+| `activo`          | string  | Filtrar por estado activo (`true`, `false`, `all`)            | `?activo=true`         |
+| `search`          | string  | Búsqueda en texto libre                                       | `?search=demo`         |
+| `idColaborador`   | number  | Filtrar por colaborador                                       | `?idColaborador=123`   |
+| `mes`             | number  | Filtrar por mes (1-12)                                        | `?mes=6`               |
+| `gteId`           | number  | Filtrar por GTE                                               | `?gteId=456`           |
+| `tiendaId`        | number  | Filtrar por tienda/punto de contacto                          | `?tiendaId=789`        |
+| `vegetacionId`    | number  | Filtrar por vegetación                                        | `?vegetacionId=101`    |
+| `momentoAplicaId` | number  | Filtrar por momento de aplicación                             | `?momentoAplicaId=202` |
+| `productoId`      | number  | Filtrar por producto/familia                                  | `?productoId=303`      |
+| `blancoId`        | number  | Filtrar por blanco biológico                                  | `?blancoId=404`        |
+| `estado`          | string  | Filtrar por estado (`Programado`, `Completado`, `Cancelado`)  | `?estado=Programado`   |
+| `checkJefe`       | boolean | Filtrar por aprobación del jefe (`true`, `false`)             | `?checkJefe=true`      |
+| `year`            | number  | Filtrar por año                                               | `?year=2025`           |
+| `month`           | number  | Filtrar por mes específico                                    | `?month=8`             |
+| `idMacrozona`     | number  | Filtrar por macrozona del colaborador (desde ColaboradorJefe) | `?idMacrozona=5`       |
+| `idEmpresa`       | number  | Filtrar por empresa del colaborador (desde ColaboradorJefe)   | `?idEmpresa=1`         |
+| `limit`           | number  | Límite de resultados por página (default: 10)                 | `?limit=20`            |
+| `page`            | number  | Número de página (default: 1)                                 | `?page=2`              |
 
 #### **Ejemplo de Request:**
 
@@ -98,7 +100,13 @@ GET /api/nueva-planificacion?activo=true&mes=6&limit=20&page=1
         "cancelados": 5,
         "aprobados": 20,
         "rechazados": 5,
-        "pendientesAprobacion": 25
+        "pendientesAprobacion": 25,
+        "totalDemosProgramados": 150,
+        "totalDemosCompletados": 75,
+        "totalDemosCancelados": 25,
+        "totalDemosAprobados": 100,
+        "totalDemosRechazados": 25,
+        "totalDemosPendientes": 125
     }
 }
 ```
@@ -381,7 +389,56 @@ Cambia el estado de una planificación.
 
 ---
 
-## 🔍 Estados del Sistema
+## � Estadísticas de Planificación (planificacionStats)
+
+El objeto `planificacionStats` retornado en el endpoint GET `/` incluye:
+
+### **Contadores de Planificaciones:**
+
+-   `programados` - Cantidad de planificaciones con estado "Programado"
+-   `completados` - Cantidad de planificaciones con estado "Completado"
+-   `cancelados` - Cantidad de planificaciones con estado "Cancelado"
+-   `aprobados` - Cantidad de planificaciones con `checkJefe = true`
+-   `rechazados` - Cantidad de planificaciones con `checkJefe = false`
+-   `pendientesAprobacion` - Cantidad de planificaciones con `checkJefe = null`
+
+### **Suma de Demoplots (cantDemos):**
+
+-   `totalDemosProgramados` - Suma de `cantDemos` de planificaciones "Programado"
+-   `totalDemosCompletados` - Suma de `cantDemos` de planificaciones "Completado"
+-   `totalDemosCancelados` - Suma de `cantDemos` de planificaciones "Cancelado"
+-   `totalDemosAprobados` - Suma de `cantDemos` donde `checkJefe = true`
+-   `totalDemosRechazados` - Suma de `cantDemos` donde `checkJefe = false`
+-   `totalDemosPendientes` - Suma de `cantDemos` donde `checkJefe = null`
+
+**Ejemplo:**
+Si tienes 3 planificaciones programadas con `cantDemos` de 5, 10 y 15 respectivamente, entonces:
+
+-   `programados` = 3
+-   `totalDemosProgramados` = 30 (5 + 10 + 15)
+
+---
+
+## � Filtros Especiales
+
+### **Filtros por ColaboradorJefe:**
+
+Los parámetros `idMacrozona` e `idEmpresa` filtran las planificaciones basándose en la información del `ColaboradorJefe` asociado al colaborador de la planificación:
+
+-   **`idMacrozona`**: Filtra planificaciones donde el colaborador pertenece a una macrozona específica (según su registro en `ColaboradorJefe`)
+-   **`idEmpresa`**: Filtra planificaciones donde el colaborador está asociado a una empresa específica (según su registro en `ColaboradorJefe`)
+
+Estos filtros son útiles para:
+
+-   🏢 Gerentes que necesitan ver planificaciones de su macrozona
+-   🏭 Administradores que quieren filtrar por empresa
+-   📊 Reportes consolidados por región o compañía
+
+**Nota:** Estos filtros buscan en la relación `ColaboradorJefe` donde `idColaborador` coincide con el colaborador de la planificación.
+
+---
+
+## �🔍 Estados del Sistema
 
 ### **Estado de Aprobación (checkJefe):**
 
@@ -436,6 +493,24 @@ GET /api/nueva-planificacion?checkJefe=null
 
 ```http
 GET /api/nueva-planificacion?estado=Completado&year=2025&month=6
+```
+
+### Filtrar por macrozona específica:
+
+```http
+GET /api/nueva-planificacion?idMacrozona=5&activo=true
+```
+
+### Filtrar por empresa del colaborador:
+
+```http
+GET /api/nueva-planificacion?idEmpresa=1&estado=Programado
+```
+
+### Combinar filtros de macrozona y empresa:
+
+```http
+GET /api/nueva-planificacion?idMacrozona=5&idEmpresa=1&year=2025
 ```
 
 ---

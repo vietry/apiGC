@@ -12,11 +12,13 @@ interface ColaboradorFilters {
     apellidos?: string;
     area?: string;
     codigoZona?: string;
-    cargo?: string;
+    cargo?: string | string[];
     zonaAnt?: string;
     empresa?: string;
+    empresaDemo?: boolean;
     macrozona?: number | number[];
     negocio?: string;
+    rol?: string | string[];
 }
 
 export class ColaboradorService {
@@ -127,9 +129,9 @@ export class ColaboradorService {
                 };
             }
             if (cargo) {
-                where.cargo = {
-                    contains: cargo,
-                };
+                where.cargo = Array.isArray(cargo)
+                    ? { in: cargo }
+                    : { contains: cargo };
             }
             if (negocio) {
                 where.negocio = {
@@ -244,8 +246,10 @@ export class ColaboradorService {
             cargo,
             zonaAnt,
             empresa,
+            empresaDemo = true,
             macrozona,
             negocio,
+            rol,
         } = filters;
 
         try {
@@ -271,10 +275,16 @@ export class ColaboradorService {
                     },
                 };
             }
-            if (cargo) {
-                where.cargo = {
-                    contains: cargo,
+            if (rol) {
+                where.Usuario = {
+                    ...where.Usuario,
+                    rol: Array.isArray(rol) ? { in: rol } : { contains: rol },
                 };
+            }
+            if (cargo) {
+                where.cargo = Array.isArray(cargo)
+                    ? { in: cargo }
+                    : { contains: cargo };
             }
             if (negocio) {
                 where.negocio = {
@@ -305,9 +315,25 @@ export class ColaboradorService {
                 };
             }
             if (empresa) {
-                where.ZonaAnterior = {
-                    Empresa: { nomEmpresa: { contains: empresa } },
-                };
+                if (empresaDemo) {
+                    // Búsqueda en ZonaAnterior.Empresa (comportamiento por defecto)
+                    where.ZonaAnterior = {
+                        ...where.ZonaAnterior,
+                        Empresa: { nomEmpresa: { contains: empresa } },
+                    };
+                } else {
+                    // Búsqueda en ColaboradorJefe.Empresa
+                    where.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador =
+                        {
+                            ...where.ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador,
+                            some: {
+                                ...(where
+                                    .ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador
+                                    ?.some || {}),
+                                Empresa: { nomEmpresa: { contains: empresa } },
+                            },
+                        };
+                }
             }
 
             if (macrozona) {
@@ -379,6 +405,7 @@ export class ColaboradorService {
                     idZonaAnt: colaborador.idZonaAnt,
                     nombres: colaborador.Usuario?.nombres,
                     apellidos: colaborador.Usuario?.apellidos,
+                    rol: colaborador.Usuario?.rol,
                     area: colaborador.Area?.nombre,
                     codigoZona: colaborador.ZonaAnterior?.codigo,
                     zonaAnt: colaborador.ZonaAnterior?.nombre,

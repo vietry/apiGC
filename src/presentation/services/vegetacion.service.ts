@@ -22,6 +22,8 @@ export class VegetacionService {
             const vegetacion = await prisma.vegetacion.create({
                 data: {
                     nombre: createVegetacionDto.nombre,
+                    tipo: createVegetacionDto.tipo,
+                    nomColombia: createVegetacionDto.nomColombia,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -30,6 +32,8 @@ export class VegetacionService {
             return {
                 id: vegetacion.id,
                 nombre: vegetacion.nombre,
+                tipo: vegetacion.tipo ?? null,
+                nomColombia: vegetacion.nomColombia ?? null,
                 createdAt: vegetacion.createdAt,
                 updatedAt: vegetacion.updatedAt,
             };
@@ -62,13 +66,17 @@ export class VegetacionService {
         }
     }
 
-    async getVegetacion() {
+    async getVegetacion(tipo?: string, soloConNomColombia?: boolean) {
         try {
             const vegetaciones = await prisma.vegetacion.findMany({
                 where: {
                     nombre: {
                         not: 'VARIOS CULTIVOS',
                     },
+                    ...(tipo ? { tipo: { contains: tipo } } : {}),
+                    ...(soloConNomColombia
+                        ? { nomColombia: { not: null } }
+                        : {}),
                 },
                 orderBy: {
                     nombre: 'asc',
@@ -78,6 +86,8 @@ export class VegetacionService {
             return vegetaciones.map((vegetacion) => ({
                 id: vegetacion.id,
                 nombre: vegetacion.nombre,
+                tipo: vegetacion.tipo ?? null,
+                nomColombia: vegetacion.nomColombia ?? null,
                 createdAt: vegetacion.createdAt,
                 updatedAt: vegetacion.updatedAt,
             }));
@@ -86,9 +96,10 @@ export class VegetacionService {
         }
     }
 
-    async getVegetacionGC() {
+    async getVegetacionGC(tipo?: string) {
         try {
             const vegetaciones = await prisma.vegetacion.findMany({
+                where: tipo ? { tipo: { contains: tipo } } : undefined,
                 orderBy: {
                     nombre: 'asc',
                 },
@@ -97,6 +108,8 @@ export class VegetacionService {
             return vegetaciones.map((vegetacion) => ({
                 id: vegetacion.id,
                 nombre: vegetacion.nombre,
+                tipo: vegetacion.tipo ?? null,
+                nomColombia: vegetacion.nomColombia ?? null,
                 createdAt: vegetacion.createdAt,
                 updatedAt: vegetacion.updatedAt,
             }));
@@ -107,15 +120,17 @@ export class VegetacionService {
 
     async getVegetacionPagination(
         paginationDto: PaginationDto,
-        nombre?: string
+        nombre?: string,
+        tipo?: string,
+        soloConNomColombia?: boolean
     ) {
         const { page, limit } = paginationDto;
 
         try {
             const where: any = {};
-            if (nombre) {
-                where.nombre = { contains: nombre };
-            }
+            if (nombre) where.nombre = { contains: nombre };
+            if (tipo) where.tipo = { contains: tipo };
+            if (soloConNomColombia) where.nomColombia = { not: null };
 
             const [total, vegetaciones] = await Promise.all([
                 await prisma.vegetacion.count({ where }),
@@ -131,15 +146,20 @@ export class VegetacionService {
                 pages: Math.ceil(total / limit),
                 limit: limit,
                 total: total,
-                next: `/v1/api/vegetaciones?page${page + 1}&limit=${limit}`,
+                next:
+                    page * limit < total
+                        ? `/v1/api/vegetaciones?page=${page + 1}&limit=${limit}`
+                        : null,
                 prev:
                     page - 1 > 0
-                        ? `/v1/api/vegetaciones?page${page - 1}&limit=${limit}`
+                        ? `/v1/api/vegetaciones?page=${page - 1}&limit=${limit}`
                         : null,
                 vegetaciones: vegetaciones.map((vegetacion) => {
                     return {
                         id: vegetacion.id,
                         nombre: vegetacion.nombre,
+                        tipo: vegetacion.tipo ?? null,
+                        nomColombia: vegetacion.nomColombia ?? null,
                         createdAt: vegetacion.createdAt,
                         updatedAt: vegetacion.updatedAt,
                     };
@@ -161,7 +181,14 @@ export class VegetacionService {
                     `Vegetacion with id ${id} does not exist`
                 );
 
-            return vegetacion;
+            return {
+                id: vegetacion.id,
+                nombre: vegetacion.nombre,
+                tipo: vegetacion.tipo ?? null,
+                nomColombia: vegetacion.nomColombia ?? null,
+                createdAt: vegetacion.createdAt,
+                updatedAt: vegetacion.updatedAt,
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

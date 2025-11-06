@@ -12,7 +12,7 @@ interface CreateNuevaPlanificacionInput {
     paramEvaDespues?: string;
     productoId: number;
     blancoId: number;
-    dosisMoc?: number;
+    dosisMoc: number;
     cantDemos: number;
     muestraTotal?: number;
     estado: string;
@@ -62,6 +62,8 @@ interface GetAllNuevaPlanificacionParams {
     checkJefe?: boolean;
     year?: number;
     month?: number;
+    idMacrozona?: number;
+    idEmpresa?: number;
     limit?: number;
     page?: number;
 }
@@ -84,6 +86,8 @@ export class NuevaPlanificacionService {
                 checkJefe,
                 year,
                 month,
+                idMacrozona,
+                idEmpresa,
                 limit = 10,
                 page = 1,
             } = params;
@@ -122,6 +126,22 @@ export class NuevaPlanificacionService {
             }
             if (checkJefe !== undefined) {
                 where.checkJefe = checkJefe;
+            }
+
+            // Filtrar por idMacrozona e idEmpresa desde ColaboradorJefe
+            if (idMacrozona || idEmpresa) {
+                where.Colaborador = {
+                    ...(where.Colaborador || {}),
+                    ColaboradorJefe_ColaboradorJefe_idColaboradorToColaborador:
+                        {
+                            some: {
+                                ...(idMacrozona && {
+                                    idMacroZona: idMacrozona,
+                                }),
+                                ...(idEmpresa && { idEmpresa: idEmpresa }),
+                            },
+                        },
+                };
             }
 
             // Filtros por año y mes usando monthYear
@@ -290,7 +310,14 @@ export class NuevaPlanificacionService {
                 aprobados,
                 rechazados,
                 pendientesAprobacion,
+                programadosData,
+                completadosData,
+                canceladosData,
+                aprobadosData,
+                rechazadosData,
+                pendientesAprobacionData,
             ] = await Promise.all([
+                // Conteo de planificaciones por estado
                 prisma.nuevaPlanificacion.count({
                     where: {
                         ...where,
@@ -327,7 +354,88 @@ export class NuevaPlanificacionService {
                         checkJefe: null,
                     },
                 }),
+                // Suma de cantDemos por estado y checkJefe
+                prisma.nuevaPlanificacion.findMany({
+                    where: {
+                        ...where,
+                        estado: 'Programado',
+                    },
+                    select: {
+                        cantDemos: true,
+                    },
+                }),
+                prisma.nuevaPlanificacion.findMany({
+                    where: {
+                        ...where,
+                        estado: 'Completado',
+                    },
+                    select: {
+                        cantDemos: true,
+                    },
+                }),
+                prisma.nuevaPlanificacion.findMany({
+                    where: {
+                        ...where,
+                        estado: 'Cancelado',
+                    },
+                    select: {
+                        cantDemos: true,
+                    },
+                }),
+                prisma.nuevaPlanificacion.findMany({
+                    where: {
+                        ...where,
+                        checkJefe: true,
+                    },
+                    select: {
+                        cantDemos: true,
+                    },
+                }),
+                prisma.nuevaPlanificacion.findMany({
+                    where: {
+                        ...where,
+                        checkJefe: false,
+                    },
+                    select: {
+                        cantDemos: true,
+                    },
+                }),
+                prisma.nuevaPlanificacion.findMany({
+                    where: {
+                        ...where,
+                        checkJefe: null,
+                    },
+                    select: {
+                        cantDemos: true,
+                    },
+                }),
             ]);
+
+            // Calcular suma de cantDemos
+            const totalDemosProgramados = programadosData.reduce(
+                (sum, item) => sum + (item.cantDemos || 0),
+                0
+            );
+            const totalDemosCompletados = completadosData.reduce(
+                (sum, item) => sum + (item.cantDemos || 0),
+                0
+            );
+            const totalDemosCancelados = canceladosData.reduce(
+                (sum, item) => sum + (item.cantDemos || 0),
+                0
+            );
+            const totalDemosAprobados = aprobadosData.reduce(
+                (sum, item) => sum + (item.cantDemos || 0),
+                0
+            );
+            const totalDemosRechazados = rechazadosData.reduce(
+                (sum, item) => sum + (item.cantDemos || 0),
+                0
+            );
+            const totalDemosPendientes = pendientesAprobacionData.reduce(
+                (sum, item) => sum + (item.cantDemos || 0),
+                0
+            );
 
             return {
                 data: planificaciones,
@@ -349,6 +457,12 @@ export class NuevaPlanificacionService {
                     aprobados,
                     rechazados,
                     pendientesAprobacion,
+                    totalDemosProgramados,
+                    totalDemosCompletados,
+                    totalDemosCancelados,
+                    totalDemosAprobados,
+                    totalDemosRechazados,
+                    totalDemosPendientes,
                 },
             };
         } catch (error) {
@@ -744,6 +858,22 @@ export class NuevaPlanificacionService {
             throw new CustomError(
                 500,
                 `Error al cambiar estado de planificación: ${
+                    (error as Error).message
+                }`
+            );
+        }
+    }
+
+    // Métodos auxiliares para obtener datos relacionados
+    async getMomentosAplicacion() {
+        try {
+            return await prisma.momentoAplicacion.findMany({
+                orderBy: { nombre: 'asc' },
+            });
+        } catch (error) {
+            throw new CustomError(
+                500,
+                `Error al obtener momentos de aplicación: ${
                     (error as Error).message
                 }`
             );

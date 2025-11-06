@@ -24,6 +24,8 @@ export class NuevaPlanificacionController {
                 checkJefe,
                 year,
                 month,
+                idMacrozona,
+                idEmpresa,
                 limit,
                 page,
             } = req.query;
@@ -51,6 +53,12 @@ export class NuevaPlanificacionController {
                 checkJefe: checkJefe ? checkJefe === 'true' : undefined,
                 year: year ? parseInt(year as string) : undefined,
                 month: month ? parseInt(month as string) : undefined,
+                idMacrozona: idMacrozona
+                    ? parseInt(idMacrozona as string)
+                    : undefined,
+                idEmpresa: idEmpresa
+                    ? parseInt(idEmpresa as string)
+                    : undefined,
                 limit: limit ? parseInt(limit as string) : undefined,
                 page: page ? parseInt(page as string) : undefined,
             };
@@ -331,6 +339,25 @@ export class NuevaPlanificacionController {
                 data: planificacion,
                 message: 'Estado de planificación actualizado exitosamente',
             });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                return res.status(error.statusCode).json({
+                    ok: false,
+                    message: error.message,
+                });
+            }
+            return res.status(500).json({
+                ok: false,
+                message: 'Error interno del servidor',
+            });
+        }
+    };
+
+    getMomentosAplicacion = async (req: Request, res: Response) => {
+        try {
+            const momentos =
+                await this.nuevaPlanificacionService.getMomentosAplicacion();
+            res.json(momentos);
         } catch (error) {
             if (error instanceof CustomError) {
                 return res.status(error.statusCode).json({

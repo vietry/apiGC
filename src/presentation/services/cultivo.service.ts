@@ -10,6 +10,57 @@ import {
 export class CultivoService {
     // DI
 
+    private buildCultivoWhere(filters: CultivoFilters = {}) {
+        const where: any = {};
+        if (!filters) return where;
+
+        if (filters.centroPoblado)
+            where.Fundo = {
+                ...(where.Fundo ?? {}),
+                centroPoblado: { contains: filters.centroPoblado },
+            };
+        if (filters.idCultivo) where.id = filters.idCultivo;
+        if (filters.idFundo) where.idFundo = filters.idFundo;
+        if (filters.ubicacionClienteId)
+            where.Fundo = {
+                ...(where.Fundo ?? {}),
+                ubicacionClienteId: filters.ubicacionClienteId,
+            };
+        if (filters.idVegetacion)
+            where.Variedad = {
+                ...(where.Variedad ?? {}),
+                idVegetacion: filters.idVegetacion,
+            };
+        if (filters.vegetacion)
+            where.Variedad = {
+                ...(where.Variedad ?? {}),
+                Vegetacion: {
+                    nombre: {
+                        contains: filters.vegetacion,
+                    },
+                },
+            };
+        if (filters.idContactoPunto)
+            where.Fundo = {
+                ...(where.Fundo ?? {}),
+                idContactoPunto: filters.idContactoPunto,
+            };
+        if (filters.idPuntoContacto)
+            where.Fundo = {
+                ...(where.Fundo ?? {}),
+                idPuntoContacto: filters.idPuntoContacto,
+            };
+        if (filters.codCliente)
+            where.Fundo = {
+                ...(where.Fundo ?? {}),
+                UbicacionCliente: {
+                    cliente: { contains: filters.codCliente },
+                },
+            };
+
+        return where;
+    }
+
     async createCultivo(createCultivoDto: CreateCultivoDto) {
         try {
             const currentDate = new Date();
@@ -18,6 +69,7 @@ export class CultivoService {
                 data: {
                     certificacion: createCultivoDto.certificacion,
                     hectareas: createCultivoDto.hectareas,
+                    poblacion: createCultivoDto.poblacion,
                     mesInicio: createCultivoDto.mesInicio,
                     mesFinal: createCultivoDto.mesFinal,
                     observacion: createCultivoDto.observacion,
@@ -32,6 +84,7 @@ export class CultivoService {
                 id: cultivo.id,
                 certificacion: cultivo.certificacion,
                 hectareas: cultivo.hectareas,
+                poblacion: cultivo.poblacion,
                 mesInicio: cultivo.mesInicio,
                 mesFinal: cultivo.mesFinal,
                 observacion: cultivo.observacion,
@@ -74,41 +127,7 @@ export class CultivoService {
         const { page, limit } = paginationDto;
 
         // Construir el objeto where dinámicamente según los filtros recibidos
-        const where: any = {};
-        if (filters) {
-            if (filters.centroPoblado)
-                where.Fundo = {
-                    ...(where.Fundo ?? {}),
-                    centroPoblado: { contains: filters.centroPoblado },
-                };
-            if (filters.idCultivo) where.id = filters.idCultivo;
-            if (filters.idFundo) where.idFundo = filters.idFundo;
-            if (filters.idVegetacion)
-                where.Variedad = {
-                    ...(where.Variedad ?? {}),
-                    idVegetacion: filters.idVegetacion,
-                };
-            if (filters.vegetacion)
-                where.Variedad = {
-                    ...(where.Variedad ?? {}),
-                    Vegetacion: {
-                        nombre: {
-                            contains: filters.vegetacion,
-                        },
-                    },
-                };
-            if (filters.idContactoPunto)
-                where.Fundo = {
-                    ...(where.Fundo ?? {}),
-                    idContactoPunto: filters.idContactoPunto,
-                };
-            if (filters.idPuntoContacto)
-                where.Fundo = {
-                    ...(where.Fundo ?? {}),
-                    idPuntoContacto: filters.idPuntoContacto,
-                };
-            // Puedes agregar más filtros según sea necesario
-        }
+        const where: any = this.buildCultivoWhere(filters);
 
         try {
             const [total, cultivos] = await Promise.all([
@@ -153,6 +172,7 @@ export class CultivoService {
                         id: cultivo.id,
                         certificacion: cultivo.certificacion,
                         hectareas: cultivo.hectareas,
+                        poblacion: cultivo.poblacion,
                         mesInicio: cultivo.mesInicio,
                         mesFinal: cultivo.mesFinal,
                         observacion: cultivo.observacion,
@@ -177,32 +197,7 @@ export class CultivoService {
 
     async getAllCultivos(filters: CultivoFilters = {}) {
         // Construir el objeto where dinámicamente según los filtros recibidos
-        const where: any = {};
-        if (filters) {
-            if (filters.centroPoblado)
-                where.Fundo = {
-                    ...(where.Fundo ?? {}),
-                    centroPoblado: { contains: filters.centroPoblado },
-                };
-            if (filters.idCultivo) where.id = filters.idCultivo;
-            if (filters.idFundo) where.idFundo = filters.idFundo;
-            if (filters.idVegetacion)
-                where.Variedad = {
-                    ...(where.Variedad ?? {}),
-                    idVegetacion: filters.idVegetacion,
-                };
-            if (filters.idContactoPunto)
-                where.Fundo = {
-                    ...(where.Fundo ?? {}),
-                    idContactoPunto: filters.idContactoPunto,
-                };
-            if (filters.idPuntoContacto)
-                where.Fundo = {
-                    ...(where.Fundo ?? {}),
-                    idPuntoContacto: filters.idPuntoContacto,
-                };
-            // Puedes agregar más filtros según sea necesario
-        }
+        const where: any = this.buildCultivoWhere(filters);
 
         try {
             const cultivos = await prisma.cultivo.findMany({
@@ -237,6 +232,7 @@ export class CultivoService {
                         id: cultivo.id,
                         certificacion: cultivo.certificacion,
                         hectareas: cultivo.hectareas,
+                        poblacion: cultivo.poblacion,
                         mesInicio: cultivo.mesInicio,
                         mesFinal: cultivo.mesFinal,
                         observacion: cultivo.observacion,
@@ -285,6 +281,7 @@ export class CultivoService {
                 id: cultivo.id,
                 certificacion: cultivo.certificacion,
                 hectareas: cultivo.hectareas,
+                poblacion: cultivo.poblacion,
                 mesInicio: cultivo.mesInicio,
                 mesFinal: cultivo.mesFinal,
                 observacion: cultivo.observacion,
@@ -358,6 +355,7 @@ export class CultivoService {
                         id: cultivo.id,
                         certificacion: cultivo.certificacion,
                         hectareas: cultivo.hectareas,
+                        poblacion: cultivo.poblacion,
                         mesInicio: cultivo.mesInicio,
                         mesFinal: cultivo.mesFinal,
                         observacion: cultivo.observacion,
@@ -425,6 +423,7 @@ export class CultivoService {
                         id: cultivo.id,
                         certificacion: cultivo.certificacion,
                         hectareas: cultivo.hectareas,
+                        poblacion: cultivo.poblacion,
                         mesInicio: cultivo.mesInicio,
                         mesFinal: cultivo.mesFinal,
                         observacion: cultivo.observacion,

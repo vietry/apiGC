@@ -7,6 +7,9 @@ interface SubLaborEstadistica {
     nombre: string;
     totalVisitas: number;
     visitasCompletadas: number;
+    visitasProgramadas: number;
+    visitasEnVisita: number;
+    visitasCanceladas: number;
     porcentajeCompletadas: number;
 }
 
@@ -15,6 +18,9 @@ interface LaborEstadistica {
     nombre: string;
     totalVisitas: number;
     visitasCompletadas: number;
+    visitasProgramadas: number;
+    visitasEnVisita: number;
+    visitasCanceladas: number;
     porcentajeCompletadas: number;
     sublabores: SubLaborEstadistica[];
 }
@@ -28,6 +34,9 @@ interface ColaboradorEstadistica {
     macrozonaId?: number;
     totalVisitas: number;
     visitasCompletadas: number;
+    visitasProgramadas: number;
+    visitasEnVisita: number;
+    visitasCanceladas: number;
     porcentajeCompletadas: number;
     labores: LaborEstadistica[];
 }
@@ -36,6 +45,9 @@ interface GestionVisitasEstadisticas {
     resumen: {
         totalVisitas: number;
         visitasCompletadas: number;
+        visitasProgramadas: number;
+        visitasEnVisita: number;
+        visitasCanceladas: number;
         porcentajeCompletadas: number;
         colaboradores: number;
         labores: number;
@@ -64,27 +76,57 @@ export class DashboardService {
                 whereConditions.macrozonaId = filters.macrozonaId;
             }
 
-            if (filters.year) {
-                whereConditions.programacion = {
-                    ...whereConditions.programacion,
-                    gte: new Date(
-                        filters.year,
-                        filters.month ? filters.month - 1 : 0,
-                        1
-                    ),
-                };
+            if (filters.semana) {
+                whereConditions.semana = filters.semana;
+            }
 
+            if (filters.estado) {
+                whereConditions.estado = filters.estado;
+            }
+
+            if (filters.year) {
                 if (filters.month) {
+                    // Filtro por mes específico
                     whereConditions.programacion = {
                         ...whereConditions.programacion,
+                        gte: new Date(filters.year, filters.month - 1, 1),
                         lt: new Date(filters.year, filters.month, 1),
                     };
                 } else {
+                    // Filtro solo por año
                     whereConditions.programacion = {
                         ...whereConditions.programacion,
+                        gte: new Date(filters.year, 0, 1),
                         lt: new Date(filters.year + 1, 0, 1),
                     };
                 }
+            }
+
+            // Filtro por Labor/SubLabor para retornar SOLO visitas que incluyen la labor indicada
+            const andLaborFilters: any[] = [];
+            if (filters.idLabor) {
+                andLaborFilters.push({
+                    LaborVisita: {
+                        some: {
+                            SubLabor: { idLabor: filters.idLabor },
+                        },
+                    },
+                });
+            }
+            if (filters.idSubLabor) {
+                andLaborFilters.push({
+                    LaborVisita: {
+                        some: {
+                            idSubLabor: filters.idSubLabor,
+                        },
+                    },
+                });
+            }
+            if (andLaborFilters.length > 0) {
+                whereConditions.AND = [
+                    ...(whereConditions.AND ?? []),
+                    ...andLaborFilters,
+                ];
             }
 
             // Si se especifica macrozona o empresa, necesitamos filtrar por la relación ColaboradorJefe
@@ -106,15 +148,44 @@ export class DashboardService {
                 colaboradorIds = colaboradorJefes.map((cj) => cj.idColaborador);
 
                 if (colaboradorIds.length > 0) {
-                    whereConditions.idColaborador = {
-                        in: colaboradorIds,
-                    };
+                    // Si ya existe un filtro de idColaborador, hacer intersección
+                    if (filters.idColaborador) {
+                        // Solo mantener el colaborador si está en la lista de la empresa/macrozona
+                        if (colaboradorIds.includes(filters.idColaborador)) {
+                            whereConditions.idColaborador =
+                                filters.idColaborador;
+                        } else {
+                            // El colaborador especificado no pertenece a la empresa/macrozona
+                            return {
+                                resumen: {
+                                    totalVisitas: 0,
+                                    visitasCompletadas: 0,
+                                    visitasProgramadas: 0,
+                                    visitasEnVisita: 0,
+                                    visitasCanceladas: 0,
+                                    porcentajeCompletadas: 0,
+                                    colaboradores: 0,
+                                    labores: 0,
+                                    sublabores: 0,
+                                },
+                                colaboradores: [],
+                            };
+                        }
+                    } else {
+                        // No hay filtro de idColaborador específico, usar todos los de la empresa/macrozona
+                        whereConditions.idColaborador = {
+                            in: colaboradorIds,
+                        };
+                    }
                 } else {
                     // Si no hay colaboradores que coincidan con los filtros, retornar estadísticas vacías
                     return {
                         resumen: {
                             totalVisitas: 0,
                             visitasCompletadas: 0,
+                            visitasProgramadas: 0,
+                            visitasEnVisita: 0,
+                            visitasCanceladas: 0,
                             porcentajeCompletadas: 0,
                             colaboradores: 0,
                             labores: 0,
@@ -196,6 +267,9 @@ export class DashboardService {
                         macrozonaId,
                         totalVisitas: 0,
                         visitasCompletadas: 0,
+                        visitasProgramadas: 0,
+                        visitasEnVisita: 0,
+                        visitasCanceladas: 0,
                         porcentajeCompletadas: 0,
                         labores: [],
                     });
@@ -204,8 +278,20 @@ export class DashboardService {
                 const colaboradorStat = colaboradoresMap.get(colaborador.id)!;
                 colaboradorStat.totalVisitas++;
 
-                if (visita.estado === 'Completado') {
-                    colaboradorStat.visitasCompletadas++;
+                switch (visita.estado) {
+                    case 'Completado':
+                        colaboradorStat.visitasCompletadas++;
+                        break;
+                    case 'Programado':
+                    case 'Reprogramado':
+                        colaboradorStat.visitasProgramadas++;
+                        break;
+                    case 'En visita':
+                        colaboradorStat.visitasEnVisita++;
+                        break;
+                    case 'Cancelado':
+                        colaboradorStat.visitasCanceladas++;
+                        break;
                 }
 
                 // Procesar labores de esta visita
@@ -283,11 +369,26 @@ export class DashboardService {
                 (sum, c) => sum + c.visitasCompletadas,
                 0
             );
+            const totalProgramadas = colaboradores.reduce(
+                (sum, c) => sum + c.visitasProgramadas,
+                0
+            );
+            const totalEnVisita = colaboradores.reduce(
+                (sum, c) => sum + c.visitasEnVisita,
+                0
+            );
+            const totalCanceladas = colaboradores.reduce(
+                (sum, c) => sum + c.visitasCanceladas,
+                0
+            );
 
             return {
                 resumen: {
                     totalVisitas,
                     visitasCompletadas: totalCompletadas,
+                    visitasProgramadas: totalProgramadas,
+                    visitasEnVisita: totalEnVisita,
+                    visitasCanceladas: totalCanceladas,
                     porcentajeCompletadas:
                         totalVisitas > 0
                             ? Number(
@@ -367,6 +468,9 @@ export class DashboardService {
                 nombre: labor.nombre,
                 totalVisitas: 0,
                 visitasCompletadas: 0,
+                visitasProgramadas: 0,
+                visitasEnVisita: 0,
+                visitasCanceladas: 0,
                 porcentajeCompletadas: 0,
                 sublabores: [],
             };
@@ -374,8 +478,21 @@ export class DashboardService {
         }
 
         laborStat.totalVisitas++;
-        if (visita.estado === 'Completado') {
-            laborStat.visitasCompletadas++;
+
+        switch (visita.estado) {
+            case 'Completado':
+                laborStat.visitasCompletadas++;
+                break;
+            case 'Programado':
+            case 'Reprogramado':
+                laborStat.visitasProgramadas++;
+                break;
+            case 'En visita':
+                laborStat.visitasEnVisita++;
+                break;
+            case 'Cancelado':
+                laborStat.visitasCanceladas++;
+                break;
         }
 
         // Actualizar sublabores
@@ -403,14 +520,29 @@ export class DashboardService {
                         nombre: subLaborInfo.nombre,
                         totalVisitas: 0,
                         visitasCompletadas: 0,
+                        visitasProgramadas: 0,
+                        visitasEnVisita: 0,
+                        visitasCanceladas: 0,
                         porcentajeCompletadas: 0,
                     };
                     laborStat.sublabores.push(subLaborStat);
                 }
 
                 subLaborStat.totalVisitas++;
-                if (visita.estado === 'Completado') {
-                    subLaborStat.visitasCompletadas++;
+                switch (visita.estado) {
+                    case 'Completado':
+                        subLaborStat.visitasCompletadas++;
+                        break;
+                    case 'Programado':
+                    case 'Reprogramado':
+                        subLaborStat.visitasProgramadas++;
+                        break;
+                    case 'En visita':
+                        subLaborStat.visitasEnVisita++;
+                        break;
+                    case 'Cancelado':
+                        subLaborStat.visitasCanceladas++;
+                        break;
                 }
             }
         });

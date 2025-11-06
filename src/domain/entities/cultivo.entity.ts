@@ -1,10 +1,11 @@
-import { CustomError } from "../errors/custom.error";
+import { CustomError } from '../errors/custom.error';
 
 export class CultivoEntity {
     constructor(
         public id: number,
         public certificacion: string | null,
         public hectareas: number | null,
+        public poblacion: number | null,
         public mesInicio: string | null,
         public mesFinal: string | null,
         public observacion: string | null,
@@ -16,17 +17,36 @@ export class CultivoEntity {
 
     public static fromObject(object: { [key: string]: any }): CultivoEntity {
         const {
-            id, certificacion, hectareas, mesInicio, mesFinal,
-            observacion, idFundo, idVariedad, createdAt, updatedAt
+            id,
+            certificacion,
+            hectareas,
+            poblacion,
+            mesInicio,
+            mesFinal,
+            observacion,
+            idFundo,
+            idVariedad,
+            createdAt,
+            updatedAt,
         } = object;
 
         if (!id) throw CustomError.badRequest('ID is required');
         if (!idFundo) throw CustomError.badRequest('ID Fundo is required');
-        if (!idVariedad) throw CustomError.badRequest('ID Variedad is required');
+        if (!idVariedad)
+            throw CustomError.badRequest('ID Variedad is required');
 
         return new CultivoEntity(
-            id, certificacion, hectareas, mesInicio, mesFinal, observacion,
-            idFundo, idVariedad, createdAt, updatedAt
+            id,
+            certificacion,
+            hectareas,
+            poblacion ?? null,
+            mesInicio,
+            mesFinal,
+            observacion,
+            idFundo,
+            idVariedad,
+            createdAt,
+            updatedAt
         );
     }
 }

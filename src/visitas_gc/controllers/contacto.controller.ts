@@ -53,6 +53,8 @@ export class ContactoController {
             clienteGestionCId,
             tipo,
             createdBy,
+            ubicacionId,
+            codCliente,
         } = req.query as any;
 
         const filters: any = {
@@ -76,6 +78,9 @@ export class ContactoController {
                     : undefined,
             tipo,
             createdBy: createdBy !== undefined ? Number(createdBy) : undefined,
+            ubicacionId:
+                ubicacionId !== undefined ? Number(ubicacionId) : undefined,
+            codCliente,
         };
         this.service
             .getAll(pagination!, filters)

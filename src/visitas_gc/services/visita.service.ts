@@ -15,7 +15,7 @@ type EstadisticasVisitaPeriodo = {
         porcentajeCompletadas: number;
         //colaborador: { nombre: string; cargo: string | null };
     }[];
-    porPuntoContacto: { nombre: string; cantidad: number }[];
+    porClienteVendedor: { nombre: string; cantidad: number }[];
     totalCompra: number;
 };
 
@@ -129,19 +129,8 @@ async function calcularEstadisticasVisitas(
             },
             Contacto: {
                 include: {
-                    PuntoContacto: {
-                        include: {
-                            Distrito: {
-                                include: {
-                                    Provincia: {
-                                        include: {
-                                            Departamento: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
+                    ClienteVendedorExactus: true,
+                    ClienteVendedorGC: true,
                 },
             },
         },
@@ -158,7 +147,7 @@ async function calcularEstadisticasVisitas(
             cargo: string | null;
         }
     > = {};
-    const porPuntoContacto: Record<string, number> = {};
+    const porClienteVendedor: Record<string, number> = {};
     let totalCompra = 0;
 
     visitas.forEach((v) => {
@@ -185,9 +174,13 @@ async function calcularEstadisticasVisitas(
         if (!porColaborador[nombreColab].colaborador.cargo && cargoColab) {
             porColaborador[nombreColab].colaborador.cargo = cargoColab;
         }
-        // Punto de contacto
-        const punto = v.Contacto?.PuntoContacto?.nombre ?? 'Sin punto';
-        porPuntoContacto[punto] = (porPuntoContacto[punto] || 0) + 1;
+        // Punto de contacto - ahora obtener de ClienteVendedorExactus o ClienteVendedorGC
+        const puntoNombre =
+            v.Contacto?.ClienteVendedorExactus?.nomcli ??
+            v.Contacto?.ClienteVendedorGC?.nomcli ??
+            'Sin cliente';
+        porClienteVendedor[puntoNombre] =
+            (porClienteVendedor[puntoNombre] || 0) + 1;
         // Resultado compra
         if ((v.resultado ?? '').toLowerCase() === 'compra') totalCompra++;
     });
@@ -209,10 +202,15 @@ async function calcularEstadisticasVisitas(
         }))
         .sort((a, b) => b.cantidad - a.cantidad);
 
-    const porPuntoContactoOrdenado = Object.entries(porPuntoContacto)
+    const porClienteVendedorOrdenado = Object.entries(porClienteVendedor)
         .map(([nombre, cantidad]) => ({ nombre, cantidad }))
         .sort((a, b) => b.cantidad - a.cantidad);
 
+    // TODO: Implementar agrupación por ubigeo usando direcciones de entrega
+    // Los datos de ubigeo ahora vienen de findDireccionesInAllSchemas
+    const porUbigeo: any[] = [];
+
+    /*
     // Agrupación por Departamento > Provincia > Distrito
     const ubigeoMap = new Map<
         number, // idDepartamento
@@ -240,49 +238,8 @@ async function calcularEstadisticasVisitas(
     >();
 
     visitas.forEach((v) => {
-        const punto = v.Contacto?.PuntoContacto;
-        const distrito = punto?.Distrito;
-        const provincia = distrito?.Provincia;
-        const departamento = provincia?.Departamento;
-        if (!departamento || !provincia || !distrito) return;
-
-        // Departamento
-        const departamentoId = Number(departamento.id);
-        if (!ubigeoMap.has(departamentoId)) {
-            ubigeoMap.set(departamentoId, {
-                id: departamentoId,
-                nombre: departamento.nombre,
-                cantidad: 0,
-                provincias: new Map(),
-            });
-        }
-        const dep = ubigeoMap.get(departamentoId)!;
-        dep.cantidad++;
-
-        // Provincia
-        const provinciaId = Number(provincia.id);
-        if (!dep.provincias.has(provinciaId)) {
-            dep.provincias.set(provinciaId, {
-                id: provinciaId,
-                nombre: provincia.nombre,
-                cantidad: 0,
-                distritos: new Map(),
-            });
-        }
-        const prov = dep.provincias.get(provinciaId)!;
-        prov.cantidad++;
-
-        // Distrito
-        const distritoId = Number(distrito.id);
-        if (!prov.distritos.has(distritoId)) {
-            prov.distritos.set(distritoId, {
-                id: distritoId,
-                nombre: distrito.nombre,
-                cantidad: 0,
-            });
-        }
-        const dist = prov.distritos.get(distritoId)!;
-        dist.cantidad++;
+        // TODO: Obtener datos de ubicación usando findDireccionesInAllSchemas
+        // con el codcli de ClienteVendedorExactus o ClienteVendedorGC
     });
 
     // Convertir a array y ordenar descendente por cantidad
@@ -307,18 +264,108 @@ async function calcularEstadisticasVisitas(
                 .sort((a, b) => b.cantidad - a.cantidad),
         }))
         .sort((a, b) => b.cantidad - a.cantidad);
+    */
 
     return {
         total,
         porEstado,
         porColaborador: porColaboradorOrdenado,
-        porPuntoContacto: porPuntoContactoOrdenado,
+        porClienteVendedor: porClienteVendedorOrdenado,
         totalCompra,
         porUbigeo,
     };
 }
 
 export class VisitaService {
+    private buildBaseWhere(filters: VisitaFilters): Record<string, any> {
+        const {
+            idColaborador,
+            estado,
+            semana,
+            idRepresentada,
+            idContacto,
+            idClienteVendedor,
+            idVegetacion,
+            idFamilia,
+            idSubLabor1,
+            idSubLabor2,
+            programada,
+            empresa,
+            negocio,
+            macrozonaId,
+        } = filters;
+
+        const where: Record<string, any> = {};
+
+        const directEquals: Array<[keyof VisitaFilters, string]> = [
+            ['idColaborador', 'idColaborador'],
+            ['semana', 'semana'],
+            ['idRepresentada', 'idRepresentada'],
+            ['idContacto', 'idContacto'],
+            ['macrozonaId', 'macrozonaId'],
+        ];
+
+        for (const [filterKey, whereKey] of directEquals) {
+            const value = filters[filterKey];
+            if (value !== undefined) {
+                where[whereKey] = value;
+            }
+        }
+
+        if (estado) {
+            where.estado = estado;
+        }
+
+        if (programada !== undefined) {
+            where.programada = programada;
+        }
+
+        if (empresa) {
+            where.empresa = { contains: empresa };
+        }
+
+        if (negocio) {
+            where.negocio = { contains: negocio };
+        }
+
+        if (idVegetacion || idFamilia) {
+            where.Cultivo = {
+                Variedad: {
+                    Vegetacion: {
+                        ...(idVegetacion !== undefined
+                            ? { id: idVegetacion }
+                            : {}),
+                        ...(idFamilia !== undefined ? { idFamilia } : {}),
+                    },
+                },
+            };
+        }
+
+        if (idClienteVendedor) {
+            where.Contacto = {
+                OR: [
+                    { clienteExactusId: idClienteVendedor },
+                    { clienteGestionCId: idClienteVendedor },
+                ],
+            };
+        }
+
+        const laborConditions: any[] = [];
+        if (idSubLabor1) {
+            laborConditions.push({ idSubLabor1 });
+        }
+        if (idSubLabor2) {
+            laborConditions.push({ idSubLabor2 });
+        }
+        if (laborConditions.length === 1) {
+            where.LaborVisita = { some: laborConditions[0] };
+        } else if (laborConditions.length > 1) {
+            where.LaborVisita = { some: { OR: laborConditions } };
+        }
+
+        return where;
+    }
+
     async createVisita(createVisitaDto: CreateVisitaDto) {
         // Verificar que el colaborador exista
         const colaboradorExists = await prisma.colaborador.findUnique({
@@ -347,6 +394,8 @@ export class VisitaService {
                     detalle: createVisitaDto.detalle,
                     latitud: createVisitaDto.latitud,
                     longitud: createVisitaDto.longitud,
+                    latitudFin: createVisitaDto.latitudFin,
+                    longitudFin: createVisitaDto.longitudFin,
                     idColaborador: createVisitaDto.idColaborador,
                     idContacto: createVisitaDto.idContacto,
                     idCultivo: createVisitaDto.idCultivo,
@@ -398,122 +447,18 @@ export class VisitaService {
         filters: VisitaFilters = {}
     ) {
         const { page, limit } = paginationDto;
-        const {
-            idColaborador,
-            estado,
-            semana,
-            year,
-            month,
-            idVegetacion,
-            idFamilia,
-            idPuntoContacto,
-            idContacto,
-            idRepresentada,
-            idSubLabor1,
-            idSubLabor2,
-            programada,
-            empresa,
-            negocio,
-            macrozonaId,
-        } = filters;
+        const { year, month } = filters;
+        const where = this.buildBaseWhere(filters);
 
-        const where: any = {};
-
-        // Filtros básicos
-        if (idColaborador) {
-            where.idColaborador = idColaborador;
-        }
-        if (estado) {
-            where.estado = estado;
-        }
-        if (semana) {
-            where.semana = semana;
-        }
-        if (idRepresentada) {
-            where.idRepresentada = idRepresentada;
-        }
-
-        if (programada !== undefined) where.programada = filters.programada;
-
-        // Filtro por vegetación (a través de cultivo)
-        if (idVegetacion) {
-            where.Cultivo = {
-                Variedad: {
-                    Vegetacion: {
-                        id: idVegetacion,
-                    },
-                },
-            };
-        }
-
-        // Filtro por familia (a través de cultivo)
-        if (idFamilia) {
-            where.Cultivo = {
-                ...where.Cultivo,
-                Variedad: {
-                    ...where.Cultivo?.Variedad,
-                    Vegetacion: {
-                        ...where.Cultivo?.Variedad?.Vegetacion,
-                        idFamilia: idFamilia,
-                    },
-                },
-            };
-        }
-
-        // Filtro por punto de contacto
-        if (idPuntoContacto) {
-            where.Contacto = {
-                idPuntoContacto: idPuntoContacto,
-            };
-        }
-
-        // Filtro por contacto
-        if (idContacto) {
-            where.idContacto = idContacto;
-        }
-
-        // Filtro por subLabor
-        if (idSubLabor1) {
-            where.LaborVisita = {
-                some: {
-                    idSubLabor1: idSubLabor1,
-                },
-            };
-        }
-
-        if (idSubLabor2) {
-            where.LaborVisita = {
-                some: {
-                    idSubLabor2: idSubLabor2,
-                },
-            };
-        }
-
-        // Filtro por empresa
-        if (empresa) {
-            where.empresa = { contains: empresa };
-        }
-
-        // Filtro por negocio
-        if (negocio) {
-            where.negocio = { contains: negocio };
-        }
-
-        // Filtro por macrozonaId
-        if (macrozonaId) {
-            where.macrozonaId = macrozonaId;
-        }
-
-        // Filtros de fecha
         if (year) {
-            where.createdAt = {
+            where.programacion = {
                 gte: new Date(year, 0, 1),
                 lt: new Date(year + 1, 0, 1),
             };
         }
 
         if (month && year) {
-            where.updatedAt = {
+            where.programacion = {
                 gte: new Date(year, month - 1, 1),
                 lt: new Date(year, month, 1),
             };
@@ -541,7 +486,8 @@ export class VisitaService {
                         },
                         Contacto: {
                             include: {
-                                PuntoContacto: true,
+                                ClienteVendedorExactus: true,
+                                ClienteVendedorGC: true,
                             },
                         },
                         Cultivo: {
@@ -596,6 +542,8 @@ export class VisitaService {
                         detalle: visita.detalle,
                         latitud: visita.latitud,
                         longitud: visita.longitud,
+                        latitudFin: visita.latitudFin,
+                        longitudFin: visita.longitudFin,
                         motivo: visita.motivo,
                         empresa: visita.empresa,
                         programada: visita.programada,
@@ -614,8 +562,17 @@ export class VisitaService {
                               }`.trim()
                             : '',
                         cargo: visita.Contacto?.cargo,
-                        idPuntoContacto: visita.Contacto?.idPunto,
-                        puntoContacto: visita.Contacto?.PuntoContacto?.nombre,
+                        clienteVendedorId:
+                            visita.Contacto?.clienteExactusId ||
+                            visita.Contacto?.clienteGestionCId,
+                        clienteVendedor:
+                            visita.Contacto?.ClienteVendedorExactus?.nomcli ||
+                            visita.Contacto?.ClienteVendedorGC?.nomcli ||
+                            'Sin cliente',
+                        codClienteVendedor:
+                            visita.Contacto?.ClienteVendedorExactus?.codcli ||
+                            visita.Contacto?.ClienteVendedorGC?.codcli ||
+                            'Sin cliente',
                         idCultivo: visita.idCultivo,
                         idVegetacion: visita.Cultivo?.Variedad?.Vegetacion?.id,
                         cultivo: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
@@ -658,7 +615,8 @@ export class VisitaService {
                     },
                     Contacto: {
                         include: {
-                            PuntoContacto: true,
+                            ClienteVendedorExactus: true,
+                            ClienteVendedorGC: true,
                         },
                     },
                     Cultivo: {
@@ -682,11 +640,8 @@ export class VisitaService {
                     },
                     VisitaProducto: {
                         include: {
-                            Familia: {
-                                include: {
-                                    Empresa: true,
-                                },
-                            },
+                            // En prisma, VisitaProducto.Familia referencia a FamiliaVisita
+                            Familia: true,
                         },
                     },
                 },
@@ -718,6 +673,8 @@ export class VisitaService {
                 detalle: visita.detalle,
                 latitud: visita.latitud,
                 longitud: visita.longitud,
+                latitudFin: visita.latitudFin,
+                longitudFin: visita.longitudFin,
                 motivo: visita.motivo,
                 empresa: visita.empresa,
                 programada: visita.programada,
@@ -736,8 +693,13 @@ export class VisitaService {
                       }`.trim()
                     : '',
                 cargo: visita.Contacto?.cargo,
-                idPuntoContacto: visita.Contacto?.idPunto,
-                puntoContacto: visita.Contacto?.PuntoContacto?.nombre,
+                clienteVendedorId:
+                    visita.Contacto?.clienteExactusId ||
+                    visita.Contacto?.clienteGestionCId,
+                clienteVendedor:
+                    visita.Contacto?.ClienteVendedorExactus?.nomcli ||
+                    visita.Contacto?.ClienteVendedorGC?.nomcli ||
+                    'Sin cliente',
                 idCultivo: visita.idCultivo,
                 idVegetacion: visita.Cultivo?.Variedad?.Vegetacion?.id,
                 cultivo: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
@@ -757,10 +719,26 @@ export class VisitaService {
                 productos: visita.VisitaProducto.map((producto) => ({
                     id: producto.id,
                     idFamilia: producto.idFamilia,
-                    codigo: producto.Familia.codigo.trim(),
-                    nombre: producto.Familia.nombre.trim(),
-                    idEmpresa: producto.Familia.idEmpresa,
-                    empresa: producto.Familia.Empresa.nomEmpresa,
+                    // FamiliaVisita tiene campos: familia (codigo) y nombre, sin Empresa
+                    codigo: producto.Familia?.familia?.trim?.() ?? '',
+                    nombre: producto.Familia?.nombre?.trim?.() ?? '',
+                    idEmpresa: (() => {
+                        const esquema =
+                            producto.Familia?.esquema?.toUpperCase?.() ?? '';
+                        switch (esquema) {
+                            case 'TQC':
+                                return 1;
+                            case 'AGRAVENT':
+                                return 5;
+                            case 'TALEX':
+                                return 6;
+                            case 'BIOGEN':
+                                return 8;
+                            default:
+                                return undefined;
+                        }
+                    })(),
+                    empresa: producto.Familia?.esquema ?? undefined,
                 })),
             };
         } catch (error) {
@@ -769,113 +747,9 @@ export class VisitaService {
     }
 
     async getAllVisitas(filters: VisitaFilters = {}) {
-        const {
-            idColaborador,
-            estado,
-            semana,
-            year,
-            month,
-            idVegetacion,
-            idFamilia,
-            idPuntoContacto,
-            idContacto,
-            idRepresentada,
-            idSubLabor1,
-            idSubLabor2,
-            programada,
-            empresa,
-            negocio,
-            macrozonaId,
-        } = filters;
+        const { year, month } = filters;
+        const where = this.buildBaseWhere(filters);
 
-        const where: any = {};
-
-        // Filtros básicos
-        if (idColaborador) {
-            where.idColaborador = idColaborador;
-        }
-        if (estado) {
-            where.estado = estado;
-        }
-        if (semana) {
-            where.semana = semana;
-        }
-        if (idRepresentada) {
-            where.idRepresentada = idRepresentada;
-        }
-
-        if (programada !== undefined) where.programada = filters.programada;
-
-        // Filtro por vegetación (a través de cultivo)
-        if (idVegetacion) {
-            where.Cultivo = {
-                Variedad: {
-                    Vegetacion: {
-                        id: idVegetacion,
-                    },
-                },
-            };
-        }
-
-        // Filtro por familia (a través de cultivo)
-        if (idFamilia) {
-            where.Cultivo = {
-                ...where.Cultivo,
-                Variedad: {
-                    ...where.Cultivo?.Variedad,
-                    Vegetacion: {
-                        ...where.Cultivo?.Variedad?.Vegetacion,
-                        idFamilia: idFamilia,
-                    },
-                },
-            };
-        }
-
-        // Filtro por punto de contacto
-        if (idPuntoContacto) {
-            where.Contacto = {
-                idPuntoContacto: idPuntoContacto,
-            };
-        }
-
-        // Filtro por contacto
-        if (idContacto) {
-            where.idContacto = idContacto;
-        }
-
-        // Filtro por subLabor
-        if (idSubLabor1) {
-            where.LaborVisita = {
-                some: {
-                    idSubLabor1: idSubLabor1,
-                },
-            };
-        }
-
-        if (idSubLabor2) {
-            where.LaborVisita = {
-                some: {
-                    idSubLabor2: idSubLabor2,
-                },
-            };
-        }
-
-        // Filtro por empresa
-        if (empresa) {
-            where.empresa = { contains: empresa };
-        }
-
-        // Filtro por negocio
-        if (negocio) {
-            where.negocio = { contains: negocio };
-        }
-
-        // Filtro por macrozonaId
-        if (macrozonaId) {
-            where.macrozonaId = macrozonaId;
-        }
-
-        // Filtros de fecha (usamos updatedAt como ejemplo; puede cambiarse según el negocio)
         if (year) {
             where.updatedAt = {
                 gte: new Date(year, 0, 1),
@@ -907,7 +781,8 @@ export class VisitaService {
                     },
                     Contacto: {
                         include: {
-                            PuntoContacto: true,
+                            ClienteVendedorExactus: true,
+                            ClienteVendedorGC: true,
                         },
                     },
                     Cultivo: {
@@ -956,6 +831,8 @@ export class VisitaService {
                     detalle: visita.detalle,
                     latitud: visita.latitud,
                     longitud: visita.longitud,
+                    latitudFin: visita.latitudFin,
+                    longitudFin: visita.longitudFin,
                     empGrupo: visita.motivo,
                     empresa: visita.empresa,
                     programada: visita.programada,
@@ -974,8 +851,12 @@ export class VisitaService {
                           }`.trim()
                         : '',
                     cargo: visita.Contacto?.cargo,
-                    idPuntoContacto: visita.Contacto?.idPunto,
-                    puntoContacto: visita.Contacto?.PuntoContacto?.nombre,
+                    clienteVendedorId:
+                        visita.Contacto?.clienteExactusId ||
+                        visita.Contacto?.clienteGestionCId,
+                    clienteVendedor:
+                        visita.Contacto?.ClienteVendedorExactus?.nomcli ||
+                        visita.Contacto?.ClienteVendedorGC?.nomcli,
                     idCultivo: visita.idCultivo,
                     idVegetacion: visita.Cultivo?.Variedad?.Vegetacion?.id,
                     cultivo: visita.Cultivo?.Variedad?.Vegetacion?.nombre,
@@ -999,73 +880,10 @@ export class VisitaService {
         }
     }
 
-    async getPuntoContactoRanking(filters: VisitaFilters = {}): Promise<any> {
-        // Construir objeto where basado en los filtros
-        const {
-            idColaborador,
-            estado,
-            semana,
-            year,
-            month,
-            idVegetacion,
-            idFamilia,
-            idPuntoContacto,
-            idContacto,
-            idRepresentada,
-            idSubLabor1,
-            idSubLabor2,
-            programada,
-            empresa,
-            negocio,
-            macrozonaId,
-        } = filters;
-        const where: any = {};
-        if (idColaborador) where.idColaborador = idColaborador;
-        if (estado) where.estado = estado;
-        if (semana) where.semana = semana;
-        if (idRepresentada) where.idRepresentada = idRepresentada;
-        if (programada !== undefined) where.programada = programada;
+    async getClienteVendedorRanking(filters: VisitaFilters = {}): Promise<any> {
+        const { year, month } = filters;
+        const where = this.buildBaseWhere(filters);
 
-        // Filtro por empresa
-        if (empresa) {
-            where.empresa = { contains: empresa };
-        }
-
-        // Filtro por negocio
-        if (negocio) {
-            where.negocio = { contains: negocio };
-        }
-
-        // Filtro por macrozonaId
-        if (macrozonaId) {
-            where.macrozonaId = macrozonaId;
-        }
-
-        if (idVegetacion) {
-            where.Cultivo = { Variedad: { Vegetacion: { id: idVegetacion } } };
-        }
-        if (idFamilia) {
-            where.Cultivo = {
-                ...where.Cultivo,
-                Variedad: {
-                    ...where.Cultivo?.Variedad,
-                    Vegetacion: {
-                        ...where.Cultivo?.Variedad?.Vegetacion,
-                        idFamilia: idFamilia,
-                    },
-                },
-            };
-        }
-        if (idPuntoContacto) {
-            where.Contacto = { idPuntoContacto: idPuntoContacto };
-        }
-        if (idContacto) where.idContacto = idContacto;
-        if (idSubLabor1) {
-            where.LaborVisita = { some: { idSubLabor1: idSubLabor1 } };
-        }
-        if (idSubLabor2) {
-            where.LaborVisita = { some: { idSubLabor2: idSubLabor2 } };
-        }
         if (year) {
             where.updatedAt = {
                 gte: new Date(year, 0, 1),
@@ -1085,7 +903,8 @@ export class VisitaService {
             include: {
                 Contacto: {
                     include: {
-                        PuntoContacto: true,
+                        ClienteVendedorExactus: true,
+                        ClienteVendedorGC: true,
                     },
                 },
             },
@@ -1094,7 +913,7 @@ export class VisitaService {
         const total = visitas.length;
         if (total === 0) return [];
 
-        // Agrupar visitas por PuntoContacto
+        // Agrupar visitas por Cliente (Exactus o GC)
         const counts: {
             [key: string]: {
                 id: number;
@@ -1104,14 +923,17 @@ export class VisitaService {
             };
         } = {};
         visitas.forEach((visita) => {
-            const punto = visita.Contacto?.PuntoContacto;
-            if (punto?.nombre) {
-                const key = punto.nombre;
+            const clienteExactus = visita.Contacto?.ClienteVendedorExactus;
+            const clienteGC = visita.Contacto?.ClienteVendedorGC;
+
+            let cliente = clienteExactus || clienteGC;
+            if (cliente?.nomcli) {
+                const key = cliente.nomcli;
                 if (!counts[key]) {
                     counts[key] = {
-                        id: punto.id,
-                        nombre: punto.nombre,
-                        numDoc: punto.numDoc!,
+                        id: cliente.id,
+                        nombre: cliente.nomcli,
+                        numDoc: cliente.codcli || '',
                         count: 0,
                     };
                 }
@@ -1166,6 +988,8 @@ export class VisitaService {
                                     detalle: dto.detalle,
                                     latitud: dto.latitud,
                                     longitud: dto.longitud,
+                                    latitudFin: dto.latitudFin,
+                                    longitudFin: dto.longitudFin,
                                     idColaborador: dto.idColaborador,
                                     idContacto: dto.idContacto,
                                     idCultivo: dto.idCultivo,
@@ -1206,68 +1030,7 @@ export class VisitaService {
         periodoComparativo: { tipo: string; desde?: Date; hasta?: Date },
         filters: VisitaFilters = {}
     ) {
-        // Construir where base sin fechas
-        const {
-            idColaborador,
-            estado,
-            semana,
-            idVegetacion,
-            idFamilia,
-            idPuntoContacto,
-            idContacto,
-            idRepresentada,
-            idSubLabor1,
-            idSubLabor2,
-            programada,
-            empresa,
-            negocio,
-            macrozonaId,
-        } = filters;
-        const whereBase: any = {};
-        if (idColaborador) whereBase.idColaborador = idColaborador;
-        if (estado) whereBase.estado = estado;
-        if (semana) whereBase.semana = semana;
-        if (idRepresentada) whereBase.idRepresentada = idRepresentada;
-        if (programada !== undefined) whereBase.programada = programada;
-        if (idVegetacion) {
-            whereBase.Cultivo = {
-                Variedad: { Vegetacion: { id: idVegetacion } },
-            };
-        }
-        if (idFamilia) {
-            whereBase.Cultivo = {
-                ...whereBase.Cultivo,
-                Variedad: {
-                    ...whereBase.Cultivo?.Variedad,
-                    Vegetacion: {
-                        ...whereBase.Cultivo?.Variedad?.Vegetacion,
-                        idFamilia: idFamilia,
-                    },
-                },
-            };
-        }
-        if (idPuntoContacto)
-            whereBase.Contacto = { idPuntoContacto: idPuntoContacto };
-        if (idContacto) whereBase.idContacto = idContacto;
-        if (idSubLabor1)
-            whereBase.LaborVisita = { some: { idSubLabor1: idSubLabor1 } };
-        if (idSubLabor2)
-            whereBase.LaborVisita = { some: { idSubLabor2: idSubLabor2 } };
-
-        // Filtro por empresa
-        if (empresa) {
-            whereBase.empresa = { contains: empresa };
-        }
-
-        // Filtro por negocio
-        if (negocio) {
-            whereBase.negocio = { contains: negocio };
-        }
-
-        // Filtro por macrozonaId
-        if (macrozonaId) {
-            whereBase.macrozonaId = macrozonaId;
-        }
+        const whereBase = this.buildBaseWhere(filters);
 
         // Calcular periodos
         const periodo1 = calcularPeriodo(
