@@ -174,3 +174,14 @@ export interface GestionVisitasFilters {
     negocio?: string;
     macrozonaId?: number;
 }
+
+export interface CultivoAgricultorFilters {
+    contactoId?: number;
+    vegetacionId?: number;
+}
+
+export interface VisitaCultivoAgricultorFilters {
+    visitaId?: number;
+    cultivoAgricultorId?: number;
+    contactoId?: number;
+}

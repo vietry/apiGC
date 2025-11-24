@@ -11,6 +11,8 @@ export * from './dashboard.service';
 export * from './articulo.service';
 export * from './blanco.service';
 export * from './cultivo.service';
+export * from './cultivo-agricultor.service';
+export * from './visita-cultivo-agricultor.service';
 export * from './vegetacion.service';
 export * from './variedad.service';
 export * from './distrito.service';

@@ -75,6 +75,8 @@ export class CultivoService {
                     observacion: createCultivoDto.observacion,
                     idFundo: createCultivoDto.idFundo,
                     idVariedad: createCultivoDto.idVariedad,
+                    nomAsesor: createCultivoDto.nomAsesor,
+                    numAsesor: createCultivoDto.numAsesor,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -90,6 +92,8 @@ export class CultivoService {
                 observacion: cultivo.observacion,
                 idFundo: cultivo.idFundo,
                 idVariedad: cultivo.idVariedad,
+                nomAsesor: cultivo.nomAsesor,
+                numAsesor: cultivo.numAsesor,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -187,6 +191,8 @@ export class CultivoService {
                         idPunto: cultivo.Fundo.PuntoContacto?.id,
                         idDistrito: cultivo.Fundo.idDistrito,
                         punto: cultivo.Fundo.PuntoContacto?.nombre,
+                        nomAsesor: cultivo.nomAsesor,
+                        numAsesor: cultivo.numAsesor,
                     };
                 }),
             };
@@ -246,6 +252,8 @@ export class CultivoService {
                         idVegetacion: cultivo.Variedad.Vegetacion.id,
                         idPunto: cultivo.Fundo.PuntoContacto?.id,
                         idDistrito: cultivo.Fundo.idDistrito,
+                        nomAsesor: cultivo.nomAsesor,
+                        numAsesor: cultivo.numAsesor,
                     };
                 }),
             };
@@ -295,6 +303,8 @@ export class CultivoService {
                 idDistrito: cultivo.Fundo.idDistrito,
                 idPunto: cultivo.Fundo.PuntoContacto?.id,
                 punto: cultivo.Fundo.PuntoContacto?.nombre,
+                nomAsesor: cultivo.nomAsesor,
+                numAsesor: cultivo.numAsesor,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -370,6 +380,8 @@ export class CultivoService {
                         idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
                         idDistrito: cultivo.Fundo.idDistrito,
                         tipoContacto: cultivo.Fundo.ContactoPunto?.tipo,
+                        nomAsesor: cultivo.nomAsesor,
+                        numAsesor: cultivo.numAsesor,
                     };
                 }),
             };
@@ -437,6 +449,8 @@ export class CultivoService {
                         idPunto: cultivo.Fundo.PuntoContacto?.id,
                         idContactoPunto: cultivo.Fundo.ContactoPunto?.id,
                         idDistrito: cultivo.Fundo?.idDistrito,
+                        nomAsesor: cultivo.nomAsesor,
+                        numAsesor: cultivo.numAsesor,
                     };
                 }),
             };

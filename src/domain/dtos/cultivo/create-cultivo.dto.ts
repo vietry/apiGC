@@ -7,7 +7,9 @@ export class CreateCultivoDto {
         public readonly observacion: string | null,
         public readonly poblacion: number | null,
         public readonly idFundo: number,
-        public readonly idVariedad: number
+        public readonly idVariedad: number,
+        public readonly nomAsesor: string | null,
+        public readonly numAsesor: string | null
     ) {}
 
     static async create(object: {
@@ -22,6 +24,8 @@ export class CreateCultivoDto {
             poblacion,
             idFundo,
             idVariedad,
+            nomAsesor,
+            numAsesor,
         } = object;
 
         let hectareasNumber = hectareas;
@@ -62,7 +66,9 @@ export class CreateCultivoDto {
                 observacion,
                 poblacionNumber ?? null,
                 idFundoNumber,
-                idVariedadNumber
+                idVariedadNumber,
+                nomAsesor ?? null,
+                numAsesor ?? null
             ),
         ];
     }

@@ -44,6 +44,9 @@ export class ContactoPuntoService {
                     activo: createContactoPuntoDto.activo,
                     idPunto: createContactoPuntoDto.idPunto,
                     idGte: createContactoPuntoDto.idGte,
+                    nomAsesor: createContactoPuntoDto.nomAsesor,
+                    numAsesor: createContactoPuntoDto.numAsesor,
+                    referente: createContactoPuntoDto.referente,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -189,6 +192,9 @@ export class ContactoPuntoService {
                             tipoDocPunto: contacto.PuntoContacto.tipoDoc,
                             numDocPunto: contacto.PuntoContacto.numDoc,
                             idGte: contacto.idGte,
+                            nomAsesor: contacto.nomAsesor,
+                            numAsesor: contacto.numAsesor,
+                            referente: contacto.referente,
                         };
                     }),
             };
@@ -287,6 +293,9 @@ export class ContactoPuntoService {
                     tipoDoc: contacto.PuntoContacto.tipoDoc,
                     numDocPunto: contacto.PuntoContacto.numDoc,
                     idGte: contacto.idGte,
+                    nomAsesor: contacto.nomAsesor,
+                    numAsesor: contacto.numAsesor,
+                    referente: contacto.referente,
                 })),
             };
         } catch (error) {

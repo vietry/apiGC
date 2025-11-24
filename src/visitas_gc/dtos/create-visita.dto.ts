@@ -24,7 +24,9 @@ export class CreateVisitaDto {
         public readonly empresa: string | null,
         public readonly programada: boolean | null,
         public readonly negocio: string | null,
-        public readonly macrozonaId: number | null
+        public readonly macrozonaId: number | null,
+        public readonly createdAt?: Date,
+        public readonly updatedAt?: Date
     ) {}
 
     static async create(object: {
@@ -56,6 +58,8 @@ export class CreateVisitaDto {
             programada,
             negocio,
             macrozonaId,
+            createdAt,
+            updatedAt,
         } = object;
 
         if (!idColaborador || isNaN(Number(idColaborador))) {
@@ -75,6 +79,23 @@ export class CreateVisitaDto {
             const num = Number(value);
             return isNaN(num) ? null : num;
         };
+
+        let parsedCreatedAt: Date | undefined;
+        let parsedUpdatedAt: Date | undefined;
+
+        if (createdAt) {
+            parsedCreatedAt = new Date(createdAt);
+            if (isNaN(parsedCreatedAt.getTime())) {
+                return ['createdAt debe ser una fecha válida'];
+            }
+        }
+
+        if (updatedAt) {
+            parsedUpdatedAt = new Date(updatedAt);
+            if (isNaN(parsedUpdatedAt.getTime())) {
+                return ['updatedAt debe ser una fecha válida'];
+            }
+        }
 
         return [
             undefined,
@@ -103,7 +124,9 @@ export class CreateVisitaDto {
                 empresa ?? null,
                 programada !== undefined ? Boolean(programada) : null,
                 negocio ?? null,
-                macrozonaId !== undefined ? Number(macrozonaId) : null
+                macrozonaId !== undefined ? Number(macrozonaId) : null,
+                parsedCreatedAt,
+                parsedUpdatedAt
             ),
         ];
     }

@@ -11,6 +11,8 @@ import { ImageRoutes } from './images/routes';
 import { FotoDemoplotRoutes } from './fotos-demoplot/routes';
 import { UsuarioRoutes } from './usuarios/routes';
 import { CultivoRoutes } from './cultivos/routes';
+import { CultivoAgricultorRoutes } from './cultivo-agricultor/routes';
+import { VisitaCultivoAgricultorRoutes } from './visita-cultivo-agricultor/routes';
 import { BlancoBiologicoRoutes } from './blancos/routes';
 import { ArticuloRoutes } from './articulos/routes';
 import { VegetacionRoutes } from './vegetacion/routes';
@@ -48,6 +50,7 @@ import { ContactoRoutes } from '../visitas_gc/routes/contacto.routes';
 import { direccionEntregaRoutes } from '../visitas_gc/routes/direccion-entrega.routes';
 import { UbicacionClienteRoutes } from '../visitas_gc/routes/ubicacion-cliente.routes';
 import { FamiliaVisitaRoutes } from '../visitas_gc/routes/familia-visita.routes';
+import { SyncRoutes } from '../visitas_gc/routes/sync.routes';
 
 export class AppRoutes {
     static get routes(): Router {
@@ -66,6 +69,11 @@ export class AppRoutes {
         router.use('/api/images', ImageRoutes.routes);
         router.use('/api/fotosdemoplots', FotoDemoplotRoutes.routes);
         router.use('/api/cultivos', CultivoRoutes.routes);
+        router.use('/api/cultivos-agricultor', CultivoAgricultorRoutes.routes);
+        router.use(
+            '/api/visitas-cultivo-agricultor',
+            VisitaCultivoAgricultorRoutes.routes
+        );
         router.use('/api/blancos', BlancoBiologicoRoutes.routes);
         router.use('/api/articulos', ArticuloRoutes.routes);
         router.use('/api/vegetacion', VegetacionRoutes.routes);
@@ -107,6 +115,7 @@ export class AppRoutes {
         router.use('/api/ubicacion-cliente', UbicacionClienteRoutes.routes);
         router.use('/api/contacto', ContactoRoutes.routes);
         router.use('/api/familias-visita', FamiliaVisitaRoutes.routes);
+        router.use('/api/sync', SyncRoutes.routes);
         return router;
     }
 }

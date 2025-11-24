@@ -25,7 +25,8 @@ export class UpdateVisitaDto {
         public readonly empresa?: string | null,
         public readonly programada?: boolean | null,
         public readonly negocio?: string | null,
-        public readonly macrozonaId?: number | null //public readonly updatedBy?: number | null
+        public readonly macrozonaId?: number | null,
+        public readonly updatedAt?: Date
     ) {}
 
     get values(): { [key: string]: any } {
@@ -55,6 +56,7 @@ export class UpdateVisitaDto {
             'programada',
             'negocio',
             'macrozonaId',
+            'updatedAt',
         ];
 
         return fields.reduce((acc, field) => {
@@ -96,6 +98,7 @@ export class UpdateVisitaDto {
             programada,
             negocio,
             macrozonaId,
+            updatedAt,
             //updatedBy,
         } = object;
 
@@ -114,6 +117,14 @@ export class UpdateVisitaDto {
             const num = Number(value);
             return !num ? undefined : num;
         };
+
+        let parsedUpdatedAt: Date | undefined;
+        if (updatedAt) {
+            parsedUpdatedAt = new Date(updatedAt);
+            if (isNaN(parsedUpdatedAt.getTime())) {
+                return ['updatedAt debe ser una fecha válida'];
+            }
+        }
 
         return [
             undefined,
@@ -143,7 +154,8 @@ export class UpdateVisitaDto {
                 empresa ?? undefined,
                 programada !== undefined ? Boolean(programada) : undefined,
                 negocio ?? undefined,
-                macrozonaId !== undefined ? Number(macrozonaId) : undefined
+                macrozonaId !== undefined ? Number(macrozonaId) : undefined,
+                parsedUpdatedAt
                 //updatedBy !== undefined ? Number(updatedBy) : undefined
             ),
         ];

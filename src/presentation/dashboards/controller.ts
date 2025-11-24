@@ -256,4 +256,28 @@ export class DashboardController {
             this.handleError(res, error);
         }
     };
+
+    getDemoplotReport = async (req: Request, res: Response) => {
+        try {
+            const { idGte, year, month } = req.query;
+
+            // Validar parámetros requeridos
+            if (!idGte || !year || !month) {
+                return res.status(400).json({
+                    error: 'Los parámetros idGte, year y month son obligatorios',
+                });
+            }
+
+            const report =
+                await this.dashboardService.getDemoplotReportByGteYearMonth(
+                    +idGte,
+                    +year,
+                    +month
+                );
+
+            res.status(200).json(report);
+        } catch (error) {
+            this.handleError(res, error);
+        }
+    };
 }

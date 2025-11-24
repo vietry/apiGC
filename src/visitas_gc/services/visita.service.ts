@@ -375,7 +375,11 @@ export class VisitaService {
             throw CustomError.badRequest(
                 `El colaborador con id ${createVisitaDto.idColaborador} no existe`
             );
+
+        // Usar fechas del cliente si están disponibles, sino usar la del servidor
         const currentDate = getCurrentDate();
+        const createdAt = createVisitaDto.createdAt || currentDate;
+        const updatedAt = createVisitaDto.updatedAt || currentDate;
 
         try {
             const visita = await prisma.visita.create({
@@ -405,8 +409,8 @@ export class VisitaService {
                     programada: createVisitaDto.programada,
                     negocio: createVisitaDto.negocio,
                     macrozonaId: createVisitaDto.macrozonaId,
-                    createdAt: currentDate,
-                    updatedAt: currentDate,
+                    createdAt: createdAt,
+                    updatedAt: updatedAt,
                 },
             });
 
@@ -419,7 +423,6 @@ export class VisitaService {
     }
 
     async updateVisita(updateVisitaDto: UpdateVisitaDto) {
-        const currentDate = getCurrentDate();
         const visitaExists = await prisma.visita.findUnique({
             where: { id: updateVisitaDto.id },
         });
@@ -428,12 +431,16 @@ export class VisitaService {
                 `Visita con id ${updateVisitaDto.id} no existe`
             );
 
+        // Usar updatedAt del cliente si está disponible
+        const currentDate = getCurrentDate();
+        const updatedAt = updateVisitaDto.updatedAt || currentDate;
+
         try {
             const updatedVisita = await prisma.visita.update({
                 where: { id: updateVisitaDto.id },
                 data: {
                     ...updateVisitaDto.values,
-                    updatedAt: currentDate,
+                    updatedAt: updatedAt,
                 },
             });
             return updatedVisita;
@@ -972,6 +979,9 @@ export class VisitaService {
                         const results = [];
                         for (const dto of batch) {
                             const currentDate = getCurrentDate();
+                            const createdAt = dto.createdAt || currentDate;
+                            const updatedAt = dto.updatedAt || currentDate;
+
                             const visita = await prismaClient.visita.create({
                                 data: {
                                     programacion: dto.programacion,
@@ -998,8 +1008,8 @@ export class VisitaService {
                                     empresa: dto.empresa,
                                     programada: dto.programada,
                                     negocio: dto.negocio,
-                                    createdAt: currentDate,
-                                    updatedAt: currentDate,
+                                    createdAt: createdAt,
+                                    updatedAt: updatedAt,
                                 },
                             });
                             results.push(visita);

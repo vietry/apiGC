@@ -8,7 +8,9 @@ export class UpdateCultivoDto {
         public readonly observacion?: string | null,
         public readonly poblacion?: number | null,
         public readonly idFundo?: number,
-        public readonly idVariedad?: number
+        public readonly idVariedad?: number,
+        public readonly nomAsesor?: string | null,
+        public readonly numAsesor?: string | null
     ) {}
 
     get values() {
@@ -21,6 +23,8 @@ export class UpdateCultivoDto {
         if (this.poblacion !== undefined) returnObj.poblacion = this.poblacion;
         if (this.idFundo) returnObj.idFundo = this.idFundo;
         if (this.idVariedad) returnObj.idVariedad = this.idVariedad;
+        if (this.nomAsesor !== undefined) returnObj.nomAsesor = this.nomAsesor;
+        if (this.numAsesor !== undefined) returnObj.numAsesor = this.numAsesor;
 
         return returnObj;
     }
@@ -38,6 +42,8 @@ export class UpdateCultivoDto {
             poblacion,
             idFundo,
             idVariedad,
+            nomAsesor,
+            numAsesor,
         } = props;
 
         if (!id || isNaN(Number(id))) return ['ID inválido o faltante'];
@@ -78,7 +84,9 @@ export class UpdateCultivoDto {
                 observacion,
                 poblacionNumber,
                 idFundoNumber,
-                idVariedadNumber
+                idVariedadNumber,
+                nomAsesor,
+                numAsesor
             ),
         ];
     }

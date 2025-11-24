@@ -1303,4 +1303,106 @@ export class DashboardService {
             throw CustomError.internalServer(`${error}`);
         }
     }
+
+    async getDemoplotReportByGteYearMonth(
+        idGte: number,
+        year: number,
+        month: number
+    ) {
+        try {
+            // Validar que el GTE existe
+            const gteExists = await prisma.gte.findUnique({
+                where: { id: idGte },
+                select: {
+                    id: true,
+                    Usuario: {
+                        select: {
+                            nombres: true,
+                            apellidos: true,
+                        },
+                    },
+                },
+            });
+
+            if (!gteExists) {
+                throw CustomError.badRequest(`GTE con id ${idGte} no existe`);
+            }
+
+            // Calcular rango de fechas del mes
+            const startDate = new Date(
+                Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+            );
+            const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+
+            // Obtener demoplots del GTE en el mes especificado
+            const demoplots = await prisma.demoPlot.findMany({
+                where: {
+                    idGte: idGte,
+                    programacion: {
+                        gte: startDate,
+                        lt: endDate,
+                    },
+                },
+                orderBy: {
+                    programacion: 'desc',
+                },
+                include: {
+                    Familia: {
+                        select: {
+                            nombre: true,
+                        },
+                    },
+                    ContactoDelPunto: {
+                        select: {
+                            nombre: true,
+                            apellido: true,
+                            PuntoContacto: {
+                                select: {
+                                    nombre: true,
+                                },
+                            },
+                        },
+                    },
+                    Cultivo: {
+                        select: {
+                            Variedad: {
+                                select: {
+                                    Vegetacion: {
+                                        select: {
+                                            nombre: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            // Mapear los resultados con los campos solicitados
+            const reportData = demoplots.map((demoplot) => ({
+                id: demoplot.id,
+                objetivo: demoplot.objetivo,
+                estado: demoplot.estado,
+                agricultor: `${demoplot.ContactoDelPunto.nombre} ${demoplot.ContactoDelPunto.apellido}`,
+                cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
+                tienda: demoplot.ContactoDelPunto.PuntoContacto.nombre,
+                producto: demoplot.Familia?.nombre.trim(),
+                //programacion: demoplot.programacion,
+                instalacion: demoplot.instalacion,
+                //seguimiento: demoplot.seguimiento,
+                finalizacion: demoplot.finalizacion,
+                //presentacion: demoplot.presentacion,
+            }));
+
+            return {
+                nombreGte: `${gteExists.Usuario?.nombres} ${gteExists.Usuario?.apellidos}`,
+                periodo: `${month}/${year}`,
+                totalDemoplots: reportData.length,
+                demoplots: reportData,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
 }

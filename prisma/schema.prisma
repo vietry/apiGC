@@ -190,6 +190,7 @@ model Contacto {
   ClienteVendedorGC      ClienteVendedorGC?      @relation(fields: [clienteGestionCId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Contacto_ClienteGestionC")
   Colaborador            Colaborador?            @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Contacto_CreatedByColaborador")
   UbicacionCliente       UbicacionCliente?       @relation(fields: [ubicacionId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Contacto_UbicacionId")
+  CultivoAgricultor      CultivoAgricultor[]
   Visita                 Visita[]
 }
 
@@ -206,6 +207,8 @@ model Cultivo {
   updatedAt     DateTime?  @db.DateTime
   centroPoblado String?    @db.VarChar(70)
   poblacion     Int?
+  nomAsesor     String?    @db.VarChar(50)
+  numAsesor     String?    @db.VarChar(15)
   Fundo         Fundo      @relation(fields: [idFundo], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Cultivo_Fundo1")
   Variedad      Variedad   @relation(fields: [idVariedad], references: [id], onUpdate: NoAction, map: "fk_Cultivo_Variedad1")
   DemoPlot      DemoPlot[]
@@ -393,42 +396,43 @@ model Variedad {
 }
 
 model Visita {
-  id             Int              @id(map: "PK__Visita__3213E83FA3BA3D00") @default(autoincrement())
-  programacion   DateTime?        @db.DateTime
-  duracionP      Int?
-  objetivo       String?          @db.VarChar(255)
-  semana         Int?
-  estado         String?          @db.VarChar(12)
-  numReprog      Int?
-  inicio         DateTime?        @db.DateTime
-  finalizacion   DateTime?        @db.DateTime
-  duracionV      Int?
-  resultado      String?          @db.VarChar(45)
-  aFuturo        String?          @db.VarChar(150)
-  detalle        String?          @db.VarChar(255)
-  latitud        Decimal?         @db.Decimal(10, 6)
-  longitud       Decimal?         @db.Decimal(10, 6)
-  idColaborador  Int
-  idContacto     Int?
-  idCultivo      Int?
-  idRepresentada Int?
-  createdAt      DateTime?        @db.DateTime
-  updatedAt      DateTime?        @db.DateTime
-  motivo         String?          @db.VarChar(255)
-  programada     Boolean?
-  empresa        String?          @db.VarChar(15)
-  negocio        String?          @db.VarChar(20)
-  macrozonaId    Int?
-  latitudFin     Decimal?         @db.Decimal(10, 6)
-  longitudFin    Decimal?         @db.Decimal(10, 6)
-  FotoVisita     FotoVisita[]
-  LaborVisita    LaborVisita[]
-  Colaborador    Colaborador      @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_Visita_Colaborador1")
-  Contacto       Contacto?        @relation(fields: [idContacto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Contacto1")
-  Cultivo        Cultivo?         @relation(fields: [idCultivo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Cultivo1")
-  SuperZona      SuperZona?       @relation(fields: [macrozonaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Macrozona")
-  Representada   Representada?    @relation(fields: [idRepresentada], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Representada1")
-  VisitaProducto VisitaProducto[]
+  id                      Int                       @id(map: "PK__Visita__3213E83FA3BA3D00") @default(autoincrement())
+  programacion            DateTime?                 @db.DateTime
+  duracionP               Int?
+  objetivo                String?                   @db.VarChar(255)
+  semana                  Int?
+  estado                  String?                   @db.VarChar(12)
+  numReprog               Int?
+  inicio                  DateTime?                 @db.DateTime
+  finalizacion            DateTime?                 @db.DateTime
+  duracionV               Int?
+  resultado               String?                   @db.VarChar(45)
+  aFuturo                 String?                   @db.VarChar(150)
+  detalle                 String?                   @db.VarChar(255)
+  latitud                 Decimal?                  @db.Decimal(10, 6)
+  longitud                Decimal?                  @db.Decimal(10, 6)
+  idColaborador           Int
+  idContacto              Int?
+  idCultivo               Int?
+  idRepresentada          Int?
+  createdAt               DateTime?                 @db.DateTime
+  updatedAt               DateTime?                 @db.DateTime
+  motivo                  String?                   @db.VarChar(255)
+  programada              Boolean?
+  empresa                 String?                   @db.VarChar(15)
+  negocio                 String?                   @db.VarChar(20)
+  macrozonaId             Int?
+  latitudFin              Decimal?                  @db.Decimal(10, 6)
+  longitudFin             Decimal?                  @db.Decimal(10, 6)
+  FotoVisita              FotoVisita[]
+  LaborVisita             LaborVisita[]
+  Colaborador             Colaborador               @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_Visita_Colaborador1")
+  Contacto                Contacto?                 @relation(fields: [idContacto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Contacto1")
+  Cultivo                 Cultivo?                  @relation(fields: [idCultivo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Cultivo1")
+  SuperZona               SuperZona?                @relation(fields: [macrozonaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Macrozona")
+  Representada            Representada?             @relation(fields: [idRepresentada], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Visita_Representada1")
+  VisitaCultivoAgricultor VisitaCultivoAgricultor[]
+  VisitaProducto          VisitaProducto[]
 }
 
 model ZonaAnterior {
@@ -620,6 +624,7 @@ model Vegetacion {
   nomColombia        String?              @db.VarChar(45)
   BlancoBiologico    BlancoBiologico[]
   Charla             Charla[]
+  CultivoAgricultor  CultivoAgricultor[]
   NuevaPlanificacion NuevaPlanificacion[]
   Variedad           Variedad[]
 }
@@ -638,6 +643,9 @@ model ContactoPunto {
   tipo                                       String        @db.VarChar(10)
   idGte                                      Int?
   activo                                     Boolean?
+  nomAsesor                                  String?       @db.VarChar(50)
+  numAsesor                                  String?       @db.VarChar(15)
+  referente                                  Boolean?
   Asistencia                                 Asistencia[]
   Charla_Charla_idPropietarioToContactoPunto Charla[]      @relation("Charla_idPropietarioToContactoPunto")
   Charla_Charla_idMostradorToContactoPunto   Charla[]      @relation("Charla_idMostradorToContactoPunto")
@@ -1080,6 +1088,7 @@ model ClienteVendedorGC {
   createdBy                                            Int
   updatedAt                                            DateTime        @default(dbgenerated("sysutcdatetime()"), map: "DF__ClienteVe__updat__5F9E293D")
   updatedBy                                            Int?
+  newId                                                Int?
   Colaborador_ClienteVendedorGC_createdByToColaborador Colaborador     @relation("ClienteVendedorGC_createdByToColaborador", fields: [createdBy], references: [id], onUpdate: NoAction, map: "FK__ClienteVe__creat__5EAA0504")
   Empresa                                              Empresa         @relation(fields: [empresaId], references: [id], onUpdate: NoAction, map: "FK__ClienteVe__empre__5BCD9859")
   Colaborador_ClienteVendedorGC_updatedByToColaborador Colaborador?    @relation("ClienteVendedorGC_updatedByToColaborador", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK__ClienteVe__updat__60924D76")
@@ -1138,8 +1147,35 @@ model FamiliaVisita {
   clasificacion  String?          @db.VarChar(20)
   proveedor      String?          @db.VarChar(15)
   vigente        Boolean          @default(true, map: "DF__FamiliaVi__vigen__02E7657A")
-  esquema        String           @db.VarChar(10)
+  esquema        String           @db.VarChar(11)
   createdAt      DateTime?
   updatedAt      DateTime?
   VisitaProducto VisitaProducto[]
+}
+
+model CultivoAgricultor {
+  id                      Int                       @id(map: "PK__CultivoA__3213E83F829845B1") @default(autoincrement())
+  contactoId              Int
+  vegetacionId            Int
+  createdAt               DateTime                  @default(dbgenerated("sysutcdatetime()"), map: "DF__CultivoAg__creat__2077C861")
+  createdBy               Int
+  updatedAt               DateTime                  @default(dbgenerated("sysutcdatetime()"), map: "DF__CultivoAg__updat__216BEC9A")
+  updatedBy               Int?
+  nomAsesor               String?                   @db.VarChar(100)
+  numAsesor               String?                   @db.VarChar(20)
+  Contacto                Contacto                  @relation(fields: [contactoId], references: [id], onUpdate: NoAction, map: "FK__CultivoAg__conta__1E8F7FEF")
+  Vegetacion              Vegetacion                @relation(fields: [vegetacionId], references: [id], onUpdate: NoAction, map: "FK__CultivoAg__veget__1F83A428")
+  VisitaCultivoAgricultor VisitaCultivoAgricultor[]
+}
+
+model VisitaCultivoAgricultor {
+  id                  Int               @id(map: "PK__VisitaCu__3213E83F9D61F3A7") @default(autoincrement())
+  visitaId            Int
+  cultivoAgricultorId Int
+  createdAt           DateTime          @default(dbgenerated("sysutcdatetime()"), map: "DF__VisitaCul__creat__2CDD9F46")
+  createdBy           Int
+  updatedAt           DateTime          @default(dbgenerated("sysutcdatetime()"), map: "DF__VisitaCul__updat__2DD1C37F")
+  updatedBy           Int?
+  CultivoAgricultor   CultivoAgricultor @relation(fields: [cultivoAgricultorId], references: [id], onUpdate: NoAction, map: "FK__VisitaCul__culti__253C7D7E")
+  Visita              Visita            @relation(fields: [visitaId], references: [id], onUpdate: NoAction, map: "FK__VisitaCul__visit__24485945")
 }

@@ -34,6 +34,10 @@ export * from './vegetacion/update-vegetacion.dto';
 export * from './cultivo/create-cultivo.dto';
 export * from './cultivo/update-cultivo.dto';
 
+export * from './cultivo-agricultor';
+
+export * from './visita-cultivo-agricultor';
+
 export * from './zona-anterior/create-zona-anterior.dto';
 export * from './zona-anterior/update-zona-anterior.dto';
 

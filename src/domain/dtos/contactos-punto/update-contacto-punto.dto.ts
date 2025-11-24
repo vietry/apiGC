@@ -1,7 +1,6 @@
-import { Validators } from "../../../config";
+import { Validators } from '../../../config';
 
 export class UpdateContactoPuntoDto {
-
     private constructor(
         public readonly id: number,
         public readonly nombre?: string,
@@ -14,7 +13,10 @@ export class UpdateContactoPuntoDto {
         public readonly activo?: boolean | null,
         public readonly idPunto?: number,
         public readonly idGte?: number | null,
-    ){}
+        public readonly nomAsesor?: string | null,
+        public readonly numAsesor?: string | null,
+        public readonly referente?: boolean | null
+    ) {}
 
     get values() {
         const returnObj: { [key: string]: any } = {};
@@ -29,12 +31,32 @@ export class UpdateContactoPuntoDto {
         if (this.activo !== undefined) returnObj.activo = this.activo;
         if (this.idPunto) returnObj.idPunto = this.idPunto;
         if (this.idGte) returnObj.idGte = this.idGte;
+        if (this.nomAsesor !== undefined) returnObj.nomAsesor = this.nomAsesor;
+        if (this.numAsesor !== undefined) returnObj.numAsesor = this.numAsesor;
+        if (this.referente !== undefined) returnObj.referente = this.referente;
 
         return returnObj;
     }
 
-    static async create(props: { [key: string]: any }): Promise<[string?, UpdateContactoPuntoDto?]> {
-        const { id, nombre, apellido, cargo, tipo, email, celularA, celularB,activo, idPunto, idGte } = props;
+    static async create(props: {
+        [key: string]: any;
+    }): Promise<[string?, UpdateContactoPuntoDto?]> {
+        const {
+            id,
+            nombre,
+            apellido,
+            cargo,
+            tipo,
+            email,
+            celularA,
+            celularB,
+            activo,
+            idPunto,
+            idGte,
+            nomAsesor,
+            numAsesor,
+            referente,
+        } = props;
 
         if (!id || isNaN(Number(id))) {
             return ['Invalid or missing ID'];
@@ -44,7 +66,8 @@ export class UpdateContactoPuntoDto {
 
         if (idPunto !== undefined && typeof idPunto !== 'number') {
             idPuntoNumber = parseInt(idPunto);
-            if (isNaN(idPuntoNumber)) return ['idPunto debe ser un número válido'];
+            if (isNaN(idPuntoNumber))
+                return ['idPunto debe ser un número válido'];
         }
 
         if (idPuntoNumber !== undefined) {
@@ -65,8 +88,11 @@ export class UpdateContactoPuntoDto {
                 celularB,
                 activo,
                 idPuntoNumber,
-                idGte
-            )
+                idGte,
+                nomAsesor,
+                numAsesor,
+                referente
+            ),
         ];
     }
 }

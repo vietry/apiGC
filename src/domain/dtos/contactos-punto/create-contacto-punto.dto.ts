@@ -11,7 +11,10 @@ export class CreateContactoPuntoDto {
         public readonly celularB: string | null,
         public readonly activo: boolean | null,
         public readonly idPunto: number,
-        public readonly idGte: number | null
+        public readonly idGte: number | null,
+        public readonly nomAsesor: string | null,
+        public readonly numAsesor: string | null,
+        public readonly referente: boolean | null
     ) {}
 
     static async create(object: {
@@ -28,6 +31,9 @@ export class CreateContactoPuntoDto {
             activo,
             idPunto,
             idGte,
+            nomAsesor,
+            numAsesor,
+            referente,
         } = object;
 
         let idPuntoNumber = idPunto;
@@ -59,7 +65,10 @@ export class CreateContactoPuntoDto {
                 celularB,
                 activo,
                 idPuntoNumber,
-                idGte
+                idGte,
+                nomAsesor ?? null,
+                numAsesor ?? null,
+                referente ?? null
             ),
         ];
     }
