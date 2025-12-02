@@ -217,9 +217,12 @@ model Cultivo {
 
 model Departamento {
   id        String      @id(map: "PK__Departam__3213E83F2E429D76") @db.VarChar(2)
-  nombre    String      @unique(map: "UQ_nombre_Departamento") @db.VarChar(30)
+  nombre    String      @db.VarChar(30)
+  pais      String      @default("Perú", map: "DF__Departamen__pais__2EC5E7B8") @db.VarChar(30)
+  codigo    String?     @db.VarChar(6)
   Provincia Provincia[]
 
+  @@unique([nombre, pais], map: "UQ_nombre_Departamento")
   @@index([nombre], map: "idx_nombre_Departamento")
 }
 
@@ -228,6 +231,7 @@ model Distrito {
   nombre         String          @db.VarChar(40)
   idProvincia    String          @db.VarChar(4)
   idDepartamento String          @db.VarChar(2)
+  pais           String          @default("Perú", map: "DF__Distrito__pais__30AE302A") @db.VarChar(30)
   Charla         Charla[]
   ClienteUbigeo  ClienteUbigeo[]
   DemoPlot       DemoPlot[]
@@ -355,11 +359,13 @@ model Negocio {
 
 model Provincia {
   id             String       @id(map: "PK__Provinci__3213E83FFA46C972") @db.VarChar(4)
-  nombre         String       @unique(map: "UQ_nombre_Provincia") @db.VarChar(30)
+  nombre         String       @db.VarChar(30)
   idDepartamento String       @db.VarChar(2)
+  pais           String       @default("Perú", map: "DF__Provincia__pais__347EC10E") @db.VarChar(30)
   Distrito       Distrito[]
   Departamento   Departamento @relation(fields: [idDepartamento], references: [id], onUpdate: NoAction, map: "fk_Provincia_Departamento")
 
+  @@unique([nombre, pais], map: "UQ_nombre_Provincia")
   @@index([idDepartamento], map: "idx_idDepartamento_Provincia")
 }
 
@@ -1163,6 +1169,7 @@ model CultivoAgricultor {
   updatedBy               Int?
   nomAsesor               String?                   @db.VarChar(100)
   numAsesor               String?                   @db.VarChar(20)
+  cargoAsesor             String?                   @db.VarChar(50)
   Contacto                Contacto                  @relation(fields: [contactoId], references: [id], onUpdate: NoAction, map: "FK__CultivoAg__conta__1E8F7FEF")
   Vegetacion              Vegetacion                @relation(fields: [vegetacionId], references: [id], onUpdate: NoAction, map: "FK__CultivoAg__veget__1F83A428")
   VisitaCultivoAgricultor VisitaCultivoAgricultor[]

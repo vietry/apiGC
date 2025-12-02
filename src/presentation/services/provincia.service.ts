@@ -9,16 +9,20 @@ export class ProvinciaService {
 
         try {
             const [total, provincias] = await Promise.all([
-                await prisma.provincia.count(),
-                await prisma.provincia.findMany({
+                prisma.provincia.count(),
+                prisma.provincia.findMany({
                     skip: (page - 1) * limit,
                     take: limit,
                     include: {
                         Departamento: {
                             select: {
+                                id: true,
                                 nombre: true,
                             },
                         },
+                    },
+                    orderBy: {
+                        nombre: 'asc',
                     },
                 }),
             ]);
@@ -27,30 +31,37 @@ export class ProvinciaService {
                 page: page,
                 limit: limit,
                 total: total,
-                next: `/v1/provincias?page=${page + 1}&limit=${limit}`,
-                prev:
-                    page - 1 > 0
-                        ? `/v1/provincias?page=${page - 1}&limit=${limit}`
-                        : null,
-                provincias: provincias.map((provincia) => {
-                    return {
-                        id: provincia.id,
-                        nombre: provincia.nombre,
-                        idDepartamento: provincia.idDepartamento,
-                        departamento: provincia.Departamento.nombre,
-                    };
-                }),
+                provincias: provincias.map((provincia) => ({
+                    id: provincia.id,
+                    nombre: provincia.nombre,
+                    idDepartamento: provincia.idDepartamento,
+                    pais: provincia.pais,
+                    departamento: provincia.Departamento?.nombre || null,
+                })),
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
     }
 
-    async getProvincias(departamento?: string) {
+    async getProvincias(departamento?: string, pais?: string) {
         try {
             const where: any = {};
+
+            // Filtro por país
+            if (pais) {
+                where.pais = {
+                    contains: pais,
+                };
+            }
+
+            // Filtro por departamento
             if (departamento) {
-                where.Departamento = { nombre: { equals: departamento } }; // Cambio aquí
+                where.Departamento = {
+                    nombre: {
+                        contains: departamento,
+                    },
+                };
             }
 
             const provincias = await prisma.provincia.findMany({
@@ -58,9 +69,13 @@ export class ProvinciaService {
                 include: {
                     Departamento: {
                         select: {
+                            id: true,
                             nombre: true,
                         },
                     },
+                },
+                orderBy: {
+                    nombre: 'asc',
                 },
             });
 
@@ -68,7 +83,8 @@ export class ProvinciaService {
                 id: provincia.id,
                 nombre: provincia.nombre.trim(),
                 idDepartamento: provincia.idDepartamento,
-                departamento: provincia.Departamento.nombre,
+                pais: provincia.pais,
+                departamento: provincia.Departamento?.nombre || null,
             }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -82,6 +98,7 @@ export class ProvinciaService {
                 include: {
                     Departamento: {
                         select: {
+                            id: true,
                             nombre: true,
                         },
                     },
@@ -97,7 +114,8 @@ export class ProvinciaService {
                 id: provincia.id,
                 nombre: provincia.nombre,
                 idDepartamento: provincia.idDepartamento,
-                departamento: provincia.Departamento.nombre,
+                pais: provincia.pais,
+                departamento: provincia.Departamento?.nombre || null,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);

@@ -4,14 +4,21 @@ export class CreateCultivoAgricultorDto {
         public readonly vegetacionId: number,
         public readonly createdBy: number,
         public readonly nomAsesor?: string,
-        public readonly numAsesor?: string
+        public readonly numAsesor?: string,
+        public readonly cargoAsesor?: string
     ) {}
 
     static async create(props: {
         [key: string]: any;
     }): Promise<[string?, CreateCultivoAgricultorDto?]> {
-        const { contactoId, vegetacionId, createdBy, nomAsesor, numAsesor } =
-            props;
+        const {
+            contactoId,
+            vegetacionId,
+            createdBy,
+            nomAsesor,
+            numAsesor,
+            cargoAsesor,
+        } = props;
 
         if (!contactoId || Number.isNaN(Number(contactoId))) {
             return ['contactoId es requerido y debe ser un número válido'];
@@ -43,6 +50,15 @@ export class CreateCultivoAgricultorDto {
             return ['numAsesor no puede exceder los 20 caracteres'];
         }
 
+        // Validación opcional de cargoAsesor
+        if (cargoAsesor !== undefined && typeof cargoAsesor !== 'string') {
+            return ['cargoAsesor debe ser una cadena de texto'];
+        }
+
+        if (cargoAsesor && cargoAsesor.length > 50) {
+            return ['cargoAsesor no puede exceder los 50 caracteres'];
+        }
+
         return [
             undefined,
             new CreateCultivoAgricultorDto(
@@ -50,7 +66,8 @@ export class CreateCultivoAgricultorDto {
                 Number(vegetacionId),
                 Number(createdBy),
                 nomAsesor,
-                numAsesor
+                numAsesor,
+                cargoAsesor
             ),
         ];
     }

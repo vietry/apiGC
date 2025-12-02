@@ -5,7 +5,8 @@ export class UpdateCultivoAgricultorDto {
         public readonly vegetacionId?: number,
         public readonly updatedBy?: number,
         public readonly nomAsesor?: string,
-        public readonly numAsesor?: string
+        public readonly numAsesor?: string,
+        public readonly cargoAsesor?: string
     ) {}
 
     get values() {
@@ -18,6 +19,8 @@ export class UpdateCultivoAgricultorDto {
         if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
         if (this.nomAsesor !== undefined) returnObj.nomAsesor = this.nomAsesor;
         if (this.numAsesor !== undefined) returnObj.numAsesor = this.numAsesor;
+        if (this.cargoAsesor !== undefined)
+            returnObj.cargoAsesor = this.cargoAsesor;
 
         return returnObj;
     }
@@ -32,6 +35,7 @@ export class UpdateCultivoAgricultorDto {
             updatedBy,
             nomAsesor,
             numAsesor,
+            cargoAsesor,
         } = props;
 
         if (!id || Number.isNaN(Number(id))) {
@@ -78,6 +82,15 @@ export class UpdateCultivoAgricultorDto {
             return ['numAsesor no puede exceder los 20 caracteres'];
         }
 
+        // Validación de cargoAsesor
+        if (cargoAsesor !== undefined && typeof cargoAsesor !== 'string') {
+            return ['cargoAsesor debe ser una cadena de texto'];
+        }
+
+        if (cargoAsesor && cargoAsesor.length > 50) {
+            return ['cargoAsesor no puede exceder los 50 caracteres'];
+        }
+
         return [
             undefined,
             new UpdateCultivoAgricultorDto(
@@ -86,7 +99,8 @@ export class UpdateCultivoAgricultorDto {
                 vegetacionIdNumber,
                 updatedByNumber,
                 nomAsesor,
-                numAsesor
+                numAsesor,
+                cargoAsesor
             ),
         ];
     }

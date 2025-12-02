@@ -2,16 +2,40 @@ import { prisma } from '../../data/sqlserver';
 import { CustomError, PaginationDto } from '../../domain';
 
 export class DistritoService {
-    async getDistritos(departamento?: string, provincia?: string) {
+    async getDistritos(
+        departamento?: string,
+        provincia?: string,
+        pais?: string
+    ) {
         try {
             const where: any = {};
-            if (departamento) {
-                where.Provincia = {
-                    Departamento: { nombre: { contains: departamento } },
+
+            // Filtro por país
+            if (pais) {
+                where.pais = {
+                    contains: pais,
                 };
             }
+
+            // Filtro por departamento a través de la relación con Provincia
+            if (departamento) {
+                where.Provincia = {
+                    Departamento: {
+                        nombre: {
+                            contains: departamento,
+                        },
+                    },
+                };
+            }
+
+            // Filtro por provincia
             if (provincia) {
-                where.Provincia = { nombre: { contains: provincia } };
+                where.Provincia = {
+                    ...where.Provincia,
+                    nombre: {
+                        contains: provincia,
+                    },
+                };
             }
 
             const distritos = await prisma.distrito.findMany({
@@ -19,14 +43,19 @@ export class DistritoService {
                 include: {
                     Provincia: {
                         select: {
+                            id: true,
                             nombre: true,
                             Departamento: {
                                 select: {
+                                    id: true,
                                     nombre: true,
                                 },
                             },
                         },
                     },
+                },
+                orderBy: {
+                    nombre: 'asc',
                 },
             });
 
@@ -35,8 +64,9 @@ export class DistritoService {
                 nombre: distrito.nombre,
                 idProvincia: distrito.idProvincia,
                 idDepartamento: distrito.idDepartamento,
-                provincia: distrito.Provincia.nombre,
-                departamento: distrito.Provincia.Departamento.nombre,
+                pais: distrito.pais,
+                provincia: distrito.Provincia?.nombre || null,
+                departamento: distrito.Provincia?.Departamento?.nombre || null,
             }));
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -48,21 +78,26 @@ export class DistritoService {
 
         try {
             const [total, distritos] = await Promise.all([
-                await prisma.distrito.count(),
-                await prisma.distrito.findMany({
+                prisma.distrito.count(),
+                prisma.distrito.findMany({
                     skip: (page - 1) * limit,
                     take: limit,
                     include: {
                         Provincia: {
                             select: {
+                                id: true,
                                 nombre: true,
                                 Departamento: {
                                     select: {
+                                        id: true,
                                         nombre: true,
                                     },
                                 },
                             },
                         },
+                    },
+                    orderBy: {
+                        nombre: 'asc',
                     },
                 }),
             ]);
@@ -71,16 +106,16 @@ export class DistritoService {
                 page: page,
                 limit: limit,
                 total: total,
-                distritos: distritos.map((distrito) => {
-                    return {
-                        id: distrito.id,
-                        nombre: distrito.nombre,
-                        idProvincia: distrito.idProvincia,
-                        idDepartamento: distrito.idDepartamento,
-                        provincia: distrito.Provincia.nombre,
-                        departamento: distrito.Provincia.Departamento.nombre,
-                    };
-                }),
+                distritos: distritos.map((distrito) => ({
+                    id: distrito.id,
+                    nombre: distrito.nombre,
+                    idProvincia: distrito.idProvincia,
+                    idDepartamento: distrito.idDepartamento,
+                    pais: distrito.pais,
+                    provincia: distrito.Provincia?.nombre || null,
+                    departamento:
+                        distrito.Provincia?.Departamento?.nombre || null,
+                })),
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -91,6 +126,20 @@ export class DistritoService {
         try {
             const distrito = await prisma.distrito.findUnique({
                 where: { id },
+                include: {
+                    Provincia: {
+                        select: {
+                            id: true,
+                            nombre: true,
+                            Departamento: {
+                                select: {
+                                    id: true,
+                                    nombre: true,
+                                },
+                            },
+                        },
+                    },
+                },
             });
 
             if (!distrito)
@@ -98,7 +147,15 @@ export class DistritoService {
                     `Distrito with id ${id} does not exist`
                 );
 
-            return distrito;
+            return {
+                id: distrito.id,
+                nombre: distrito.nombre,
+                idProvincia: distrito.idProvincia,
+                idDepartamento: distrito.idDepartamento,
+                pais: distrito.pais,
+                provincia: distrito.Provincia?.nombre || null,
+                departamento: distrito.Provincia?.Departamento?.nombre || null,
+            };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }

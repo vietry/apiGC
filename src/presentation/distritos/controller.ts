@@ -1,23 +1,23 @@
-import { Request, Response } from "express";
-import { CustomError, PaginationDto } from "../../domain";
-import { DistritoService } from "../services";
+import { Request, Response } from 'express';
+import { CustomError, PaginationDto } from '../../domain';
+import { DistritoService } from '../services';
 
 export class DistritoController {
-  // DI
-  constructor(private readonly distritoService: DistritoService) {}
+    // DI
+    constructor(private readonly distritoService: DistritoService) {}
 
-  private handleError = (res: Response, error: unknown) => {
-    if (error instanceof CustomError) {
-      return res.status(error.statusCode).json({ error: error.message });
-    }
-    //grabar logs
-    console.log(`${error}`);
-    return res
-      .status(500)
-      .json({ error: "Internal server error - check logs" });
-  };
+    private handleError = (res: Response, error: unknown) => {
+        if (error instanceof CustomError) {
+            return res.status(error.statusCode).json({ error: error.message });
+        }
+        //grabar logs
+        console.log(`${error}`);
+        return res
+            .status(500)
+            .json({ error: 'Internal server error - check logs' });
+    };
 
-  /*createDistrito = async (req: Request, res: Response) => {
+    /*createDistrito = async (req: Request, res: Response) => {
         const [error, createDistritoDto] = CreateDistritoDTO.create(req.body);
         if (error) return res.status(400).json({ error });
 
@@ -36,32 +36,36 @@ export class DistritoController {
             .catch(error => this.handleError(res, error));
     }*/
 
-  getDistritos = async (req: Request, res: Response) => {
-    const { departamento, provincia } = req.query;
-    this.distritoService
-      .getDistritos(departamento?.toString(), provincia?.toString())
-      .then((distritos) => res.status(200).json(distritos))
-      .catch((error) => this.handleError(res, error));
-  };
+    getDistritos = async (req: Request, res: Response) => {
+        const { departamento, provincia, pais } = req.query;
+        this.distritoService
+            .getDistritos(
+                departamento?.toString(),
+                provincia?.toString(),
+                pais?.toString()
+            )
+            .then((distritos) => res.status(200).json(distritos))
+            .catch((error) => this.handleError(res, error));
+    };
 
-  getDistritosByPage = async (req: Request, res: Response) => {
-    const { page = 1, limit = 10 } = req.query;
-    const [error, paginationDto] = PaginationDto.create(+page, +limit);
-    if (error) return res.status(400).json({ error });
+    getDistritosByPage = async (req: Request, res: Response) => {
+        const { page = 1, limit = 10 } = req.query;
+        const [error, paginationDto] = PaginationDto.create(+page, +limit);
+        if (error) return res.status(400).json({ error });
 
-    this.distritoService
-      .getDistritosByPage(paginationDto!)
-      .then((distritos) => res.status(200).json(distritos))
-      .catch((error) => this.handleError(res, error));
-  };
+        this.distritoService
+            .getDistritosByPage(paginationDto!)
+            .then((distritos) => res.status(200).json(distritos))
+            .catch((error) => this.handleError(res, error));
+    };
 
-  getDistritoById = async (req: Request, res: Response) => {
-    const id = req.params.id;
-    if (!id) return res.status(400).json({ error: "Invalid ID" });
+    getDistritoById = async (req: Request, res: Response) => {
+        const id = req.params.id;
+        if (!id) return res.status(400).json({ error: 'Invalid ID' });
 
-    this.distritoService
-      .getDistritoById(id)
-      .then((distrito) => res.status(200).json(distrito))
-      .catch((error) => this.handleError(res, error));
-  };
+        this.distritoService
+            .getDistritoById(id)
+            .then((distrito) => res.status(200).json(distrito))
+            .catch((error) => this.handleError(res, error));
+    };
 }
