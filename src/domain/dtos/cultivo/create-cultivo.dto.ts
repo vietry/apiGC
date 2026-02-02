@@ -9,7 +9,8 @@ export class CreateCultivoDto {
         public readonly idFundo: number,
         public readonly idVariedad: number,
         public readonly nomAsesor: string | null,
-        public readonly numAsesor: string | null
+        public readonly numAsesor: string | null,
+        public readonly cargoAsesor: string | null
     ) {}
 
     static async create(object: {
@@ -26,6 +27,7 @@ export class CreateCultivoDto {
             idVariedad,
             nomAsesor,
             numAsesor,
+            cargoAsesor,
         } = object;
 
         let hectareasNumber = hectareas;
@@ -56,6 +58,15 @@ export class CreateCultivoDto {
             poblacionNumber = parseFloat(poblacion);
         }
 
+        // Validación de cargoAsesor
+        if (cargoAsesor !== undefined && typeof cargoAsesor !== 'string') {
+            return ['cargoAsesor debe ser una cadena de texto'];
+        }
+
+        if (cargoAsesor && cargoAsesor.length > 50) {
+            return ['cargoAsesor no puede exceder los 50 caracteres'];
+        }
+
         return [
             undefined,
             new CreateCultivoDto(
@@ -68,7 +79,8 @@ export class CreateCultivoDto {
                 idFundoNumber,
                 idVariedadNumber,
                 nomAsesor ?? null,
-                numAsesor ?? null
+                numAsesor ?? null,
+                cargoAsesor ?? null
             ),
         ];
     }

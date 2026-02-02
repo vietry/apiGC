@@ -129,19 +129,41 @@ export class DashboardService {
             // 3. Calcular las fechas según year y month (si se proveen)
             // Si no hay year ni month => sin filtrar por fecha
             // Si hay year, pero no month => filtrar all el año
-            // Si hay year y month => filtrar solo ese month
-            let startDate: Date | undefined;
-            let endDate: Date | undefined;
+            // Si hay year y month => filtrar del 20 del mes anterior al 19 del mes actual (UTC)
+            let currentMonthStart: Date | undefined;
+            let currentMonthEnd: Date | undefined;
+            let previousMonthStart: Date | undefined;
+            let previousMonthEnd: Date | undefined;
 
             if (year) {
                 if (month) {
-                    // año y month
-                    startDate = new Date(year, month - 1, 1); // Primer día del month
-                    endDate = new Date(year, month, 1); // Primer día del siguiente month
-                } else {
-                    // solo año
-                    startDate = new Date(year, 0, 1); // 1 de enero de 'year'
-                    endDate = new Date(year + 1, 0, 1); // 1 de enero del year siguiente
+                    // Lógica del 20 del mes anterior al 19 del mes actual
+                    const previousMonth = month === 1 ? 12 : month - 1;
+                    const previousYear = month === 1 ? year - 1 : year;
+
+                    // Rango 1-19 del mes actual en UTC (00:00:00.000Z)
+                    currentMonthStart = new Date(
+                        Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+                    );
+                    currentMonthEnd = new Date(
+                        Date.UTC(year, month - 1, 20, 0, 0, 0, 0)
+                    );
+
+                    // Rango 20-fin del mes anterior en UTC (00:00:00.000Z)
+                    previousMonthStart = new Date(
+                        Date.UTC(
+                            previousYear,
+                            previousMonth - 1,
+                            20,
+                            0,
+                            0,
+                            0,
+                            0
+                        )
+                    );
+                    previousMonthEnd = new Date(
+                        Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+                    );
                 }
             }
 
@@ -251,20 +273,39 @@ export class DashboardService {
                 ...familiaFilter,
             };
 
-            if (startDate && endDate) {
-                const dateFilter = {
-                    updatedAt: {
-                        gte: startDate,
-                        lt: endDate,
-                    },
+            // Aplicar filtro de fechas si year y month están definidos
+            if (
+                year &&
+                month &&
+                currentMonthStart &&
+                currentMonthEnd &&
+                previousMonthStart &&
+                previousMonthEnd
+            ) {
+                const dateFilterOR = {
+                    OR: [
+                        {
+                            updatedAt: {
+                                gte: currentMonthStart,
+                                lt: currentMonthEnd,
+                            },
+                        },
+                        {
+                            updatedAt: {
+                                gte: previousMonthStart,
+                                lt: previousMonthEnd,
+                            },
+                        },
+                    ],
                 };
-                demoWhereCompletado.updatedAt = dateFilter.updatedAt;
-                demoWhereDiaCampo.updatedAt = dateFilter.updatedAt;
-                demoWhereProgramado.updatedAt = dateFilter.updatedAt;
-                demoWhereIniciado.updatedAt = dateFilter.updatedAt;
-                demoWhereSeguimiento.updatedAt = dateFilter.updatedAt;
-                demoWhereCancelado.updatedAt = dateFilter.updatedAt;
-                demoWhereReprogramado.updatedAt = dateFilter.updatedAt;
+
+                Object.assign(demoWhereCompletado, dateFilterOR);
+                Object.assign(demoWhereDiaCampo, dateFilterOR);
+                Object.assign(demoWhereProgramado, dateFilterOR);
+                Object.assign(demoWhereIniciado, dateFilterOR);
+                Object.assign(demoWhereSeguimiento, dateFilterOR);
+                Object.assign(demoWhereCancelado, dateFilterOR);
+                Object.assign(demoWhereReprogramado, dateFilterOR);
             }
 
             // 5. Agrupa los demoplots "Completado" y "Día campo"
@@ -888,20 +929,23 @@ export class DashboardService {
                 const previousMonth = month === 1 ? 12 : month - 1;
                 const previousYear = month === 1 ? year - 1 : year;
 
-                // Rango 1-19 del mes actual
-                const currentMonthStart = new Date(year, month - 1, 1);
-                const currentMonthEnd = new Date(year, month - 1, 20);
-
-                // Rango 20-fin del mes anterior
-                const previousMonthStart = new Date(
-                    previousYear,
-                    previousMonth - 1,
-                    20
+                // Rango 1-19 del mes actual en UTC (00:00:00.000Z)
+                const currentMonthStart = new Date(
+                    Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
                 );
-                const previousMonthEnd = new Date(year, month - 1, 1);
+                const currentMonthEnd = new Date(
+                    Date.UTC(year, month - 1, 20, 0, 0, 0, 0)
+                );
+
+                // Rango 20-fin del mes anterior en UTC (00:00:00.000Z)
+                const previousMonthStart = new Date(
+                    Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+                );
+                const previousMonthEnd = new Date(
+                    Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+                );
 
                 // Para aplicar esta lógica en Prisma, usamos OR en 'updatedAt'
-                // (o en 'finalizacion' si tu campo de fecha es otro)
                 const customOR = [
                     {
                         updatedAt: {
@@ -1328,20 +1372,44 @@ export class DashboardService {
                 throw CustomError.badRequest(`GTE con id ${idGte} no existe`);
             }
 
-            // Calcular rango de fechas del mes
-            const startDate = new Date(
+            // Calcular rango de fechas del mes (del 20 del mes anterior al 19 del mes actual en UTC)
+            const previousMonth = month === 1 ? 12 : month - 1;
+            const previousYear = month === 1 ? year - 1 : year;
+
+            // Rango 1-19 del mes actual en UTC (00:00:00.000Z)
+            const currentMonthStart = new Date(
                 Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
             );
-            const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+            const currentMonthEnd = new Date(
+                Date.UTC(year, month - 1, 20, 0, 0, 0, 0)
+            );
 
-            // Obtener demoplots del GTE en el mes especificado
+            // Rango 20-fin del mes anterior en UTC (00:00:00.000Z)
+            const previousMonthStart = new Date(
+                Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+            );
+            const previousMonthEnd = new Date(
+                Date.UTC(year, month - 1, 1, 0, 0, 0, 0)
+            );
+
+            // Obtener demoplots del GTE en el rango especificado
             const demoplots = await prisma.demoPlot.findMany({
                 where: {
                     idGte: idGte,
-                    programacion: {
-                        gte: startDate,
-                        lt: endDate,
-                    },
+                    OR: [
+                        {
+                            programacion: {
+                                gte: currentMonthStart,
+                                lt: currentMonthEnd,
+                            },
+                        },
+                        {
+                            programacion: {
+                                gte: previousMonthStart,
+                                lt: previousMonthEnd,
+                            },
+                        },
+                    ],
                 },
                 orderBy: {
                     programacion: 'desc',

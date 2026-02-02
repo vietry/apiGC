@@ -40,7 +40,8 @@ export class UpdateDemoplotDto {
         public readonly cantidad?: number | null,
         public readonly importe?: number | null,
         public readonly updatedAt?: Date | null,
-        public readonly updatedBy?: number | null
+        public readonly updatedBy?: number | null,
+        public readonly testigo?: string | null
     ) {}
 
     get values() {
@@ -94,6 +95,7 @@ export class UpdateDemoplotDto {
         if (this.importe !== undefined) returnObj.importe = this.importe;
         if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
         if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
+        if (this.testigo !== undefined) returnObj.testigo = this.testigo;
 
         return returnObj;
     }
@@ -141,6 +143,7 @@ export class UpdateDemoplotDto {
             importe,
             updatedAt,
             updatedBy,
+            testigo,
         } = props;
 
         if (!id || isNaN(Number(id))) {
@@ -247,7 +250,8 @@ export class UpdateDemoplotDto {
                 cantidadNum,
                 importeNum,
                 updatedAt,
-                updatedBy
+                updatedBy,
+                testigo
             ),
         ];
     }

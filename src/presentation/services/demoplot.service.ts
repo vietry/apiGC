@@ -91,6 +91,7 @@ export class DemoplotService {
                     createdBy: createDemoplotDto.createdBy,
                     updatedAt: currentDate,
                     updatedBy: createDemoplotDto.updatedBy,
+                    testigo: createDemoplotDto.testigo,
                 },
             });
 
@@ -238,7 +239,7 @@ export class DemoplotService {
                             },
                         },
                         Cultivo: {
-                            select: {
+                            include: {
                                 Variedad: {
                                     select: {
                                         nombre: true,
@@ -326,6 +327,9 @@ export class DemoplotService {
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
+                        asesor: demoplot.Cultivo.nomAsesor,
+                        numAsesor: demoplot.Cultivo.numAsesor,
+                        cargoAsesor: demoplot.Cultivo.cargoAsesor,
                         FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: `${demoplot.Gte.Usuario?.nombres} ${demoplot.Gte.Usuario?.apellidos}`,
                         departamento:

@@ -10,7 +10,8 @@ export class UpdateCultivoDto {
         public readonly idFundo?: number,
         public readonly idVariedad?: number,
         public readonly nomAsesor?: string | null,
-        public readonly numAsesor?: string | null
+        public readonly numAsesor?: string | null,
+        public readonly cargoAsesor?: string | null
     ) {}
 
     get values() {
@@ -25,6 +26,8 @@ export class UpdateCultivoDto {
         if (this.idVariedad) returnObj.idVariedad = this.idVariedad;
         if (this.nomAsesor !== undefined) returnObj.nomAsesor = this.nomAsesor;
         if (this.numAsesor !== undefined) returnObj.numAsesor = this.numAsesor;
+        if (this.cargoAsesor !== undefined)
+            returnObj.cargoAsesor = this.cargoAsesor;
 
         return returnObj;
     }
@@ -44,6 +47,7 @@ export class UpdateCultivoDto {
             idVariedad,
             nomAsesor,
             numAsesor,
+            cargoAsesor,
         } = props;
 
         if (!id || isNaN(Number(id))) return ['ID inválido o faltante'];
@@ -73,6 +77,15 @@ export class UpdateCultivoDto {
             poblacionNumber = parseFloat(poblacion);
         }
 
+        // Validación de cargoAsesor
+        if (cargoAsesor !== undefined && typeof cargoAsesor !== 'string') {
+            return ['cargoAsesor debe ser una cadena de texto'];
+        }
+
+        if (cargoAsesor && cargoAsesor.length > 50) {
+            return ['cargoAsesor no puede exceder los 50 caracteres'];
+        }
+
         return [
             undefined,
             new UpdateCultivoDto(
@@ -86,7 +99,8 @@ export class UpdateCultivoDto {
                 idFundoNumber,
                 idVariedadNumber,
                 nomAsesor,
-                numAsesor
+                numAsesor,
+                cargoAsesor
             ),
         ];
     }

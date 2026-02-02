@@ -13,6 +13,7 @@ export class CultivoEntity {
         public idVariedad: number,
         public nomAsesor: string | null,
         public numAsesor: string | null,
+        public cargoAsesor: string | null,
         public createdAt: Date | null,
         public updatedAt: Date | null
     ) {}
@@ -30,6 +31,7 @@ export class CultivoEntity {
             idVariedad,
             nomAsesor,
             numAsesor,
+            cargoAsesor,
             createdAt,
             updatedAt,
         } = object;
@@ -51,6 +53,7 @@ export class CultivoEntity {
             idVariedad,
             nomAsesor,
             numAsesor,
+            cargoAsesor,
             createdAt,
             updatedAt
         );

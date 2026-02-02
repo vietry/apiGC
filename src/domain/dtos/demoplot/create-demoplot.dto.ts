@@ -31,7 +31,8 @@ export class CreateDemoplotDto {
         public readonly cantidad: number | null,
         public readonly importe: number | null,
         public readonly createdBy: number | null,
-        public readonly updatedBy: number | null
+        public readonly updatedBy: number | null,
+        public readonly testigo: string | null
     ) {}
 
     static async create(object: {
@@ -70,6 +71,7 @@ export class CreateDemoplotDto {
             importe,
             createdBy,
             updatedBy,
+            testigo,
         } = object;
 
         if (!idCultivo) return ['idCultivo faltante'];
@@ -157,7 +159,8 @@ export class CreateDemoplotDto {
                 cantidad,
                 importe,
                 createdBy,
-                updatedBy
+                updatedBy,
+                testigo
             ),
         ];
     }

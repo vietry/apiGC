@@ -77,6 +77,7 @@ export class CultivoService {
                     idVariedad: createCultivoDto.idVariedad,
                     nomAsesor: createCultivoDto.nomAsesor,
                     numAsesor: createCultivoDto.numAsesor,
+                    cargoAsesor: createCultivoDto.cargoAsesor,
                     createdAt: currentDate,
                     updatedAt: currentDate,
                 },
@@ -94,6 +95,7 @@ export class CultivoService {
                 idVariedad: cultivo.idVariedad,
                 nomAsesor: cultivo.nomAsesor,
                 numAsesor: cultivo.numAsesor,
+                cargoAsesor: cultivo.cargoAsesor,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -193,6 +195,7 @@ export class CultivoService {
                         punto: cultivo.Fundo.PuntoContacto?.nombre,
                         nomAsesor: cultivo.nomAsesor,
                         numAsesor: cultivo.numAsesor,
+                        cargoAsesor: cultivo.cargoAsesor,
                     };
                 }),
             };
@@ -254,6 +257,7 @@ export class CultivoService {
                         idDistrito: cultivo.Fundo.idDistrito,
                         nomAsesor: cultivo.nomAsesor,
                         numAsesor: cultivo.numAsesor,
+                        cargoAsesor: cultivo.cargoAsesor,
                     };
                 }),
             };
@@ -305,6 +309,7 @@ export class CultivoService {
                 punto: cultivo.Fundo.PuntoContacto?.nombre,
                 nomAsesor: cultivo.nomAsesor,
                 numAsesor: cultivo.numAsesor,
+                cargoAsesor: cultivo.cargoAsesor,
             };
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
@@ -382,6 +387,7 @@ export class CultivoService {
                         tipoContacto: cultivo.Fundo.ContactoPunto?.tipo,
                         nomAsesor: cultivo.nomAsesor,
                         numAsesor: cultivo.numAsesor,
+                        cargoAsesor: cultivo.cargoAsesor,
                     };
                 }),
             };
@@ -451,6 +457,7 @@ export class CultivoService {
                         idDistrito: cultivo.Fundo?.idDistrito,
                         nomAsesor: cultivo.nomAsesor,
                         numAsesor: cultivo.numAsesor,
+                        cargoAsesor: cultivo.cargoAsesor,
                     };
                 }),
             };

@@ -149,6 +149,70 @@ export class EntregaMuestrasService {
                 `Entrega de muestras con id ${updateEntregaMuestrasDto.id} no existe`
             );
 
+        // Validar que la familia existe si se está actualizando
+        if (updateEntregaMuestrasDto.values.idFamilia !== undefined) {
+            const idFamiliaValue = updateEntregaMuestrasDto.values.idFamilia;
+
+            // Si es null, lo permitimos (campo opcional)
+            if (idFamiliaValue !== null) {
+                const familiaExists = await prisma.familia.findUnique({
+                    where: { id: idFamiliaValue },
+                });
+
+                if (!familiaExists) {
+                    throw CustomError.badRequest(
+                        `La familia con id ${idFamiliaValue} no existe`
+                    );
+                }
+            }
+        }
+
+        // Validar que el GTE existe si se está actualizando
+        if (updateEntregaMuestrasDto.values.idGte !== undefined) {
+            const idGteValue = updateEntregaMuestrasDto.values.idGte;
+
+            // Si es null, no permitimos (campo requerido)
+            if (idGteValue === null) {
+                throw CustomError.badRequest(
+                    'El campo idGte no puede ser null'
+                );
+            }
+
+            // Verificar que el valor sea un número válido
+            if (Number.isNaN(Number(idGteValue))) {
+                throw CustomError.badRequest(
+                    `El idGte debe ser un número válido. Valor recibido: ${idGteValue}`
+                );
+            }
+
+            const gteExists = await prisma.gte.findUnique({
+                where: { id: Number(idGteValue) },
+            });
+
+            if (!gteExists) {
+                throw CustomError.badRequest(
+                    `El GTE con id ${idGteValue} no existe. Por favor, verifica que el GTE seleccionado sea válido.`
+                );
+            }
+        }
+
+        // Validar que el usuario updatedBy existe si se está actualizando
+        if (updateEntregaMuestrasDto.values.updatedBy !== undefined) {
+            const updatedByValue = updateEntregaMuestrasDto.values.updatedBy;
+
+            if (updatedByValue !== null) {
+                const usuarioExists = await prisma.usuario.findUnique({
+                    where: { id: updatedByValue },
+                });
+
+                if (!usuarioExists) {
+                    throw CustomError.badRequest(
+                        `El usuario con id ${updatedByValue} no existe. No se puede asignar como updatedBy.`
+                    );
+                }
+            }
+        }
+
         try {
             const updatedEntrega = await prisma.entregaMuestras.update({
                 where: { id: updateEntregaMuestrasDto.id },
@@ -157,8 +221,15 @@ export class EntregaMuestrasService {
                     updatedAt: currentDate,
                 },
             });
+
             return updatedEntrega;
         } catch (error) {
+            // Si hay un error de clave foránea, proporcionar un mensaje más claro
+            if (error instanceof Error && error.message.includes('P2003')) {
+                throw CustomError.badRequest(
+                    'Error de validación: Uno de los campos de relación (GTE, Familia o Usuario) contiene un ID que no existe en la base de datos. Por favor verifica los datos ingresados.'
+                );
+            }
             throw CustomError.internalServer(`${error}`);
         }
     }

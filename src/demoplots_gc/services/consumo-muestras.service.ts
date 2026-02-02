@@ -678,9 +678,17 @@ export class ConsumoMuestrasService {
         const { idGte, idFamilia, year, month, presentacion } = filters;
 
         try {
+            // Obtener el año actual
+            const currentYear = new Date().getFullYear();
+
             // 1. Obtener estadísticas de consumo
             const whereConsumo: any = {
                 DemoPlot: {},
+                // Filtrar solo registros del año actual por createdAt
+                createdAt: {
+                    gte: new Date(currentYear, 0),
+                    lt: new Date(currentYear + 1, 0),
+                },
             };
 
             // Filtrar por idGte
@@ -693,26 +701,38 @@ export class ConsumoMuestrasService {
                 whereConsumo.DemoPlot.idFamilia = idFamilia;
             }
 
-            // Filtrar por año y mes para consumo
-            if (year) {
-                whereConsumo.fechaConsumo = {
-                    gte: new Date(year, 0),
-                    lt: new Date(year + 1, 0),
-                };
-            }
-            if (month && year) {
-                whereConsumo.fechaConsumo = {
-                    gte: new Date(year, month - 1),
-                    lt: new Date(year, month),
-                };
-            }
-
             // 2. Obtener estadísticas de entrega
-            const whereEntrega: any = {};
+            const whereEntrega: any = {
+                // Filtrar solo registros del año actual por createdAt
+                createdAt: {
+                    gte: new Date(currentYear, 0),
+                    lt: new Date(currentYear + 1, 0),
+                },
+            };
 
-            // Aplicar filtros
+            // Si se proporciona idGte, primero obtenemos su idColaborador
+            // y luego buscamos todas las entregas de GTEs con ese mismo colaborador
             if (idGte) {
-                whereEntrega.idGte = idGte;
+                const gteInfo = await prisma.gte.findUnique({
+                    where: { id: idGte },
+                    select: { idColaborador: true },
+                });
+
+                if (gteInfo?.idColaborador) {
+                    // Buscar todos los GTEs que tienen el mismo colaborador
+                    const gtesDelColaborador = await prisma.gte.findMany({
+                        where: { idColaborador: gteInfo.idColaborador },
+                        select: { id: true },
+                    });
+
+                    const idsGtes = gtesDelColaborador.map((gte) => gte.id);
+
+                    // Filtrar entregas por todos esos GTEs
+                    whereEntrega.idGte = { in: idsGtes };
+                } else {
+                    // Si el GTE no tiene colaborador, usar solo ese GTE
+                    whereEntrega.idGte = idGte;
+                }
             }
 
             if (idFamilia) {
@@ -721,19 +741,6 @@ export class ConsumoMuestrasService {
 
             if (presentacion) {
                 whereEntrega.presentacion = presentacion;
-            }
-
-            // Filtros de fecha para facturación de entregas
-            if (year && month) {
-                whereEntrega.facturacion = {
-                    gte: new Date(year, month - 1),
-                    lt: new Date(year, month),
-                };
-            } else if (year) {
-                whereEntrega.facturacion = {
-                    gte: new Date(year, 0),
-                    lt: new Date(year + 1, 0),
-                };
             }
 
             // 3. Ejecutar consultas en paralelo
