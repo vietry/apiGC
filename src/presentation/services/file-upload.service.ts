@@ -77,6 +77,18 @@ export class FileUploadService {
         if (!demoplotExists)
             throw CustomError.badRequest(`IdDemoplot no exists`);
 
+        // Validar que el hash no exista antes de guardar
+        if (createFotoDemoplotDto.fotoHash) {
+            const hashExists = await prisma.fotoDemoPlot.findFirst({
+                where: { fotoHash: createFotoDemoplotDto.fotoHash },
+            });
+            if (hashExists) {
+                throw CustomError.badRequest(
+                    `Ya existe una foto con el mismo hash. ID de foto existente: ${hashExists.id}`
+                );
+            }
+        }
+
         const uploadResult = await this.uploadSingle(
             file,
             folder,
@@ -99,6 +111,7 @@ export class FileUploadService {
                 longitud: createFotoDemoplotDto.longitud,
                 createdBy: createFotoDemoplotDto.createdBy,
                 updatedBy: createFotoDemoplotDto.updatedBy,
+                fotoHash: createFotoDemoplotDto.fotoHash,
                 createdAt: currentDate,
                 updatedAt: currentDate,
             },

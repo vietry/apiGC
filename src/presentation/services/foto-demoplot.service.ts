@@ -2,6 +2,28 @@ import { prisma } from '../../data/sqlserver';
 import { CustomError, PaginationDto } from '../../domain';
 
 export class FotoDemoplotService {
+    async verificarHash(hash: string) {
+        try {
+            const fotoExistente = await prisma.fotoDemoPlot.findFirst({
+                where: { fotoHash: hash },
+                select: {
+                    id: true,
+                    idDemoPlot: true,
+                    nombre: true,
+                    fotoHash: true,
+                    createdAt: true,
+                },
+            });
+
+            return {
+                exists: !!fotoExistente,
+                foto: fotoExistente,
+            };
+        } catch (error) {
+            throw CustomError.internalServer(`${error}`);
+        }
+    }
+
     /*async createFotoDemoplot(createFotoDemoplotDto: CreateFotoDemoplotDto, foto: FotoDemoplotEntity) {
         try {
             // Subir el archivo

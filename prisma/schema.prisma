@@ -431,6 +431,8 @@ model Visita {
   macrozonaId             Int?
   latitudFin              Decimal?                  @db.Decimal(10, 6)
   longitudFin             Decimal?                  @db.Decimal(10, 6)
+  motivoReprog            String?                   @db.VarChar(255)
+  motivoCancel            String?                   @db.VarChar(255)
   FotoVisita              FotoVisita[]
   LaborVisita             LaborVisita[]
   Colaborador             Colaborador               @relation(fields: [idColaborador], references: [id], onUpdate: NoAction, map: "fk_Visita_Colaborador1")
@@ -475,7 +477,7 @@ model DemoPlot {
   titulo                              String?           @db.VarChar(255)
   objetivo                            String?           @db.VarChar(255)
   instalacion                         DateTime?         @db.DateTime
-  finalizacion                        DateTime?         @db.DateTime
+  finalizacion                        DateTime?
   estado                              String?           @db.VarChar(12)
   validacion                          Boolean?
   idCultivo                           Int
@@ -483,8 +485,8 @@ model DemoPlot {
   idBlanco                            Int
   idDistrito                          String            @db.VarChar(6)
   idGte                               Int
-  createdAt                           DateTime?         @db.DateTime
-  updatedAt                           DateTime?         @db.DateTime
+  createdAt                           DateTime?
+  updatedAt                           DateTime?
   resultado                           String?           @db.VarChar(255)
   seguimiento                         DateTime?         @db.DateTime
   dosis                               Decimal?          @db.Decimal(7, 2)
@@ -493,7 +495,7 @@ model DemoPlot {
   idFamilia                           Int?
   diaCampo                            Boolean?
   programacion                        DateTime?         @db.DateTime
-  presentacion                        DateTime?         @db.DateTime
+  presentacion                        DateTime?
   venta                               Boolean?
   cantidad                            Decimal?          @db.Decimal(6, 2)
   importe                             Decimal?          @db.Decimal(6, 2)
@@ -546,9 +548,12 @@ model FotoDemoPlot {
   estado                                  String?   @db.VarChar(15)
   createdBy                               Int?
   updatedBy                               Int?
+  fotoHash                                String?   @db.VarChar(64)
   DemoPlot                                DemoPlot  @relation(fields: [idDemoPlot], references: [id], onUpdate: NoAction, map: "fk_Foto_DemoPlot1")
   Usuario_FotoDemoPlot_createdByToUsuario Usuario?  @relation("FotoDemoPlot_createdByToUsuario", fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_FotoD_createdBy1")
   Usuario_FotoDemoPlot_updatedByToUsuario Usuario?  @relation("FotoDemoPlot_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_FotoD_updatedBy1")
+
+  @@index([fotoHash], map: "idx_foto_hash")
 }
 
 model Gte {
@@ -933,7 +938,7 @@ model EntregaMuestras {
   agotado                                    Boolean?
   facturacion                                DateTime?         @db.DateTime
   recepcion                                  DateTime?         @db.DateTime
-  createdAt                                  DateTime?         @db.DateTime
+  createdAt                                  DateTime?         @default(dbgenerated("sysutcdatetime()"), map: "DF__EntregaMu__creat__36670980") @db.DateTime
   updatedAt                                  DateTime?         @db.DateTime
   createdBy                                  Int?
   updatedBy                                  Int?

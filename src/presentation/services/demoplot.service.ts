@@ -330,6 +330,7 @@ export class DemoplotService {
                         asesor: demoplot.Cultivo.nomAsesor,
                         numAsesor: demoplot.Cultivo.numAsesor,
                         cargoAsesor: demoplot.Cultivo.cargoAsesor,
+                        testigo: demoplot.testigo,
                         FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: `${demoplot.Gte.Usuario?.nombres} ${demoplot.Gte.Usuario?.apellidos}`,
                         departamento:
@@ -712,6 +713,9 @@ export class DemoplotService {
                     Cultivo: {
                         select: {
                             hectareas: true,
+                            nomAsesor: true,
+                            numAsesor: true,
+                            cargoAsesor: true,
                             Variedad: {
                                 select: {
                                     nombre: true,
@@ -821,7 +825,10 @@ export class DemoplotService {
                 nombreGte: demoplot.Gte.Usuario?.nombres,
                 departamento: demoplot.Distrito.Provincia.Departamento.nombre,
                 provincia: demoplot.Distrito.Provincia.nombre.trim(),
-
+                asesor: demoplot.Cultivo.nomAsesor,
+                numAsesor: demoplot.Cultivo.numAsesor,
+                cargoAsesor: demoplot.Cultivo.cargoAsesor,
+                testigo: demoplot.testigo,
                 distrito: demoplot.Distrito.nombre,
                 idFundo: demoplot.Cultivo.Fundo.id,
                 fundo: demoplot.Cultivo.Fundo.nombre,
