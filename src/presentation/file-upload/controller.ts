@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import {
     CreateFotoDemoplotDto,
+    CreateVideoDemoplotDto,
     CustomError,
     UpdateFotoDemoplotDto,
+    UpdateVideoDemoplotDto,
     CreateFotoCharlaDto,
 } from '../../domain';
 import { FileUploadService } from '../services/file-upload.service';
@@ -185,11 +187,9 @@ export class FileUploadController {
     ) => {
         const idVisitaGteTienda = req.body.idVisitaGteTienda;
         if (!idVisitaGteTienda || isNaN(parseInt(idVisitaGteTienda))) {
-            return res
-                .status(400)
-                .json({
-                    error: 'idVisitaGteTienda is required and must be a valid number',
-                });
+            return res.status(400).json({
+                error: 'idVisitaGteTienda is required and must be a valid number',
+            });
         }
         const file = req.body.files.at(0) as UploadedFile;
 
@@ -200,6 +200,53 @@ export class FileUploadController {
         this.fileUploadService
             .uploadAndCreateFotVisitaGte(file, parseInt(idVisitaGteTienda))
             .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    //! VIDEO DEMOPLOT
+    uploadAndCreateVideoDemoplot = async (req: Request, res: Response) => {
+        const file = req.body.files.at(0) as UploadedFile;
+        const [error, createVideoDemoplotDto] =
+            await CreateVideoDemoplotDto.create(req.body);
+
+        if (error) return res.status(400).json({ error });
+
+        this.fileUploadService
+            .uploadAndCreateVideoDemoplot(file, createVideoDemoplotDto!)
+            .then((video) => res.status(201).json(video))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    uploadAndUpdateVideoDemoplot = async (req: Request, res: Response) => {
+        const id = +req.params.id;
+        const file = req.body.files.at(0) as UploadedFile;
+        const [error, updateVideoDemoplotDto] =
+            await UpdateVideoDemoplotDto.create({ ...req.body, id });
+
+        if (error) return res.status(400).json({ error });
+
+        this.fileUploadService
+            .uploadAndUpdateVideoDemoplot(file, updateVideoDemoplotDto!)
+            .then((video) => res.status(200).json(video))
+            .catch((error) => this.handleError(res, error));
+    };
+
+    deleteVideoDemoplot = async (req: Request, res: Response) => {
+        const idDemoplot = +req.params.idDemoplot;
+        const videoName = req.params.videoName;
+
+        if (!idDemoplot || isNaN(idDemoplot)) {
+            return res
+                .status(400)
+                .json({ error: 'idDemoplot is required and must be a number' });
+        }
+        if (!videoName) {
+            return res.status(400).json({ error: 'videoName is required' });
+        }
+
+        this.fileUploadService
+            .deleteVideoDemoplot(idDemoplot, videoName)
+            .then((result) => res.status(200).json(result))
             .catch((error) => this.handleError(res, error));
     };
 }

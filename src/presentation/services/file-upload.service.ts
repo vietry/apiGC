@@ -5,9 +5,11 @@ import { Uuid } from '../../config';
 import {
     CreateFotoCharlaDto,
     CreateFotoDemoplotDto,
+    CreateVideoDemoplotDto,
     CustomError,
     UpdateFotoCharlaDto,
     UpdateFotoDemoplotDto,
+    UpdateVideoDemoplotDto,
 } from '../../domain';
 import { prisma } from '../../data/sqlserver';
 import { getCurrentDate } from '../../config/time';
@@ -18,6 +20,12 @@ export class FileUploadService {
     private checkFolder(folderPath: string) {
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath);
+        }
+    }
+
+    private checkFolderRecursive(folderPath: string) {
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
         }
     }
 
@@ -77,12 +85,39 @@ export class FileUploadService {
         if (!demoplotExists)
             throw CustomError.badRequest(`IdDemoplot no exists`);
 
+        // Validar límite de 3 fotos en estado "Iniciado" por demoplot
+        if (createFotoDemoplotDto.estado === 'Iniciado') {
+            const fotosIniciadoCount = await prisma.fotoDemoPlot.count({
+                where: {
+                    idDemoPlot: createFotoDemoplotDto.idDemoPlot,
+                    estado: 'Iniciado',
+                },
+            });
+
+            if (fotosIniciadoCount >= 3) {
+                throw CustomError.badRequest(
+                    `El demoplot ya tiene el máximo de 3 fotos en estado "Iniciado". No se pueden agregar más fotos con este estado.`
+                );
+            }
+        }
+
         // Validar que el hash no exista antes de guardar
         if (createFotoDemoplotDto.fotoHash) {
             const hashExists = await prisma.fotoDemoPlot.findFirst({
                 where: { fotoHash: createFotoDemoplotDto.fotoHash },
             });
             if (hashExists) {
+                console.log('=== FOTO DUPLICADA DETECTADA ===');
+                console.log('Hash recibido:', createFotoDemoplotDto.fotoHash);
+                console.log('ID foto existente:', hashExists.id);
+                console.log(
+                    'idDemoPlot foto existente:',
+                    hashExists.idDemoPlot
+                );
+                console.log('Nombre foto existente:', hashExists.nombre);
+                console.log('Fecha creación:', hashExists.createdAt);
+                console.log('================================');
+
                 throw CustomError.badRequest(
                     `Ya existe una foto con el mismo hash. ID de foto existente: ${hashExists.id}`
                 );
@@ -492,6 +527,179 @@ export class FileUploadService {
             return createdFoto;
         } catch (error) {
             throw CustomError.internalServer(`Error creating file: ${error}`);
+        }
+    }
+
+    //! VIDEO DEMOPLOT
+    async uploadAndCreateVideoDemoplot(
+        file: UploadedFile,
+        createVideoDemoplotDto: CreateVideoDemoplotDto,
+        folder: string = `uploads/demoplots/videos/${createVideoDemoplotDto.idDemoplot}`,
+        validExtensions: string[] = [
+            'mp4',
+            'webm',
+            'mov',
+            'avi',
+            'mkv',
+            'quicktime',
+        ]
+    ) {
+        try {
+            const demoplotExists = await prisma.demoPlot.findFirst({
+                where: { id: createVideoDemoplotDto.idDemoplot },
+            });
+            if (!demoplotExists)
+                throw CustomError.badRequest(
+                    `DemoPlot with id ${createVideoDemoplotDto.idDemoplot} does not exist`
+                );
+
+            const currentDate = getCurrentDate();
+
+            // Crear carpeta recursivamente si no existe
+            const destination = path.resolve(__dirname, '../../../', folder);
+            this.checkFolderRecursive(destination);
+
+            const fileExtension = file.mimetype.split('/').at(1) ?? '';
+
+            if (!validExtensions.includes(fileExtension)) {
+                throw CustomError.badRequest(
+                    `Invalid extension: ${fileExtension}, valid ones ${validExtensions}`
+                );
+            }
+
+            const fileName = `${this.uuid()}.${fileExtension}`;
+            await file.mv(`${destination}/${fileName}`);
+
+            const nombreVideo = fileName;
+            const rutaVideo = `${folder}/${fileName}`;
+            const tipo = fileExtension;
+            // Convertir bytes a MB con 2 decimales
+            const pesoMB = parseFloat((file.size / (1024 * 1024)).toFixed(2));
+
+            const createdVideo = await prisma.videoDemoplot.create({
+                data: {
+                    idDemoplot: createVideoDemoplotDto.idDemoplot,
+                    nombre: nombreVideo,
+                    rutaVideo: rutaVideo,
+                    tipo: tipo,
+                    duracion: createVideoDemoplotDto.duracion,
+                    peso: pesoMB,
+                    comentario: createVideoDemoplotDto.comentario,
+                    activo: true,
+                    createdBy: createVideoDemoplotDto.createdBy,
+                    updatedBy: createVideoDemoplotDto.updatedBy,
+                    createdAt: currentDate,
+                    updatedAt: currentDate,
+                },
+            });
+
+            return {
+                fileName: nombreVideo,
+                rutaVideo,
+                video: createdVideo,
+            };
+        } catch (error) {
+            if (error instanceof CustomError) throw error;
+            throw CustomError.internalServer(`Error creating video: ${error}`);
+        }
+    }
+
+    async uploadAndUpdateVideoDemoplot(
+        file: UploadedFile,
+        updateVideoDemoplotDto: UpdateVideoDemoplotDto,
+        validExtensions: string[] = [
+            'mp4',
+            'webm',
+            'mov',
+            'avi',
+            'mkv',
+            'quicktime',
+        ]
+    ) {
+        try {
+            const videoExists = await prisma.videoDemoplot.findFirst({
+                where: { id: updateVideoDemoplotDto.id },
+            });
+            if (!videoExists)
+                throw CustomError.badRequest(
+                    `VideoDemoplot with id ${updateVideoDemoplotDto.id} does not exist`
+                );
+
+            const currentDate = getCurrentDate();
+
+            // Usar la misma carpeta del video existente
+            const folder = `uploads/demoplots/videos/${videoExists.idDemoplot}`;
+            const destination = path.resolve(__dirname, '../../../', folder);
+            this.checkFolderRecursive(destination);
+
+            const fileExtension = file.mimetype.split('/').at(1) ?? '';
+
+            if (!validExtensions.includes(fileExtension)) {
+                throw CustomError.badRequest(
+                    `Invalid extension: ${fileExtension}, valid ones ${validExtensions}`
+                );
+            }
+
+            const fileName = `${this.uuid()}.${fileExtension}`;
+            await file.mv(`${destination}/${fileName}`);
+
+            const nombreVideo = fileName;
+            const rutaVideo = `${folder}/${fileName}`;
+            const tipo = fileExtension;
+            // Convertir bytes a MB con 2 decimales
+            const pesoMB = parseFloat((file.size / (1024 * 1024)).toFixed(2));
+
+            const updatedVideo = await prisma.videoDemoplot.update({
+                where: { id: updateVideoDemoplotDto.id },
+                data: {
+                    ...updateVideoDemoplotDto.values,
+                    nombre: nombreVideo,
+                    rutaVideo: rutaVideo,
+                    tipo: tipo,
+                    peso: pesoMB,
+                    updatedAt: currentDate,
+                },
+            });
+
+            // Intentar eliminar el video anterior
+            try {
+                await this.deleteVideoDemoplot(
+                    videoExists.idDemoplot,
+                    videoExists.nombre
+                );
+                console.log(`Video anterior eliminado: ${videoExists.nombre}`);
+            } catch (deleteError) {
+                console.log(
+                    `No se pudo eliminar el video anterior: ${deleteError}`
+                );
+            }
+
+            return {
+                fileName: nombreVideo,
+                rutaVideo,
+                video: updatedVideo,
+            };
+        } catch (error) {
+            if (error instanceof CustomError) throw error;
+            throw CustomError.internalServer(`Error updating video: ${error}`);
+        }
+    }
+
+    async deleteVideoDemoplot(idDemoplot: number, videoName: string) {
+        const videoPath = path.resolve(
+            __dirname,
+            `../../../uploads/demoplots/videos/${idDemoplot}/${videoName}`
+        );
+
+        if (!fs.existsSync(videoPath)) {
+            throw CustomError.badRequest('Video not found');
+        }
+
+        try {
+            fs.unlinkSync(videoPath);
+            return { message: 'Video deleted successfully' };
+        } catch (error) {
+            throw CustomError.internalServer(`Error deleting video: ${error}`);
         }
     }
 }

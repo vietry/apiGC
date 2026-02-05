@@ -54,6 +54,56 @@ export class DemoplotService {
         try {
             const date = new Date();
             const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
+
+            // Validación: máximo 4 demoplots con familias diferentes por cultivo
+            // dentro del rango de fechas (20 del mes anterior al 19 del mes actual)
+            const now = new Date();
+            const currentYear = now.getUTCFullYear();
+            const currentMonth = now.getUTCMonth() + 1;
+
+            // Calcular mes anterior
+            const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+            const previousYear =
+                currentMonth === 1 ? currentYear - 1 : currentYear;
+
+            // Fecha inicio: día 20 del mes anterior en UTC
+            const rangeStart = new Date(
+                Date.UTC(previousYear, previousMonth - 1, 20, 0, 0, 0, 0)
+            );
+
+            // Fecha fin: día 20 del mes actual en UTC (exclusivo, hasta el 19)
+            const rangeEnd = new Date(
+                Date.UTC(currentYear, currentMonth - 1, 20, 0, 0, 0, 0)
+            );
+
+            const existingDemoplotsByFamily = await prisma.demoPlot.findMany({
+                where: {
+                    idCultivo: createDemoplotDto.idCultivo,
+                    idFamilia: { not: null },
+                    programacion: {
+                        gte: rangeStart,
+                        lt: rangeEnd,
+                    },
+                },
+                select: {
+                    idFamilia: true,
+                },
+                distinct: ['idFamilia'],
+            });
+
+            const existingFamilyIds = existingDemoplotsByFamily.map(
+                (dp) => dp.idFamilia
+            );
+            const isNewFamily =
+                createDemoplotDto.idFamilia &&
+                !existingFamilyIds.includes(createDemoplotDto.idFamilia);
+
+            if (isNewFamily && existingFamilyIds.length >= 4) {
+                throw CustomError.badRequest(
+                    `No se puede crear el demoplot. Ya existen 4 demoplots con familias diferentes para este cultivo en el período actual (del 20/${previousMonth}/${previousYear} al 19/${currentMonth}/${currentYear}). Familias existentes: ${existingFamilyIds.length}`
+                );
+            }
+
             const demoplot = await prisma.demoPlot.create({
                 data: {
                     titulo: createDemoplotDto.titulo,
@@ -251,6 +301,7 @@ export class DemoplotService {
                                         id: true,
                                         nombre: true,
                                         idDistrito: true,
+                                        centroPoblado: true,
                                     },
                                 },
                             },
@@ -327,6 +378,7 @@ export class DemoplotService {
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
+                        direccionCultivo: demoplot.Cultivo.Fundo.centroPoblado,
                         asesor: demoplot.Cultivo.nomAsesor,
                         numAsesor: demoplot.Cultivo.numAsesor,
                         cargoAsesor: demoplot.Cultivo.cargoAsesor,
@@ -409,6 +461,7 @@ export class DemoplotService {
                                         id: true,
                                         nombre: true,
                                         idDistrito: true,
+                                        centroPoblado: true,
                                     },
                                 },
                             },
@@ -485,6 +538,7 @@ export class DemoplotService {
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
+                        direccionCultivo: demoplot.Cultivo.Fundo.centroPoblado,
                         FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: demoplot.Gte.Usuario?.nombres,
                         departamento:
@@ -576,6 +630,7 @@ export class DemoplotService {
                                         id: true,
                                         nombre: true,
                                         idDistrito: true,
+                                        centroPoblado: true,
                                     },
                                 },
                             },
@@ -650,6 +705,7 @@ export class DemoplotService {
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
+                        direccionCultivo: demoplot.Cultivo.Fundo.centroPoblado,
                         FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: demoplot.Gte.Usuario?.nombres,
                         departamento:
@@ -728,6 +784,7 @@ export class DemoplotService {
                                     id: true,
                                     nombre: true,
                                     idDistrito: true,
+                                    centroPoblado: true,
                                 },
                             },
                         },
@@ -759,6 +816,10 @@ export class DemoplotService {
                     },
 
                     FotoDemoPlot: true,
+                    VideoDemoplot: {
+                        where: { activo: true },
+                        orderBy: { createdAt: 'desc' },
+                    },
                 },
             });
 
@@ -822,6 +883,7 @@ export class DemoplotService {
                 cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                 hectareas: demoplot.Cultivo.hectareas,
                 variedad: demoplot.Cultivo.Variedad.nombre,
+                direccionCultivo: demoplot.Cultivo.Fundo.centroPoblado,
                 nombreGte: demoplot.Gte.Usuario?.nombres,
                 departamento: demoplot.Distrito.Provincia.Departamento.nombre,
                 provincia: demoplot.Distrito.Provincia.nombre.trim(),
@@ -833,6 +895,7 @@ export class DemoplotService {
                 idFundo: demoplot.Cultivo.Fundo.id,
                 fundo: demoplot.Cultivo.Fundo.nombre,
                 fotosDemoplot: demoplot.FotoDemoPlot,
+                videosDemoplot: demoplot.VideoDemoplot,
                 venta: demoplot.venta,
                 fecVenta: demoplot.fecVenta,
                 cantidad: demoplot.cantidad,
@@ -1758,6 +1821,7 @@ export class DemoplotService {
                                         id: true,
                                         nombre: true,
                                         idDistrito: true,
+                                        centroPoblado: true,
                                     },
                                 },
                             },
@@ -1888,6 +1952,7 @@ export class DemoplotService {
                         idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                         cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                         variedad: demoplot.Cultivo.Variedad.nombre,
+                        direccionCultivo: demoplot.Cultivo.Fundo.centroPoblado,
                         //FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: `${demoplot.Gte.Usuario?.apellidos}, ${demoplot.Gte.Usuario?.nombres}`,
                         subzona: demoplot.Gte.SubZona?.nombre,
@@ -2277,6 +2342,7 @@ export class DemoplotService {
                                         id: true,
                                         nombre: true,
                                         idDistrito: true,
+                                        centroPoblado: true,
                                     },
                                 },
                             },
@@ -2346,6 +2412,7 @@ export class DemoplotService {
                     idVegetacion: demoplot.Cultivo.Variedad.Vegetacion.id,
                     cultivo: demoplot.Cultivo.Variedad.Vegetacion.nombre,
                     variedad: demoplot.Cultivo.Variedad.nombre,
+                    direccionCultivo: demoplot.Cultivo.Fundo.centroPoblado,
                     //FotoDemoPlot: demoplot.FotoDemoPlot,
                     nombreGte: demoplot.Gte.Usuario?.nombres,
                     departamento:

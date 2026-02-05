@@ -515,7 +515,7 @@ model DemoPlot {
   checkJefeCampo                      Boolean?
   approvedCampoAt                     DateTime?
   comentariosJefeCampo                String?           @db.VarChar(255)
-  testigo                             String?           @db.VarChar(30)
+  testigo                             String?           @db.VarChar(75)
   ConsumoMuestras                     ConsumoMuestras[]
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
@@ -529,6 +529,7 @@ model DemoPlot {
   Usuario_DemoPlot_updatedByToUsuario Usuario?          @relation("DemoPlot_updatedByToUsuario", fields: [updatedBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_DemoPlot_updatedBy1")
   FotoDemoPlot                        FotoDemoPlot[]
   FotoDemoPlotLog                     FotoDemoPlotLog[]
+  VideoDemoplot                       VideoDemoplot[]
 
   @@index([idGte, estado], map: "IX_DemoPlot_idGte_estado")
   @@index([idGte, idFamilia], map: "IX_DemoPlot_idGte_idFamilia")
@@ -1192,4 +1193,21 @@ model VisitaCultivoAgricultor {
   updatedBy           Int?
   CultivoAgricultor   CultivoAgricultor @relation(fields: [cultivoAgricultorId], references: [id], onUpdate: NoAction, map: "FK__VisitaCul__culti__253C7D7E")
   Visita              Visita            @relation(fields: [visitaId], references: [id], onUpdate: NoAction, map: "FK__VisitaCul__visit__24485945")
+}
+
+model VideoDemoplot {
+  id         Int      @id(map: "PK__VideoDem__3213E83F46932D49") @default(autoincrement())
+  idDemoplot Int
+  nombre     String   @db.VarChar(255)
+  rutaVideo  String   @db.VarChar(255)
+  tipo       String   @db.VarChar(20)
+  duracion   Int?
+  peso      Decimal?  @db.Decimal(6, 2)
+  comentario String?  @db.VarChar(255)
+  activo     Boolean  @default(true, map: "DF__VideoDemo__activ__3B2BBE9D")
+  createdAt  DateTime @default(dbgenerated("sysutcdatetime()"), map: "DF__VideoDemo__creat__3C1FE2D6")
+  createdBy  Int?
+  updatedAt  DateTime @default(dbgenerated("sysutcdatetime()"), map: "DF__VideoDemo__updat__3D14070F")
+  updatedBy  Int?
+  DemoPlot   DemoPlot @relation(fields: [idDemoplot], references: [id], onUpdate: NoAction, map: "FK__VideoDemo__idDem__3A379A64")
 }

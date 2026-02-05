@@ -8,7 +8,9 @@ import { ContactoPuntoRoutes } from './contactos-punto/routes';
 import { DemoplotRoutes } from './demoplots/routes';
 import { FileUploadRoutes } from './file-upload/routes';
 import { ImageRoutes } from './images/routes';
+import { VideoRoutes } from './videos/routes';
 import { FotoDemoplotRoutes } from './fotos-demoplot/routes';
+import { VideoDemoplotRoutes } from './videos-demoplot/routes';
 import { UsuarioRoutes } from './usuarios/routes';
 import { CultivoRoutes } from './cultivos/routes';
 import { CultivoAgricultorRoutes } from './cultivo-agricultor/routes';
@@ -67,7 +69,9 @@ export class AppRoutes {
         router.use('/api/upload', FileUploadRoutes.routes);
         router.use('/api/carga/', FotoUsuarioRoutes.routes);
         router.use('/api/images', ImageRoutes.routes);
+        router.use('/api/videos', VideoRoutes.routes);
         router.use('/api/fotosdemoplots', FotoDemoplotRoutes.routes);
+        router.use('/api/videodemoplots', VideoDemoplotRoutes.routes);
         router.use('/api/cultivos', CultivoRoutes.routes);
         router.use('/api/cultivos-agricultor', CultivoAgricultorRoutes.routes);
         router.use(

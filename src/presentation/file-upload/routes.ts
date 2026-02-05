@@ -15,10 +15,15 @@ export class FileUploadRoutes {
                 'demoplots',
                 'variedad',
                 'charlas',
+                'videos',
             ])
         );
 
         router.delete('/delete/:type/:img', controller.deleteFile);
+        router.delete(
+            '/delete/videos/:idDemoplot/:videoName',
+            controller.deleteVideoDemoplot
+        );
 
         router.use(FileUploadMiddleware.containFiles);
 
@@ -28,6 +33,16 @@ export class FileUploadRoutes {
         router.post('/multiple/:type', controller.uploadMultipleFiles);
         router.post('/foto/charlas', controller.uploadAndCreateFotoCharla);
         router.post('/foto/usuarios', controller.uploadAndCreateFotoUsuario);
+
+        // Videos demoplot
+        router.post(
+            '/video/demoplots',
+            controller.uploadAndCreateVideoDemoplot
+        );
+        router.put(
+            '/video/demoplots/:id',
+            controller.uploadAndUpdateVideoDemoplot
+        );
 
         router.post('/foto/:type', controller.uploadAndCreateFotoDemoPlot);
         router.put('/foto/:type/:id', controller.uploadAndCreateFotoDemoPlot);
