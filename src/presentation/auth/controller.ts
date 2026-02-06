@@ -38,8 +38,14 @@ export class AuthController {
         const [error, loginUsuarioDto] = LoginUsuarioDto.create(req.body);
         if (error) return res.status(400).json({ error });
 
+        // Obtener IP del cliente
+        const ipAddress =
+            (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+            req.socket.remoteAddress ||
+            req.ip;
+
         this.authService
-            .loginUser(loginUsuarioDto!)
+            .loginUser(loginUsuarioDto!, { ipAddress })
             .then((user) => res.json(user))
             .catch((error) => this.handleError(error, res));
     };

@@ -691,16 +691,6 @@ export class ConsumoMuestrasService {
                 },
             };
 
-            // Filtrar por idGte
-            if (idGte) {
-                whereConsumo.DemoPlot.idGte = idGte;
-            }
-
-            // Filtrar por idFamilia
-            if (idFamilia) {
-                whereConsumo.DemoPlot.idFamilia = idFamilia;
-            }
-
             // 2. Obtener estadísticas de entrega
             const whereEntrega: any = {
                 // Filtrar solo registros del año actual por createdAt
@@ -711,7 +701,8 @@ export class ConsumoMuestrasService {
             };
 
             // Si se proporciona idGte, primero obtenemos su idColaborador
-            // y luego buscamos todas las entregas de GTEs con ese mismo colaborador
+            // y luego buscamos todos los GTEs con ese mismo colaborador
+            // para aplicar el filtro tanto en consumos como en entregas
             if (idGte) {
                 const gteInfo = await prisma.gte.findUnique({
                     where: { id: idGte },
@@ -727,15 +718,21 @@ export class ConsumoMuestrasService {
 
                     const idsGtes = gtesDelColaborador.map((gte) => gte.id);
 
-                    // Filtrar entregas por todos esos GTEs
+                    // Filtrar consumos por todos esos GTEs (a nivel colaborador)
+                    whereConsumo.DemoPlot.idGte = { in: idsGtes };
+
+                    // Filtrar entregas por todos esos GTEs (a nivel colaborador)
                     whereEntrega.idGte = { in: idsGtes };
                 } else {
                     // Si el GTE no tiene colaborador, usar solo ese GTE
+                    whereConsumo.DemoPlot.idGte = idGte;
                     whereEntrega.idGte = idGte;
                 }
             }
 
+            // Filtrar por idFamilia
             if (idFamilia) {
+                whereConsumo.DemoPlot.idFamilia = idFamilia;
                 whereEntrega.idFamilia = idFamilia;
             }
 

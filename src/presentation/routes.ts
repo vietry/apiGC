@@ -53,6 +53,7 @@ import { direccionEntregaRoutes } from '../visitas_gc/routes/direccion-entrega.r
 import { UbicacionClienteRoutes } from '../visitas_gc/routes/ubicacion-cliente.routes';
 import { FamiliaVisitaRoutes } from '../visitas_gc/routes/familia-visita.routes';
 import { SyncRoutes } from '../visitas_gc/routes/sync.routes';
+import { LoginAuditRoutes } from './login-audit/routes';
 
 export class AppRoutes {
     static get routes(): Router {
@@ -120,6 +121,7 @@ export class AppRoutes {
         router.use('/api/contacto', ContactoRoutes.routes);
         router.use('/api/familias-visita', FamiliaVisitaRoutes.routes);
         router.use('/api/sync', SyncRoutes.routes);
+        router.use('/api/login-audit', LoginAuditRoutes.routes);
         return router;
     }
 }

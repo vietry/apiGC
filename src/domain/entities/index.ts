@@ -14,3 +14,4 @@ export * from './dashboard/cumplimiento_jerarquia.entity';
 export * from './charla/charla.entity';
 export * from './charla/asistencia.entity';
 export * from './charla/foto.entity';
+export * from './login-audit.entity';

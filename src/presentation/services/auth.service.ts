@@ -4,6 +4,11 @@ import { CustomError, RegisterUsuarioDto, UsuarioEntity } from '../../domain';
 import { LoginUsuarioDto } from '../../domain/dtos/auth/login-user.dto';
 import { EmailService } from './email.service';
 
+// Interfaz para los datos de auditoría del login
+interface LoginAuditData {
+    ipAddress?: string;
+}
+
 export class AuthService {
     prisma: any;
 
@@ -81,19 +86,49 @@ export class AuthService {
         return resultados;
     }
 
-    public async loginUser(loginUsuarioDto: LoginUsuarioDto) {
+    public async loginUser(
+        loginUsuarioDto: LoginUsuarioDto,
+        auditData?: LoginAuditData
+    ) {
         const user = await prisma.usuario.findFirst({
             where: { email: loginUsuarioDto.email },
             include: { Foto: true },
         });
-        if (!user) throw CustomError.badRequest('El email no existe');
+
+        // Si el usuario no existe, registrar intento fallido si hay info de auditoría
+        if (!user) {
+            if (loginUsuarioDto.auditInfo?.appNombre) {
+                await this.registerLoginAudit({
+                    usuarioId: 0, // Usuario desconocido
+                    username: loginUsuarioDto.email,
+                    success: false,
+                    errorMessage: 'El email no existe',
+                    auditInfo: loginUsuarioDto.auditInfo,
+                    ipAddress: auditData?.ipAddress,
+                });
+            }
+            throw CustomError.badRequest('El email no existe');
+        }
 
         const isMatching = BcryptAdapter.compare(
             loginUsuarioDto.password,
             user.password
         );
-        if (!isMatching)
+
+        // Si la contraseña no coincide, registrar intento fallido
+        if (!isMatching) {
+            if (loginUsuarioDto.auditInfo?.appNombre) {
+                await this.registerLoginAudit({
+                    usuarioId: user.id,
+                    username: user.email,
+                    success: false,
+                    errorMessage: 'La contraseña no es válida',
+                    auditInfo: loginUsuarioDto.auditInfo,
+                    ipAddress: auditData?.ipAddress,
+                });
+            }
             throw CustomError.badRequest('La contraseña no es válida');
+        }
 
         const { password, ...userEntity } = UsuarioEntity.fromObject(user);
 
@@ -104,6 +139,17 @@ export class AuthService {
         if (!token)
             throw CustomError.internalServer('Error while creating JWT');
         const tipoUser = await Validators.getTipoUsuario(user.id);
+
+        // Registrar login exitoso si hay info de auditoría
+        if (loginUsuarioDto.auditInfo?.appNombre) {
+            await this.registerLoginAudit({
+                usuarioId: user.id,
+                username: user.email,
+                success: true,
+                auditInfo: loginUsuarioDto.auditInfo,
+                ipAddress: auditData?.ipAddress,
+            });
+        }
 
         return {
             user: {
@@ -122,6 +168,44 @@ export class AuthService {
             },
             token: token,
         };
+    }
+
+    /**
+     * Registra un evento de login en la auditoría (método privado)
+     */
+    private async registerLoginAudit(data: {
+        usuarioId: number;
+        username: string;
+        success: boolean;
+        errorMessage?: string;
+        auditInfo: {
+            appNombre?: string;
+            appVersion?: string;
+            platform?: string;
+            device?: string;
+            os?: string;
+        };
+        ipAddress?: string;
+    }) {
+        try {
+            await prisma.loginAudit.create({
+                data: {
+                    usuarioId: data.usuarioId,
+                    username: data.username,
+                    appNombre: data.auditInfo.appNombre || 'unknown',
+                    appVersion: data.auditInfo.appVersion || 'unknown',
+                    platform: data.auditInfo.platform || 'unknown',
+                    device: data.auditInfo.device,
+                    os: data.auditInfo.os,
+                    ipAddress: data.ipAddress,
+                    success: data.success,
+                    errorMessage: data.errorMessage,
+                },
+            });
+        } catch (error) {
+            // No lanzar error si falla la auditoría, solo loguear
+            console.error('Error registrando auditoría de login:', error);
+        }
     }
 
     private sendEmailValidationLink = async (email: string) => {

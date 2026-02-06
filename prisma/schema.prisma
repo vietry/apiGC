@@ -54,6 +54,7 @@ model Usuario {
   FotoVisita_FotoVisita_createdByToUsuario               FotoVisita[]        @relation("FotoVisita_createdByToUsuario")
   FotoVisita_FotoVisita_updatedByToUsuario               FotoVisita[]        @relation("FotoVisita_updatedByToUsuario")
   Gte                                                    Gte[]
+  LoginAudit                                             LoginAudit[]
   RegistroLaboralGD_RegistroLaboralGD_createdByToUsuario RegistroLaboralGD[] @relation("RegistroLaboralGD_createdByToUsuario")
   RegistroLaboralGD_RegistroLaboralGD_updatedByToUsuario RegistroLaboralGD[] @relation("RegistroLaboralGD_updatedByToUsuario")
   Foto                                                   Foto?               @relation(fields: [idFoto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Usuario_Foto")
@@ -1202,7 +1203,7 @@ model VideoDemoplot {
   rutaVideo  String   @db.VarChar(255)
   tipo       String   @db.VarChar(20)
   duracion   Int?
-  peso      Decimal?  @db.Decimal(6, 2)
+  peso       Decimal? @db.Decimal(6, 2)
   comentario String?  @db.VarChar(255)
   activo     Boolean  @default(true, map: "DF__VideoDemo__activ__3B2BBE9D")
   createdAt  DateTime @default(dbgenerated("sysutcdatetime()"), map: "DF__VideoDemo__creat__3C1FE2D6")
@@ -1210,4 +1211,24 @@ model VideoDemoplot {
   updatedAt  DateTime @default(dbgenerated("sysutcdatetime()"), map: "DF__VideoDemo__updat__3D14070F")
   updatedBy  Int?
   DemoPlot   DemoPlot @relation(fields: [idDemoplot], references: [id], onUpdate: NoAction, map: "FK__VideoDemo__idDem__3A379A64")
+}
+
+model LoginAudit {
+  id           Int      @id(map: "PK__LoginAud__3213E83FD4D49700") @default(autoincrement())
+  usuarioId    Int
+  username     String   @db.VarChar(100)
+  loginAt      DateTime @default(dbgenerated("sysdatetime()"), map: "DF__LoginAudi__login__40E497F3")
+  appNombre    String   @db.VarChar(50)
+  appVersion   String   @db.VarChar(20)
+  platform     String   @db.VarChar(20)
+  ipAddress    String?  @db.VarChar(45)
+  device       String?  @db.VarChar(100)
+  os           String?  @db.VarChar(50)
+  success      Boolean
+  errorMessage String?  @db.VarChar(255)
+  Usuario      Usuario  @relation(fields: [usuarioId], references: [id], onUpdate: NoAction, map: "FK__LoginAudi__usuar__3FF073BA")
+
+  @@index([appVersion], map: "IX_LoginAudit_appVersion")
+  @@index([success], map: "IX_LoginAudit_success")
+  @@index([usuarioId, loginAt(sort: Desc)], map: "IX_LoginAudit_usuario_fecha")
 }

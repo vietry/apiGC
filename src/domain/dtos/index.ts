@@ -60,6 +60,9 @@ export * from './externo/update-externo.dto';
 export * from './videos-demoplot/create-video-demoplot.dto';
 export * from './videos-demoplot/update-video-demoplot.dto';
 
+//DTOS LOGIN AUDIT
+export * from './login-audit/create-login-audit.dto';
+
 //DTOS CHARLA
 export * from './charla/charla/create-charla.dto';
 export * from './charla/charla/update-charla.dto';
