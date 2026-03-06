@@ -98,18 +98,20 @@ export class AppRoutes {
         router.use('/api/costoslaborales', CostoLaboralRoutes.routes);
         router.use('/api/variables', VariablePersonalRoutes.routes);
         router.use('/api/externos', ExternoRoutes.routes);
-        router.use('/api/visitas', VisitaRoutes.routes);
+
         router.use('/api/muestras/consumo', ConsumoMuestrasRoutes.routes);
         router.use('/api/muestras/entrega', EntregaMuestrasRoutes.routes);
         router.use('/api/visitas-gte-tienda', VisitaGteTiendaRoutes.routes);
         router.use('/api/fotos', FotoRoutes.routes);
-        router.use('/api/labores-visita', LaborVisitaRoutes.routes);
-        router.use('/api/visita-productos', VisitaProductoRoutes.routes);
-        router.use('/api/visitas/dashboard', DashboardVisitasRoutes.routes);
+
         router.use(
             '/api/nuevas-planificaciones',
             NuevaPlanificacionRoutes.routes
         );
+        router.use('/api/visitas', VisitaRoutes.routes);
+        router.use('/api/labores-visita', LaborVisitaRoutes.routes);
+        router.use('/api/visita-productos', VisitaProductoRoutes.routes);
+        router.use('/api/visitas/dashboard', DashboardVisitasRoutes.routes);
         router.use('/api/cliente-vendedor', ClienteVendedorRoutes.routes);
         router.use(
             '/api/visitas-gc/tiendas-cliente',

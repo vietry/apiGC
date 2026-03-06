@@ -1,6 +1,5 @@
-import { PrismaClient, UbicacionCliente } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { UbicacionCliente } from '@prisma/client';
+import { prisma } from '../../data/sqlserver';
 
 export interface UbicacionClienteCreateInput {
     cliente: string;

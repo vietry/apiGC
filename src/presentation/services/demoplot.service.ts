@@ -32,7 +32,6 @@ export class DemoplotService {
                 where: { id: updateDemoplotDto.id },
                 data: {
                     ...updateDemoplotDto.values,
-                    updatedAt: updateDemoplotDto.updatedAt ?? currentDate,
                 },
             });
 
@@ -116,11 +115,12 @@ export class DemoplotService {
                     estado: createDemoplotDto.estado,
                     gradoInfestacion: createDemoplotDto.gradoInfestacion,
                     dosis: createDemoplotDto.dosis,
+                    // Campos de validación forzados a null: solo se gestionan desde la web
                     validacion: null,
                     checkJefe: null,
+                    validacionCampo: null,
+                    checkJefeCampo: null,
                     resultado: createDemoplotDto.resultado,
-                    validacionCampo: createDemoplotDto.validacionCampo,
-                    checkJefeCampo: createDemoplotDto.checkJefeCampo,
                     comentariosRtcCampo: createDemoplotDto.comentariosRtcCampo,
                     comentariosJefeCampo:
                         createDemoplotDto.comentariosJefeCampo,
@@ -233,10 +233,28 @@ export class DemoplotService {
         }
 
         try {
+            // Sanitizar: eliminar campos de validación que solo se gestionan desde la web (PATCH)
+            // para evitar que Flutter los sobreescriba con null al usar PUT
+            const {
+                validacion,
+                checkJefe,
+                validatedAt,
+                approvedAt,
+                comentariosRtc,
+                comentariosJefe,
+                validacionCampo,
+                checkJefeCampo,
+                validatedCampoAt,
+                approvedCampoAt,
+                comentariosRtcCampo,
+                comentariosJefeCampo,
+                ...safeValues
+            } = updateDemoplotDto.values;
+
             const updatedDemoplot = await prisma.demoPlot.update({
                 where: { id: updateDemoplotDto.id },
                 data: {
-                    ...updateDemoplotDto.values,
+                    ...safeValues,
                     updatedAt: updateDemoplotDto.updatedAt ?? currentDate,
                 },
             });

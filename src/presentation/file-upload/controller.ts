@@ -58,6 +58,82 @@ export class FileUploadController {
             .catch((error) => this.handleError(res, error));
     };
 
+    uploadBatchFotosDemoPlotCompletado = async (
+        req: Request,
+        res: Response
+    ) => {
+        const files = req.body.files as UploadedFile[];
+
+        if (!files || files.length !== 3) {
+            return res.status(400).json({
+                error: `Se requieren exactamente 3 fotos para el estado "Completado". Se recibieron ${files?.length ?? 0}.`,
+            });
+        }
+
+        // Parsear los datos de cada foto desde el body
+        // Se espera: comentarios[], latitudes[], longitudes[], fotoHashes[], idDemoPlot, createdBy, updatedBy
+        const {
+            idDemoPlot,
+            createdBy,
+            updatedBy,
+            comentarios,
+            latitudes,
+            longitudes,
+            fotoHashes,
+        } = req.body;
+
+        if (!comentarios || !fotoHashes) {
+            return res.status(400).json({
+                error: 'Se requieren los campos: comentarios[] y fotoHashes[] con 3 elementos cada uno.',
+            });
+        }
+
+        // Convertir a arrays si no lo son
+        const comentariosArr = Array.isArray(comentarios)
+            ? comentarios
+            : [comentarios];
+        const latitudesArr = Array.isArray(latitudes) ? latitudes : [latitudes];
+        const longitudesArr = Array.isArray(longitudes)
+            ? longitudes
+            : [longitudes];
+        const fotoHashesArr = Array.isArray(fotoHashes)
+            ? fotoHashes
+            : [fotoHashes];
+
+        if (comentariosArr.length !== 3 || fotoHashesArr.length !== 3) {
+            return res.status(400).json({
+                error: 'comentarios[] y fotoHashes[] deben tener exactamente 3 elementos.',
+            });
+        }
+
+        // Crear los 3 DTOs
+        const dtos: CreateFotoDemoplotDto[] = [];
+        for (let i = 0; i < 3; i++) {
+            const [error, dto] = await CreateFotoDemoplotDto.create({
+                idDemoPlot,
+                comentario: comentariosArr[i],
+                estado: 'Completado',
+                latitud: latitudesArr?.[i] ?? null,
+                longitud: longitudesArr?.[i] ?? null,
+                createdBy,
+                updatedBy,
+                fotoHash: fotoHashesArr[i],
+            });
+
+            if (error) {
+                return res
+                    .status(400)
+                    .json({ error: `Error en foto ${i + 1}: ${error}` });
+            }
+            dtos.push(dto!);
+        }
+
+        this.fileUploadService
+            .uploadBatchFotosDemoPlotCompletado(files, dtos)
+            .then((result) => res.status(201).json(result))
+            .catch((error) => this.handleError(res, error));
+    };
+
     uploadAndUpdateFotoDemoPlot = async (req: Request, res: Response) => {
         const id = +req.params.id;
         const file = req.body.files.at(0) as UploadedFile;

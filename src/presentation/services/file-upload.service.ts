@@ -157,6 +157,174 @@ export class FileUploadService {
         return uploadResult;
     }
 
+    /**
+     * Carga batch de exactamente 3 fotos para estado "Completado" de un DemoPlot.
+     * - Valida que sean exactamente 3 archivos.
+     * - Valida que los 3 hashes sean distintos entre sí.
+     * - Valida que ningún hash exista previamente en la BD.
+     * - Valida que el demoplot no tenga ya 3 fotos en estado "Completado".
+     * - Guarda las 3 fotos en una transacción (todas o ninguna).
+     */
+    async uploadBatchFotosDemoPlotCompletado(
+        files: UploadedFile[],
+        dtos: CreateFotoDemoplotDto[],
+        folder: string = 'uploads/demoplots',
+        validExtensions: string[] = ['png', 'jpg', 'jpeg']
+    ) {
+        // 1. Validar que sean exactamente 3 fotos
+        if (files.length !== 3 || dtos.length !== 3) {
+            throw CustomError.badRequest(
+                `Para el estado "Completado" se requieren exactamente 3 fotos. Se recibieron ${files.length} archivo(s).`
+            );
+        }
+
+        const date = new Date();
+        const currentDate = new Date(date.getTime() - 5 * 60 * 60 * 1000);
+
+        // 2. Validar que todos los DTOs tengan el mismo idDemoPlot y estado "Completado"
+        const idDemoPlot = dtos[0].idDemoPlot;
+        for (const dto of dtos) {
+            if (dto.idDemoPlot !== idDemoPlot) {
+                throw CustomError.badRequest(
+                    `Todas las fotos deben pertenecer al mismo DemoPlot.`
+                );
+            }
+            if (dto.estado !== 'Completado') {
+                throw CustomError.badRequest(
+                    `Todas las fotos deben tener estado "Completado". Se recibió estado "${dto.estado}".`
+                );
+            }
+        }
+
+        // 3. Validar que el DemoPlot exista
+        const demoplotExists = await prisma.demoPlot.findFirst({
+            where: { id: idDemoPlot },
+        });
+        if (!demoplotExists) {
+            throw CustomError.badRequest(`IdDemoplot ${idDemoPlot} no existe`);
+        }
+
+        // 4. Validar que el demoplot no tenga ya 3 fotos en estado "Completado"
+        const fotosCompletadoCount = await prisma.fotoDemoPlot.count({
+            where: {
+                idDemoPlot: idDemoPlot,
+                estado: 'Completado',
+            },
+        });
+        if (fotosCompletadoCount >= 3) {
+            throw CustomError.badRequest(
+                `El demoplot ya tiene el máximo de 3 fotos en estado "Completado". No se pueden agregar más fotos con este estado.`
+            );
+        }
+
+        // 5. Recopilar los hashes y validar que no sean nulos
+        const hashes = dtos.map((dto) => dto.fotoHash);
+        for (let i = 0; i < hashes.length; i++) {
+            if (!hashes[i]) {
+                throw CustomError.badRequest(
+                    `La foto ${i + 1} no tiene fotoHash. Es obligatorio para el estado "Completado".`
+                );
+            }
+        }
+
+        // 6. Validar que los 3 hashes sean distintos entre sí
+        const uniqueHashes = new Set(hashes);
+        if (uniqueHashes.size !== 3) {
+            throw CustomError.badRequest(
+                `Las 3 fotos deben ser diferentes entre sí. Se detectaron hashes duplicados en el lote.`
+            );
+        }
+
+        // 7. Validar que ningún hash exista en la BD
+        const existingFotos = await prisma.fotoDemoPlot.findMany({
+            where: {
+                fotoHash: { in: hashes as string[] },
+            },
+            select: { id: true, fotoHash: true, nombre: true },
+        });
+        if (existingFotos.length > 0) {
+            const duplicados = existingFotos
+                .map((f) => `hash=${f.fotoHash} (id=${f.id})`)
+                .join(', ');
+            throw CustomError.badRequest(
+                `Ya existen fotos con los mismos hashes en la BD: ${duplicados}`
+            );
+        }
+
+        // 8. Subir los 3 archivos al disco
+        const uploadResults: {
+            fileName: string;
+            rutaFoto: string;
+            tipo: string;
+        }[] = [];
+        const uploadedFilePaths: string[] = []; // Para rollback si falla algo
+
+        try {
+            for (const file of files) {
+                const uploadResult = await this.uploadSingle(
+                    file,
+                    folder,
+                    validExtensions
+                );
+                const fileName = uploadResult.fileName;
+                const rutaFoto = `${folder}/${fileName}`;
+                const tipo = file.mimetype.split('/').at(1) ?? '';
+                const fullPath = path.resolve(__dirname, '../../../', rutaFoto);
+                uploadResults.push({ fileName, rutaFoto, tipo });
+                uploadedFilePaths.push(fullPath);
+            }
+
+            // 9. Guardar las 3 fotos en una transacción
+            const createdFotos = await prisma.$transaction(
+                dtos.map((dto, index) =>
+                    prisma.fotoDemoPlot.create({
+                        data: {
+                            idDemoPlot: dto.idDemoPlot,
+                            nombre: uploadResults[index].fileName,
+                            comentario: dto.comentario,
+                            estado: dto.estado,
+                            rutaFoto: uploadResults[index].rutaFoto,
+                            tipo: uploadResults[index].tipo,
+                            latitud: dto.latitud,
+                            longitud: dto.longitud,
+                            createdBy: dto.createdBy,
+                            updatedBy: dto.updatedBy,
+                            fotoHash: dto.fotoHash,
+                            createdAt: currentDate,
+                            updatedAt: currentDate,
+                        },
+                    })
+                )
+            );
+
+            return {
+                message: `3 fotos en estado "Completado" cargadas exitosamente para el DemoPlot ${idDemoPlot}`,
+                fotos: createdFotos.map((foto, i) => ({
+                    id: foto.id,
+                    fileName: uploadResults[i].fileName,
+                    rutaFoto: uploadResults[i].rutaFoto,
+                })),
+            };
+        } catch (error) {
+            // Rollback: eliminar archivos subidos si falla la transacción
+            for (const filePath of uploadedFilePaths) {
+                try {
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                } catch (deleteErr) {
+                    console.log(
+                        `Error eliminando archivo en rollback: ${deleteErr}`
+                    );
+                }
+            }
+            if (error instanceof CustomError) throw error;
+            throw CustomError.internalServer(
+                `Error en carga batch de fotos Completado: ${error}`
+            );
+        }
+    }
+
     async uploadAndUpdateFotoDemoPlot(
         file: UploadedFile,
         updateFotoDemoplotDto: UpdateFotoDemoplotDto,

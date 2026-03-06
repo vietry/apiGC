@@ -842,12 +842,12 @@ export class VariablePersonalService {
                 // Calcular variable según reglas
                 let variableCompletado = 0;
                 let variableCampo = 0;
-                if (tipoTotal >= 15) {
-                    if (totalD <= 20) {
+                if (tipoTotal >= 30) {
+                    if (totalD <= 40) {
                         variableCompletado = total * conteo1;
                     } else {
                         variableCompletado =
-                            20 * conteo1 + (totalD - 20) * conteo2;
+                            40 * conteo1 + (totalD - 40) * conteo2;
                     }
 
                     // Calcular variableCampo solo si total >= 30

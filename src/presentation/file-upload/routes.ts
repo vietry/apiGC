@@ -34,6 +34,12 @@ export class FileUploadRoutes {
         router.post('/foto/charlas', controller.uploadAndCreateFotoCharla);
         router.post('/foto/usuarios', controller.uploadAndCreateFotoUsuario);
 
+        // Batch: 3 fotos obligatorias para estado "Completado"
+        router.post(
+            '/foto/demoplots/batch-completado',
+            controller.uploadBatchFotosDemoPlotCompletado
+        );
+
         // Videos demoplot
         router.post(
             '/video/demoplots',
