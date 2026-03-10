@@ -1,0 +1,18 @@
+{
+    "android": {
+        "version": "2.1.4",
+        "versionCode": 22,
+        "minVersion": "2.1.4",
+        "releaseNotes": "- Carga obligatoria de 3 fotos para completar demoplots\n- Nuevo sistema de autoactualización OTA\n- Descarga e instalación de actualizaciones directamente desde la app\n- Soporte para actualizaciones obligatorias",
+        "forceUpdate": true,
+        "apkFileName": "app-release.apk"
+    },
+    "ios": {
+        "version": "2.1.4",
+        "versionCode": 22,
+        "minVersion": "2.1.4",
+        "releaseNotes": "- Carga obligatoria de 3 fotos para completar demoplots\n- Nuevo sistema de autoactualización OTA\n- Mejoras de estabilidad",
+        "forceUpdate": true,
+        "storeUrl": ""
+    }
+}

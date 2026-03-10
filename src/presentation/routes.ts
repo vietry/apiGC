@@ -54,6 +54,8 @@ import { UbicacionClienteRoutes } from '../visitas_gc/routes/ubicacion-cliente.r
 import { FamiliaVisitaRoutes } from '../visitas_gc/routes/familia-visita.routes';
 import { SyncRoutes } from '../visitas_gc/routes/sync.routes';
 import { LoginAuditRoutes } from './login-audit/routes';
+import { AppUpdateRoutes } from './app-update/routes';
+import { AsesorDashboardRoutes } from './dashboard-asesores/routes';
 
 export class AppRoutes {
     static get routes(): Router {
@@ -124,6 +126,8 @@ export class AppRoutes {
         router.use('/api/familias-visita', FamiliaVisitaRoutes.routes);
         router.use('/api/sync', SyncRoutes.routes);
         router.use('/api/login-audit', LoginAuditRoutes.routes);
+        router.use('/api/app-update', AppUpdateRoutes.routes);
+        router.use('/api/dashboards/asesores', AsesorDashboardRoutes.routes);
         return router;
     }
 }

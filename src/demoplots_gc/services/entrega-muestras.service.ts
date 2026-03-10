@@ -316,14 +316,14 @@ export class EntregaMuestrasService {
 
         // Filtros de fecha - para facturación
         if (year) {
-            where.facturacion = {
+            where.createdAt = {
                 gte: new Date(year, 0),
                 lt: new Date(year + 1, 0),
             };
         }
 
         if (month && year) {
-            where.facturacion = {
+            where.createdAt = {
                 gte: new Date(year, month - 1),
                 lt: new Date(year, month),
             };
@@ -487,14 +487,14 @@ export class EntregaMuestrasService {
 
         // Filtros de fecha - para facturación
         if (year) {
-            where.createdAt = {
+            where.facturacion = {
                 gte: new Date(year, 0),
                 lt: new Date(year + 1, 0),
             };
         }
 
         if (month && year) {
-            where.createdAt = {
+            where.facturacion = {
                 gte: new Date(year, month - 1),
                 lt: new Date(year, month),
             };

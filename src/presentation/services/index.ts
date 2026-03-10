@@ -31,3 +31,4 @@ export * from './costo-laboral.service';
 export * from './variable-personal.service';
 export * from './file-upload.service';
 export * from './login-audit.service';
+export * from './asesor-dashboard.service';
