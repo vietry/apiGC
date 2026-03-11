@@ -58,6 +58,41 @@ export class FileUploadController {
             .catch((error) => this.handleError(res, error));
     };
 
+    /**
+     * Extrae un campo array del body de express-fileupload.
+     * Soporta múltiples formatos:
+     *   - campo (ya es array)
+     *   - campo (string único → [string])
+     *   - campo[0], campo[1], campo[2] (claves indexadas)
+     */
+    private extractArrayField(
+        body: Record<string, any>,
+        fieldName: string,
+        expectedLength: number
+    ): string[] | null {
+        // Caso 1: el campo ya existe directamente sin corchetes (array o string)
+        const direct = body[fieldName];
+        if (direct !== undefined && direct !== null) {
+            return Array.isArray(direct) ? direct : [direct];
+        }
+
+        // Caso 2: clave literal "campo[]" (como envía Dio de Flutter)
+        const bracketed = body[`${fieldName}[]`];
+        if (bracketed !== undefined && bracketed !== null) {
+            return Array.isArray(bracketed) ? bracketed : [bracketed];
+        }
+
+        // Caso 3: claves indexadas como "campo[0]", "campo[1]", ...
+        const result: string[] = [];
+        for (let i = 0; i < expectedLength; i++) {
+            const val = body[`${fieldName}[${i}]`];
+            if (val !== undefined && val !== null) {
+                result.push(val);
+            }
+        }
+        return result.length > 0 ? result : null;
+    }
+
     uploadBatchFotosDemoPlotCompletado = async (
         req: Request,
         res: Response
@@ -71,34 +106,23 @@ export class FileUploadController {
         }
 
         // Parsear los datos de cada foto desde el body
-        // Se espera: comentarios[], latitudes[], longitudes[], fotoHashes[], idDemoPlot, createdBy, updatedBy
-        const {
-            idDemoPlot,
-            createdBy,
-            updatedBy,
-            comentarios,
-            latitudes,
-            longitudes,
-            fotoHashes,
-        } = req.body;
+        const { idDemoPlot, createdBy, updatedBy } = req.body;
 
-        if (!comentarios || !fotoHashes) {
+        // Extraer arrays soportando tanto "campo" como "campo[0]", "campo[1]", "campo[2]"
+        const comentariosArr = this.extractArrayField(
+            req.body,
+            'comentarios',
+            3
+        );
+        const latitudesArr = this.extractArrayField(req.body, 'latitudes', 3);
+        const longitudesArr = this.extractArrayField(req.body, 'longitudes', 3);
+        const fotoHashesArr = this.extractArrayField(req.body, 'fotoHashes', 3);
+
+        if (!comentariosArr || !fotoHashesArr) {
             return res.status(400).json({
                 error: 'Se requieren los campos: comentarios[] y fotoHashes[] con 3 elementos cada uno.',
             });
         }
-
-        // Convertir a arrays si no lo son
-        const comentariosArr = Array.isArray(comentarios)
-            ? comentarios
-            : [comentarios];
-        const latitudesArr = Array.isArray(latitudes) ? latitudes : [latitudes];
-        const longitudesArr = Array.isArray(longitudes)
-            ? longitudes
-            : [longitudes];
-        const fotoHashesArr = Array.isArray(fotoHashes)
-            ? fotoHashes
-            : [fotoHashes];
 
         if (comentariosArr.length !== 3 || fotoHashesArr.length !== 3) {
             return res.status(400).json({

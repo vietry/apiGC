@@ -517,6 +517,7 @@ model DemoPlot {
   approvedCampoAt                     DateTime?
   comentariosJefeCampo                String?           @db.VarChar(255)
   testigo                             String?           @db.VarChar(75)
+  testimonio                          String?           @db.VarChar(255)
   ConsumoMuestras                     ConsumoMuestras[]
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
