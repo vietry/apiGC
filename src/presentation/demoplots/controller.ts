@@ -242,6 +242,8 @@ export class DemoplotController {
             numDocPunto,
             blancoComun,
             subZona,
+            calificacionRTC,
+            calificacionJefe,
         } = req.query;
 
         const [error, paginationDto] = PaginationDto.create(+page, +limit);
@@ -291,21 +293,23 @@ export class DemoplotController {
                 ? Array.isArray(macrozona)
                     ? macrozona.map((m) => +m)
                     : typeof macrozona === 'string' && macrozona.includes(',')
-                    ? macrozona.split(',').map((m) => +m.trim())
-                    : [+macrozona]
+                      ? macrozona.split(',').map((m) => +m.trim())
+                      : [+macrozona]
                 : undefined,
             idColaborador: idColaborador
                 ? Array.isArray(idColaborador)
                     ? idColaborador.map((c) => +c)
                     : typeof idColaborador === 'string' &&
-                      idColaborador.includes(',')
-                    ? idColaborador.split(',').map((c) => +c.trim())
-                    : +idColaborador
+                        idColaborador.includes(',')
+                      ? idColaborador.split(',').map((c) => +c.trim())
+                      : +idColaborador
                 : undefined,
             idPunto: idPunto ? +idPunto : undefined,
             numDocPunto: numDocPunto ? (numDocPunto as string) : undefined,
             blancoComun: blancoComun ? (blancoComun as string) : undefined,
             subZona: subZona ? (subZona as string) : undefined,
+            calificacionRTC: calificacionRTC ? +calificacionRTC : undefined,
+            calificacionJefe: calificacionJefe ? +calificacionJefe : undefined,
         };
 
         this.demoplotService

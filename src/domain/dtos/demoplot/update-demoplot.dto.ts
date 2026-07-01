@@ -41,7 +41,10 @@ export class UpdateDemoplotDto {
         public readonly importe?: number | null,
         public readonly updatedAt?: Date | null,
         public readonly updatedBy?: number | null,
-        public readonly testigo?: string | null
+        public readonly testigo?: string | null,
+        public readonly testimonio?: string | null,
+        public readonly calificacionRTC?: number | null,
+        public readonly calificacionJefe?: number | null
     ) {}
 
     get values() {
@@ -96,6 +99,12 @@ export class UpdateDemoplotDto {
         if (this.updatedAt) returnObj.updatedAt = this.updatedAt;
         if (this.updatedBy !== undefined) returnObj.updatedBy = this.updatedBy;
         if (this.testigo !== undefined) returnObj.testigo = this.testigo;
+        if (this.testimonio !== undefined)
+            returnObj.testimonio = this.testimonio;
+        if (this.calificacionRTC !== undefined)
+            returnObj.calificacionRTC = this.calificacionRTC;
+        if (this.calificacionJefe !== undefined)
+            returnObj.calificacionJefe = this.calificacionJefe;
 
         return returnObj;
     }
@@ -144,6 +153,9 @@ export class UpdateDemoplotDto {
             updatedAt,
             updatedBy,
             testigo,
+            testimonio,
+            calificacionRTC,
+            calificacionJefe,
         } = props;
 
         if (!id || isNaN(Number(id))) {
@@ -251,7 +263,14 @@ export class UpdateDemoplotDto {
                 importeNum,
                 updatedAt,
                 updatedBy,
-                testigo
+                testigo,
+                testimonio,
+                calificacionRTC !== undefined
+                    ? parseNumber(calificacionRTC)
+                    : undefined,
+                calificacionJefe !== undefined
+                    ? parseNumber(calificacionJefe)
+                    : undefined
             ),
         ];
     }

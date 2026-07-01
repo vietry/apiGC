@@ -389,16 +389,32 @@ export class VariablePersonalService {
             const countsPorEstado = await prisma.demoPlot.groupBy({
                 by: ['idGte', 'estado'],
                 where: {
-                    ...demoplotWhere,
-                    //validacion: true,
-                    checkJefe: true,
-                    NOT: {
-                        AND: [
-                            { updatedAt: { gte: new Date('2024-01-01') } },
-                            { updatedAt: { lt: new Date('2025-01-01') } },
-                        ],
-                    },
-                    estado: { in: ['Completado', 'Día campo'] },
+                    AND: [
+                        {
+                            ...demoplotWhere, // conserva el OR de fechas y el filtro de idGte
+                        },
+                        {
+                            NOT: {
+                                AND: [
+                                    {
+                                        updatedAt: {
+                                            gte: new Date('2024-01-01'),
+                                        },
+                                    },
+                                    {
+                                        updatedAt: {
+                                            lt: new Date('2025-01-01'),
+                                        },
+                                    },
+                                ],
+                            },
+                            // Para 'Completado' se requiere checkJefe=true; para 'Día campo' se requiere checkJefeCampo=true
+                            OR: [
+                                { estado: 'Completado', checkJefe: true },
+                                { estado: 'Día campo', checkJefeCampo: true },
+                            ],
+                        },
+                    ],
                 },
                 _count: { _all: true },
             });
@@ -427,8 +443,6 @@ export class VariablePersonalService {
                             ...demoplotWhere, // conserva el OR de fechas y el filtro de idGte
                         },
                         {
-                            //validacion: true,
-                            checkJefe: true,
                             NOT: {
                                 AND: [
                                     {
@@ -443,7 +457,11 @@ export class VariablePersonalService {
                                     },
                                 ],
                             },
-                            estado: { in: ['Completado', 'Día campo'] },
+                            // Para 'Completado' se requiere checkJefe=true; para 'Día campo' se requiere checkJefeCampo=true
+                            OR: [
+                                { estado: 'Completado', checkJefe: true },
+                                { estado: 'Día campo', checkJefeCampo: true },
+                            ],
                         },
                         orClaseIgualTipo.length
                             ? { OR: orClaseIgualTipo }
@@ -471,7 +489,7 @@ export class VariablePersonalService {
                     where: {
                         ...demoplotWhere,
                         //validacion: true,
-                        checkJefe: true,
+                        checkJefeCampo: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -501,7 +519,7 @@ export class VariablePersonalService {
                             },
                             {
                                 //validacion: true,
-                                checkJefe: true,
+                                checkJefeCampo: true,
                                 NOT: {
                                     AND: [
                                         {
@@ -749,7 +767,7 @@ export class VariablePersonalService {
                     where: {
                         idGte: gte.id,
                         //validacion: true,
-                        checkJefe: true,
+                        checkJefeCampo: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -780,7 +798,7 @@ export class VariablePersonalService {
                         idGte: gte.id,
                         estado: 'Día campo',
                         //validacion: true,
-                        checkJefe: true,
+                        checkJefeCampo: true,
                         NOT: {
                             AND: [
                                 { updatedAt: { gte: new Date('2024-01-01') } },
@@ -938,9 +956,8 @@ export class VariablePersonalService {
 
     async getJerarquiaVariables(filters: GteRankingFilters = {}) {
         try {
-            const variablesStats = await this.getAllVariablesPersonales(
-                filters
-            );
+            const variablesStats =
+                await this.getAllVariablesPersonales(filters);
             // Estructura con nivel de negocio dentro de empresa
             const empresas: { [key: string]: EmpresaNegocio } = {};
 

@@ -41,7 +41,9 @@ export class DemoPlotEntity {
         public importe: number | null,
         public createdBy: number | null,
         public updatedBy: number | null,
-        public testigo: string | null // public createdAt: Date | null, // public updatedAt: Date | null
+        public testigo: string | null, // public createdAt: Date | null, // public updatedAt: Date | null
+        public calificacionRTC: number | null,
+        public calificacionJefe: number | null
     ) {}
 
     public static fromObject(object: { [key: string]: any }): DemoPlotEntity {
@@ -88,6 +90,8 @@ export class DemoPlotEntity {
             //updatedAt,
             updatedBy,
             testigo,
+            calificacionRTC,
+            calificacionJefe,
         } = object;
 
         if (!gradoInfestacion)
@@ -144,7 +148,9 @@ export class DemoPlotEntity {
             createdBy,
             //updatedAt,
             updatedBy,
-            testigo
+            testigo,
+            calificacionRTC,
+            calificacionJefe
         );
     }
 }

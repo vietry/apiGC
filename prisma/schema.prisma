@@ -518,6 +518,8 @@ model DemoPlot {
   comentariosJefeCampo                String?           @db.VarChar(255)
   testigo                             String?           @db.VarChar(75)
   testimonio                          String?           @db.VarChar(255)
+  calificacionRTC                     Int?
+  calificacionJefe                    Int?
   ConsumoMuestras                     ConsumoMuestras[]
   BlancoBiologico                     BlancoBiologico   @relation(fields: [idBlanco], references: [id], onUpdate: NoAction, map: "fk_DemoPlot_Blanco1")
   Charla                              Charla?           @relation(fields: [idCharla], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_Demoplot_Charla")
@@ -535,6 +537,8 @@ model DemoPlot {
 
   @@index([idGte, estado], map: "IX_DemoPlot_idGte_estado")
   @@index([idGte, idFamilia], map: "IX_DemoPlot_idGte_idFamilia")
+  @@index([calificacionRTC, calificacionJefe], map: "IX_DemoPlot_Calificaciones")
+  @@index([calificacionJefe], map: "IX_DemoPlot_CalificacionJefe")
 }
 
 model FotoDemoPlot {
@@ -646,29 +650,30 @@ model Vegetacion {
 }
 
 model ContactoPunto {
-  id                                         Int           @id(map: "PK__Contacto__3213E83F168140F3") @default(autoincrement())
-  nombre                                     String        @db.VarChar(45)
-  apellido                                   String        @db.VarChar(45)
-  cargo                                      String        @db.VarChar(50)
-  celularA                                   String?       @db.VarChar(20)
-  celularB                                   String?       @db.VarChar(20)
+  id                                         Int                     @id(map: "PK__Contacto__3213E83F168140F3") @default(autoincrement())
+  nombre                                     String                  @db.VarChar(45)
+  apellido                                   String                  @db.VarChar(45)
+  cargo                                      String                  @db.VarChar(50)
+  celularA                                   String?                 @db.VarChar(20)
+  celularB                                   String?                 @db.VarChar(20)
   idPunto                                    Int
-  createdAt                                  DateTime?     @db.DateTime
-  updatedAt                                  DateTime?     @db.DateTime
-  email                                      String?       @db.VarChar(50)
-  tipo                                       String        @db.VarChar(10)
+  createdAt                                  DateTime?               @db.DateTime
+  updatedAt                                  DateTime?               @db.DateTime
+  email                                      String?                 @db.VarChar(50)
+  tipo                                       String                  @db.VarChar(10)
   idGte                                      Int?
   activo                                     Boolean?
-  nomAsesor                                  String?       @db.VarChar(50)
-  numAsesor                                  String?       @db.VarChar(15)
+  nomAsesor                                  String?                 @db.VarChar(50)
+  numAsesor                                  String?                 @db.VarChar(15)
   referente                                  Boolean?
   Asistencia                                 Asistencia[]
-  Charla_Charla_idPropietarioToContactoPunto Charla[]      @relation("Charla_idPropietarioToContactoPunto")
-  Charla_Charla_idMostradorToContactoPunto   Charla[]      @relation("Charla_idMostradorToContactoPunto")
-  PuntoContacto                              PuntoContacto @relation(fields: [idPunto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Contacto_PuntoContacto")
-  Gte                                        Gte?          @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ContactoPunto_Gte1")
+  Charla_Charla_idPropietarioToContactoPunto Charla[]                @relation("Charla_idPropietarioToContactoPunto")
+  Charla_Charla_idMostradorToContactoPunto   Charla[]                @relation("Charla_idMostradorToContactoPunto")
+  PuntoContacto                              PuntoContacto           @relation(fields: [idPunto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_Contacto_PuntoContacto")
+  Gte                                        Gte?                    @relation(fields: [idGte], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ContactoPunto_Gte1")
   DemoPlot                                   DemoPlot[]
   Fundo                                      Fundo[]
+  GteDesalojoAgricultor                      GteDesalojoAgricultor[]
 }
 
 model PuntoUbigeo {
@@ -986,21 +991,22 @@ model VisitaProducto {
 }
 
 model VisitaGteTienda {
-  id            Int           @id(map: "PK__VisitaGt__3213E83FE2D5877C") @default(autoincrement())
-  idGte         Int
-  idPunto       Int
-  objetivo      String        @db.VarChar(50)
-  comentarios   String?       @db.VarChar(255)
-  latitud       Decimal?      @db.Decimal(10, 6)
-  longitud      Decimal?      @db.Decimal(10, 6)
-  createdAt     DateTime?     @db.DateTime
-  idFamilia     Int?
-  idFoto        Int?
-  cantidad      Decimal?      @db.Decimal(6, 2)
-  Familia       Familia?      @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VisitaGteTiend3")
-  Foto          Foto?         @relation(fields: [idFoto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaGteTiend4")
-  Gte           Gte           @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VisitaGteTienda1")
-  PuntoContacto PuntoContacto @relation(fields: [idPunto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaGteTienda2")
+  id                    Int                     @id(map: "PK__VisitaGt__3213E83FE2D5877C") @default(autoincrement())
+  idGte                 Int
+  idPunto               Int
+  objetivo              String                  @db.VarChar(50)
+  comentarios           String?                 @db.VarChar(255)
+  latitud               Decimal?                @db.Decimal(10, 6)
+  longitud              Decimal?                @db.Decimal(10, 6)
+  createdAt             DateTime?               @db.DateTime
+  idFamilia             Int?
+  idFoto                Int?
+  cantidad              Decimal?                @db.Decimal(6, 2)
+  GteDesalojoAgricultor GteDesalojoAgricultor[]
+  Familia               Familia?                @relation(fields: [idFamilia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_VisitaGteTiend3")
+  Foto                  Foto?                   @relation(fields: [idFoto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaGteTiend4")
+  Gte                   Gte                     @relation(fields: [idGte], references: [id], onUpdate: NoAction, map: "fk_VisitaGteTienda1")
+  PuntoContacto         PuntoContacto           @relation(fields: [idPunto], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_VisitaGteTienda2")
 }
 
 model MomentoAplicacion {
@@ -1232,4 +1238,16 @@ model LoginAudit {
   @@index([appVersion], map: "IX_LoginAudit_appVersion")
   @@index([success], map: "IX_LoginAudit_success")
   @@index([usuarioId, loginAt(sort: Desc)], map: "IX_LoginAudit_usuario_fecha")
+}
+
+model GteDesalojoAgricultor {
+  id              Int             @id(map: "PK__GteDesal__3213E83F108C2378") @default(autoincrement())
+  desalojoId      Int
+  contactoId      Int
+  createdAt       DateTime        @default(now(), map: "DF__GteDesalo__creat__469D7149")
+  createdBy       Int
+  updatedAt       DateTime        @default(now(), map: "DF__GteDesalo__updat__47919582")
+  updatedBy       Int
+  ContactoPunto   ContactoPunto   @relation(fields: [contactoId], references: [id], onUpdate: NoAction, map: "FK__GteDesalo__conta__45A94D10")
+  VisitaGteTienda VisitaGteTienda @relation(fields: [desalojoId], references: [id], onUpdate: NoAction, map: "FK__GteDesalo__desal__44B528D7")
 }

@@ -28,6 +28,8 @@ export interface DemoplotFilters {
     tipoFecha?: string;
     blancoComun?: string;
     subZona?: string;
+    calificacionRTC?: number;
+    calificacionJefe?: number;
 }
 
 export interface GteRankingFilters {

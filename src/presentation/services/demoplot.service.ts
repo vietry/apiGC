@@ -401,6 +401,7 @@ export class DemoplotService {
                         numAsesor: demoplot.Cultivo.numAsesor,
                         cargoAsesor: demoplot.Cultivo.cargoAsesor,
                         testigo: demoplot.testigo,
+                        testimonio: demoplot.testimonio,
                         FotoDemoPlot: demoplot.FotoDemoPlot,
                         nombreGte: `${demoplot.Gte.Usuario?.nombres} ${demoplot.Gte.Usuario?.apellidos}`,
                         departamento:
@@ -565,6 +566,7 @@ export class DemoplotService {
                         distrito: demoplot.Distrito.nombre,
                         idFundo: demoplot.Cultivo.Fundo.id,
                         fundo: demoplot.Cultivo.Fundo.nombre,
+                        testimonio: demoplot.testimonio,
                         venta: demoplot.venta,
                         fecVenta: demoplot.fecVenta,
                         cantidad: demoplot.cantidad,
@@ -732,6 +734,7 @@ export class DemoplotService {
                         distrito: demoplot.Distrito.nombre,
                         idFundo: demoplot.Cultivo.Fundo.id,
                         fundo: demoplot.Cultivo.Fundo.nombre,
+                        testimonio: demoplot.testimonio,
                         fecVenta: demoplot.fecVenta,
                         cantidad: demoplot.cantidad,
                         importe: demoplot.importe,
@@ -909,6 +912,7 @@ export class DemoplotService {
                 numAsesor: demoplot.Cultivo.numAsesor,
                 cargoAsesor: demoplot.Cultivo.cargoAsesor,
                 testigo: demoplot.testigo,
+                testimonio: demoplot.testimonio,
                 distrito: demoplot.Distrito.nombre,
                 idFundo: demoplot.Cultivo.Fundo.id,
                 fundo: demoplot.Cultivo.Fundo.nombre,
@@ -918,6 +922,8 @@ export class DemoplotService {
                 fecVenta: demoplot.fecVenta,
                 cantidad: demoplot.cantidad,
                 importe: demoplot.importe,
+                calificacionRTC: demoplot.calificacionRTC,
+                calificacionJefe: demoplot.calificacionJefe,
                 createdAt: demoplot.createdAt,
                 createdBy: demoplot.createdBy,
                 updatedAt: demoplot.updatedAt,
@@ -1575,6 +1581,8 @@ export class DemoplotService {
             numDocPunto,
             blancoComun,
             subZona,
+            calificacionRTC,
+            calificacionJefe,
         } = filters;
 
         const where: any = {};
@@ -1726,6 +1734,14 @@ export class DemoplotService {
                     nombre: { contains: subZona },
                 },
             };
+        }
+
+        if (calificacionRTC !== undefined) {
+            where.calificacionRTC = calificacionRTC;
+        }
+
+        if (calificacionJefe !== undefined) {
+            where.calificacionJefe = calificacionJefe;
         }
 
         // Filtro por fechas en updatedAt
@@ -1989,10 +2005,13 @@ export class DemoplotService {
                                 ?.nomEmpresa,
                         idFundo: demoplot.Cultivo.Fundo.id,
                         fundo: demoplot.Cultivo.Fundo.nombre,
+                        testimonio: demoplot.testimonio,
                         venta: demoplot.venta,
                         fecVenta: demoplot.fecVenta,
                         cantidad: demoplot.cantidad,
                         importe: demoplot.importe,
+                        calificacionRTC: demoplot.calificacionRTC,
+                        calificacionJefe: demoplot.calificacionJefe,
                         createdAt: demoplot.createdAt,
                         createdBy: demoplot.createdBy,
                         updatedAt: demoplot.updatedAt,

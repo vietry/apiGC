@@ -1,17 +1,17 @@
 {
     "android": {
-        "version": "2.1.4",
-        "versionCode": 22,
-        "minVersion": "2.1.4",
-        "releaseNotes": "- Carga obligatoria de 3 fotos para completar demoplots\n- Nuevo sistema de autoactualización OTA\n- Descarga e instalación de actualizaciones directamente desde la app\n- Soporte para actualizaciones obligatorias",
+        "version": "2.1.9",
+        "versionCode": 26,
+        "minVersion": "2.1.9",
+        "releaseNotes": "- Se implementó el nuevo certificado de seguridad para la conexión con el servidor, por lo que es necesario actualizar la aplicación para seguir utilizando el servicio.",
         "forceUpdate": true,
         "apkFileName": "app-release.apk"
     },
     "ios": {
-        "version": "2.1.4",
-        "versionCode": 22,
-        "minVersion": "2.1.4",
-        "releaseNotes": "- Carga obligatoria de 3 fotos para completar demoplots\n- Nuevo sistema de autoactualización OTA\n- Mejoras de estabilidad",
+        "version": "2.1.9",
+        "versionCode": 26,
+        "minVersion": "2.1.9",
+        "releaseNotes": "- Se implementó el nuevo certificado de seguridad para la conexión con el servidor, por lo que es necesario actualizar la aplicación para seguir utilizando el servicio.",
         "forceUpdate": true,
         "storeUrl": ""
     }

@@ -244,6 +244,12 @@ export class AsesorDashboardService {
                             Gte: {
                                 select: {
                                     id: true,
+                                    Usuario: {
+                                        select: {
+                                            nombres: true,
+                                            apellidos: true,
+                                        },
+                                    },
                                     Colaborador: {
                                         select: {
                                             id: true,
@@ -291,6 +297,12 @@ export class AsesorDashboardService {
                             Gte: {
                                 select: {
                                     id: true,
+                                    Usuario: {
+                                        select: {
+                                            nombres: true,
+                                            apellidos: true,
+                                        },
+                                    },
                                     Colaborador: {
                                         select: {
                                             id: true,
@@ -394,6 +406,9 @@ export class AsesorDashboardService {
                 ? `${cultivo.Fundo.ContactoPunto.nombre} ${cultivo.Fundo.ContactoPunto.apellido}`.trim()
                 : null,
             // Gte y Colaborador (busca en PuntoContacto, si no en ContactoPunto)
+            generador: gte?.Usuario
+                ? `${gte.Usuario.nombres} ${gte.Usuario.apellidos}`.trim()
+                : null,
             idGte: gte?.id ?? null,
             idColaborador: colaborador?.id ?? null,
             colaborador: colaborador?.Usuario
@@ -638,6 +653,7 @@ export class AsesorDashboardService {
                 { header: 'Asesor', key: 'nomAsesor', width: 28 },
                 { header: 'N° Asesor', key: 'numAsesor', width: 14 },
                 { header: 'Cargo Asesor', key: 'cargoAsesor', width: 20 },
+                { header: 'Generador', key: 'generador', width: 28 },
                 { header: 'Cultivo', key: 'vegetacion', width: 18 },
                 { header: 'Variedad', key: 'variedad', width: 18 },
                 { header: 'Hectáreas', key: 'hectareas', width: 12 },
@@ -677,6 +693,7 @@ export class AsesorDashboardService {
                     nomAsesor: item.nomAsesor ?? '',
                     numAsesor: item.numAsesor ?? '',
                     cargoAsesor: item.cargoAsesor ?? '',
+                    generador: item.generador ?? '',
                     vegetacion: item.vegetacion ?? '',
                     variedad: item.variedad ?? '',
                     hectareas:
@@ -700,7 +717,7 @@ export class AsesorDashboardService {
             // Autofiltro en la hoja de detalle
             wsDetalle.autoFilter = {
                 from: 'A1',
-                to: `T${mapped.length + 1}`,
+                to: `U${mapped.length + 1}`,
             };
 
             // ═══════════════════════════════════════════
