@@ -97,9 +97,9 @@ export class DemoplotService {
                 createDemoplotDto.idFamilia &&
                 !existingFamilyIds.includes(createDemoplotDto.idFamilia);
 
-            if (isNewFamily && existingFamilyIds.length >= 4) {
+            if (isNewFamily && existingFamilyIds.length >= 2) {
                 throw CustomError.badRequest(
-                    `No se puede crear el demoplot. Ya existen 4 demoplots con familias diferentes para este cultivo en el período actual (del 20/${previousMonth}/${previousYear} al 19/${currentMonth}/${currentYear}). Familias existentes: ${existingFamilyIds.length}`
+                    `No se puede crear el demoplot. Ya existen 2 demoplots con familias diferentes para este cultivo en el período actual (del 20/${previousMonth}/${previousYear} al 19/${currentMonth}/${currentYear}). Familias existentes: ${existingFamilyIds.length}`
                 );
             }
 

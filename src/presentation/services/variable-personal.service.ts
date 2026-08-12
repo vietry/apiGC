@@ -862,7 +862,7 @@ export class VariablePersonalService {
                 let variableCampo = 0;
                 if (tipoTotal >= 30) {
                     if (totalD <= 40) {
-                        variableCompletado = total * conteo1;
+                        variableCompletado = totalD * conteo1;
                     } else {
                         variableCompletado =
                             40 * conteo1 + (totalD - 40) * conteo2;
